@@ -38,7 +38,7 @@ public class MapGeneratorScript : MonoBehaviour
     static RoomBuilderManager roomBuilderManager = new RoomBuilderManager();
 
     // Start is called before the first frame update
-    void Start()
+    void Start_Old()
     {
         edgesAndDoorManager = new edgesAndDoorScript(Door, ref grid);
 
@@ -49,7 +49,7 @@ public class MapGeneratorScript : MonoBehaviour
         Debug.Log("CREATE A PROPER GRID ACCESSOR");
         Debug.Log("CURRENTLY YOU CAN ACCIDENTALLY ACCESS OUT OF BOUNDS");
 
-
+        /*
 
         // Start off grid generation, with room veins and zone presets
         List<RoomPreset> bossRoomLocations = new List<RoomPreset>();
@@ -72,6 +72,7 @@ public class MapGeneratorScript : MonoBehaviour
 
         // Save generated rooms in a save file
         mapSaver.GetComponent<mapSaverScript>().saveMap(roomList);
+        */
     }
 
     void generateRandomRooms(List<RoomPreset> bossRoomLocations)

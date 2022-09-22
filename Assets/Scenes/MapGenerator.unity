@@ -494,21 +494,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 106821874}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b26fac8a8da5442439f03cce5032abb4, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f25d349e0518d2499af2153f18e6bbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomList: []
-  mapSaver: {fileID: 582483947}
-  startRoom: {fileID: 2855215869617778061, guid: b2cbf5f4d8422984b83f80bb6102280f, type: 3}
-  sendoffRoom: {fileID: 1838891703835685307, guid: 65ab1893d4c9de849aa11394b74ddb45, type: 3}
-  largeRoom: {fileID: 427923165684925401, guid: ef113c834a6df9647b59f7a977a3b1a7, type: 3}
-  smallRoom: {fileID: 7390896186120860971, guid: 7fcdcb0631882a64390e73fdda07c5fd, type: 3}
-  LRoom: {fileID: 1862673850582826480, guid: b97dc870e5557de489687202d90c5ad9, type: 3}
-  fluidRoom: {fileID: 2651385973392582400, guid: 996a30713e62af14a8ddad362dc532dd, type: 3}
-  Door: {fileID: 5109010159571911859, guid: cc4798d1c2681cd4b913f801e0ea86a4, type: 3}
-  map: {fileID: 1917926437}
-  roomManager: {fileID: 339258439}
-  grid: {fileID: 971668954}
 --- !u!4 &106821876
 Transform:
   m_ObjectHideFlags: 0
@@ -833,15 +821,49 @@ MonoBehaviour:
   map: {fileID: 1917926437}
   ProgressionTab: {fileID: 1872992012}
   ProgressionView: {fileID: 1193765766}
+  purple:
+    r: 0.29
+    g: 0.025
+    b: 0.76
+    a: 0.5
+  red:
+    r: 0.9725
+    g: 0
+    b: 0.0412
+    a: 0.76
+  green:
+    r: 0.085
+    g: 0.85
+    b: 0.12
+    a: 0.88
+  blue:
+    r: 0
+    g: 0.56
+    b: 0.87
+    a: 1
+  white:
+    r: 1
+    g: 1
+    b: 1
+    a: 1
+  black:
+    r: 0
+    g: 0
+    b: 0
+    a: 1
   gridDoorSelect: 0
   gridIsOccupiedSelect: 0
   gridSelect: 1
   gridIsVeinSelect: 0
   gridZoneSelect: 0
+  intendedTypeEnums: 00000000010000000200000003000000
+  intendedEnumSelect: 0
   intendedUnitTypeSelect: 0
   mapSelect: 1
   firstTime: 1
   mapZoneIndexSelect: 0
+  roomIndex: 0
+  locksController: []
 --- !u!1 &189761972
 GameObject:
   m_ObjectHideFlags: 0

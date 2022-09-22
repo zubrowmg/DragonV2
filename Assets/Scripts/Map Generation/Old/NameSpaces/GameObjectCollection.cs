@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace GameObjectCollection
 {
-    public class Singleton : MonoBehaviour
+    public class Blah : MonoBehaviour
     {
         // PreFabAccessor
         static GameObject gridControllerProgressionButton = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/PreFabs/GridController/DefaultRoomLock.prefab", typeof(GameObject));
