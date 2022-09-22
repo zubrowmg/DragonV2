@@ -1,0 +1,6 @@
+MAY CAUSE FUTURE ERRORS:
+1. The InnerCorner prefab's 2d colliders don't quite match the HorizontalWall and VerticalWall 2d colliders when generated.
+2. Progression script createStartingZonePathing has small subarea right now, so I can't put down error messages for when too many "small" subareas are detected
+
+
+Menu System: https://www.youtube.com/watch?v=76WOa6IU_s8&t=8s
