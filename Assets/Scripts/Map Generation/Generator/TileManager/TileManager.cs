@@ -5,16 +5,8 @@ using UnityEngine;
 using CommonlyUsedClasses;
 
 
-
-
-// If a future class needs to access any grid manager fields, then inherit this interface
-//      Classes can inherit from multiple interfaces
-interface IntfGridManager
-{
-    void accessGridManagerGrid();
-}
-
-public partial class GridManager
+// Tile Manager will create the tile map
+public partial class TileManager : ContainerAccessor
 {
     GameObject grid;
     GameObject exampleTile = Singleton.instantiateTile();
@@ -26,23 +18,24 @@ public partial class GridManager
     static Coords<int> minDim = new Coords<int>(0, 0);
     static Coords<int> maxDim = new Coords<int>(147*2*2, 72*2*2);
 
-    static Dimensions gridDimensions = new Dimensions(minDim, maxDim);
+    static Dimensions tileMapDimensions = new Dimensions(minDim, maxDim);
 
-    ~GridManager() { }
+    ~TileManager() { }
 
-    public GridManager(bool generateTiles)
+    public TileManager(bool generateTiles, ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.generateTileGameObjects = generateTiles;
     }
 
-    public void createGrid()
+
+    public void createTileMap()
     {
         float tileHeight = exampleTile.GetComponent<SpriteRenderer>().bounds.size.x;
         float tileWidth = exampleTile.GetComponent<SpriteRenderer>().bounds.size.y;
 
-        for (int x = 0; x < gridDimensions.getMaxX(); x++)
+        for (int x = 0; x < tileMapDimensions.getMaxX(); x++)
         {
-            for (int y = 0; y < gridDimensions.getMaxY(); y++)
+            for (int y = 0; y < tileMapDimensions.getMaxY(); y++)
             {
                 // Get new position
                 Coords<float> newPos = 
@@ -52,20 +45,29 @@ public partial class GridManager
                 // Create tile
             }
         }
-    }
-}
 
-// Wrapper function
-public partial class GridManager
-{
-    public void accessGrid()
+
+    }
+
+    public void test0()
     {
-        Debug.Log("accessGrid");
+        List<int> test0 = new List<int> { 1, 2, 5 };
+        setTileMap(test0);
+    }
+
+    public void test2()
+    {
+        List<int> test2 = getTileMap();
+
+        foreach (var i in test2)
+        {
+            Debug.Log(i);
+        }
     }
 }
 
 
-public partial class GridManager
+public partial class TileManager : ContainerAccessor
 {
     // ------------------ Getters ------------------
     // ------------------ Setters ------------------

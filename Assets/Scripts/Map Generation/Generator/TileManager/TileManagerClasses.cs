@@ -4,8 +4,28 @@ using UnityEngine;
 
 using CommonlyUsedClasses;
 
-namespace GridManagerClasses
+namespace TileManagerClasses
 {
+    // Tile map is used in the generation proccess to place room pieces and veins on
+    public class TileMap
+    {
+        List<int> tileMap;
+
+        public TileMap()
+        {
+            tileMap = new List<int>();
+        }
+
+        public void setTileMap(List<int> test)
+        {
+            tileMap = test;
+        }
+
+        public List<int> getTileMap()
+        {
+            return tileMap;
+        }
+    }
 
     public class Tile
     {

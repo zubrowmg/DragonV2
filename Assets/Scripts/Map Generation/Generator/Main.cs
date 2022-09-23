@@ -12,8 +12,8 @@ public class Main : MonoBehaviour
         Singleton.Init();
         generatorManager = new GeneratorWrapper(generateTileGameObject);
 
-        generatorManager.accessGridManagerGrid();
-        generatorManager.veinTest();
+        generatorManager.startGeneration();
+
     }
 
 

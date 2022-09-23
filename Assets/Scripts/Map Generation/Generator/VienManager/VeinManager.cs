@@ -2,23 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-interface IntfVeinManager
-{
-    void accessGridManagerGrid___ForVeinMananger();
-}
+
 
 // THIS IS JUST A TEMPORARY CLASS, RENAME DELETE DO WHATEVER ONCE YOU GET HERE
-//      Just wanted to show an interface example
-public class VeinManager : IntfVeinManager
+//      Just wanted to show how the container and wrapper work
+public class VeinManager : ContainerAccessor
 {
-    public void test()
+
+    public VeinManager(ref GeneratorContainer contInst) : base(ref contInst)
     {
-        Debug.Log("VeinManager Accessing Grid Manager TEST");
-        accessGridManagerGrid___ForVeinMananger();
     }
 
-    public void accessGridManagerGrid___ForVeinMananger()
+    public void test1()
     {
-        // Dummy function, doesn't do anything
+        List<int> test1 = getTileMap();
+
+        foreach (var i in test1)
+        {
+            Debug.Log(i);
+        }
+
+        test1 = new List<int> { 9, 8, 6 };
+
+        setTileMap(test1);
     }
 }
