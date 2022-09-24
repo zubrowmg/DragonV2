@@ -4,12 +4,13 @@ using UnityEngine;
 
 using CommonlyUsedEnums;
 using CommonlyUsedClasses;
+using TileManagerClasses;
 
 namespace VeinManagerClasses
 {
     public class VeinContainer
     {
-
+        Dictionary<Tile, Vein> tileToVeinLookUp;
     }
 
     public class Vein

@@ -17,6 +17,18 @@ public partial class ContainerAccessor
 // ==========================================================
 //                         Class
 // ==========================================================
+// Vein Placement:
+//      1. Veins should not be placed willy nilly. Only the first starting Veins from the sendoff room are allowed to
+//      2. Veins when generated should place VeinNodes, which is where new Veins should be generated from
+//          - Includes preset Veins
+//  Vein Node Placement:
+//      1. For regular Veins every X units should place a Vein Node. If a vein shorter than X, then you probably shouldn't place a Vein Node
+//      2. Preset Veins should have Vein Nodes predetermined
+//  Preset (Zone) Vein Placement:
+//      1. For Zone Veins, there should be a library of Vein Pieces. With Vein Nodes predetermined on the pieces
+//      2. !!!!! Determining how the pieces should connect should be done via topographical algorithm
+//          - Not every path needs to connect every where (aka a circle), try to do a tree pattern where the "branches" circle
+//          - If the algorithm feels that a connection needs to be made, feel free to use a normal vein
 public class VeinManager : ContainerAccessor
 {
     RandomProbability randProb = new RandomProbability();
