@@ -349,11 +349,11 @@ public class progressionGeneratorScript
     {
         PathMapper zonePathMapper = zone.getPathingMapper();
 
-        bool subAreaClumpIsBossRelated = false;
-        if (firstSubAreaClump.getClumpType() == SubAreaClumpType.Normal)
-            subAreaClumpIsBossRelated = false;
-        else
-            subAreaClumpIsBossRelated = true;
+        //bool subAreaClumpIsBossRelated = false;
+        //if (firstSubAreaClump.getClumpType() == SubAreaClumpType.Normal)
+        //    subAreaClumpIsBossRelated = false;
+        //else
+        //    subAreaClumpIsBossRelated = true;
 
         // Get all sub area clump entrances
         List<GameObject> subAreaClumpEntrances = getSubAreaClumpEntrances(firstSubAreaClump, zone.getCommonPath());

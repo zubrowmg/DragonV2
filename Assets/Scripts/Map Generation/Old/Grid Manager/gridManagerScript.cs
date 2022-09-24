@@ -1732,11 +1732,6 @@ public class gridManagerScript : MonoBehaviour
         yPos = grid[x,y].transform.position.y - (gridHeight / 2);
     }
 
-    public void getGridCenter(ref int x, ref int y)
-    {
-        x = gridCenterX;
-        y = gridCenterY;
-    }
 
     public void getGridStartRoom(ref int x, ref int y)
     {

@@ -46,8 +46,6 @@ public class MapGeneratorScript : MonoBehaviour
         seed = seed < 0 ? seed * -1 : seed;
         Random.InitState(seed);
         Debug.Log("Seed: " + seed);
-        Debug.Log("CREATE A PROPER GRID ACCESSOR");
-        Debug.Log("CURRENTLY YOU CAN ACCIDENTALLY ACCESS OUT OF BOUNDS");
 
         /*
 

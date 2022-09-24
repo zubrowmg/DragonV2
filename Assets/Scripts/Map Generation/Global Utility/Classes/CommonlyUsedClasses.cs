@@ -92,4 +92,38 @@ namespace CommonlyUsedClasses
         }
     }
 
+    public class RandomProbability
+    {
+        public struct RandomSelection
+        {
+            private int minValue;
+            private int maxValue;
+            public float probability;
+
+            public RandomSelection(int minValue, int maxValue, float probability)
+            {
+                this.minValue = minValue;
+                this.maxValue = maxValue;
+                this.probability = probability;
+            }
+
+            public int GetValue() { return Random.Range(minValue, maxValue + 1); }
+        }
+
+
+        // Probabilities need to add up to 1
+        public int getIntBasedOnPercentage(params RandomSelection[] selections)
+        {
+            float rand = Random.value;
+            float currentProb = 0;
+            foreach (var selection in selections)
+            {
+                currentProb += selection.probability;
+                if (rand <= currentProb)
+                    return selection.GetValue();
+            }
+
+            return -1;
+        }
+    }
 }

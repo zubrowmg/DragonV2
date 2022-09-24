@@ -12,10 +12,21 @@ namespace TileManagerClasses
         TwoDList<Tile> tileMap;
         GameObject tileMapGameObject;
 
+        // Properties
+        public Coords<int> minDim = new Coords<int>(0, 0);
+        public Coords<int> maxDim = new Coords<int>(147 * 2 * 2, 72 * 2 * 2);
+
+        public Dimensions tileMapDimensions;
+
+        public Coords<int> tileMapCenter;
+
         public TileMap(GameObject tileMapGameObject)
         {
             this.tileMap = new TwoDList<Tile>();
             this.tileMapGameObject = tileMapGameObject;
+            this.tileMapDimensions = new Dimensions(minDim, maxDim);
+            this.tileMapCenter = new Coords<int>(tileMapDimensions.getMaxX()/2, 
+                                                (tileMapDimensions.getMaxY()/2) + 50);
         }
 
         public void addTile(Coords<int> index, Tile item)

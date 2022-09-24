@@ -26,6 +26,7 @@ public partial class GeneratorWrapper
     {
         // First we need to create the tile map that's the base for all generation
         tileManager.createTileMap();
+        veinManager.startVeinGeneration();
     }
 }
 

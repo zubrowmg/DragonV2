@@ -5,23 +5,48 @@ using UnityEngine;
 using CommonlyUsedClasses;
 using TileManagerClasses;
 
+
+// ==========================================================
+//              Tile Manager Accessors
+// ==========================================================
+public partial class ContainerAccessor
+{
+    public void addTileToTileMap(Coords<int> index, Tile item)
+    {
+        contInst.tileMap.addTile(index, item);
+    }
+
+    public GameObject getTileManagerGameObject()
+    {
+        return contInst.tileMap.getTileMapGameObject();
+    }
+
+    public void countTileDims()
+    {
+        contInst.tileMap.countTileDims();
+    }
+
+    public Dimensions getTileMapDims()
+    {
+        return contInst.tileMap.tileMapDimensions;
+    }
+
+    public Coords<int> getTileMapCenter()
+    {
+        return contInst.tileMap.tileMapCenter;
+    }
+}
+
 // Tile Manager will create the tile map
 public partial class TileManager : ContainerAccessor
 {
-    GameObject grid;
     GameObject exampleTile;
 
     bool generateTileGameObjects;
 
-    // Grid Properties
-    static Coords<float> startCoords = new Coords<float>(-.3f, 0f);
-    static Coords<int> minDim = new Coords<int>(0, 0);
-    static Coords<int> maxDim = new Coords<int>(147*2*2, 72*2*2);
-
-    static Dimensions tileMapDimensions = new Dimensions(minDim, maxDim);
-
-    ~TileManager() { }
-
+    // Tile Map Properties
+    Coords<float> tileMapStartCoords = new Coords<float>(-.3f, 0f);
+    
     public TileManager(bool generateTiles, ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.generateTileGameObjects = generateTiles;
@@ -32,20 +57,24 @@ public partial class TileManager : ContainerAccessor
         this.exampleTile.name = "ExampleTile";
     }
 
+    ~TileManager() { }
+
+
+
 
     public void createTileMap()
     {
         float tileHeight = exampleTile.GetComponent<SpriteRenderer>().bounds.size.x;
         float tileWidth = exampleTile.GetComponent<SpriteRenderer>().bounds.size.y;
 
-        for (int x = 0; x < tileMapDimensions.getMaxX(); x++)
+        for (int x = 0; x < getTileMapDims().getMaxX(); x++)
         {
-            for (int y = 0; y < tileMapDimensions.getMaxY(); y++)
+            for (int y = 0; y < getTileMapDims().getMaxY(); y++)
             {
                 // Get new position
                 Coords<float> newWorldCoords = 
-                    new Coords<float> (((startCoords.getX() + x) * tileWidth) + (tileWidth / 2),
-                                       ((startCoords.getY() + y) * tileHeight) + (tileHeight / 2));
+                    new Coords<float> (((tileMapStartCoords.getX() + x) * tileWidth) + (tileWidth / 2),
+                                       ((tileMapStartCoords.getY() + y) * tileHeight) + (tileHeight / 2));
                 Coords<int> newTileMapCoords = new Coords<int>(x, y);
 
                 Tile newTile = new Tile();
@@ -76,23 +105,4 @@ public partial class TileManager : ContainerAccessor
     // ------------------ Setters ------------------
 }
 
-// ==========================================================
-//              Tile Manager Accessors
-// ==========================================================
-public partial class ContainerAccessor
-{
-    public void addTileToTileMap(Coords<int> index, Tile item)
-    {
-        contInst.tileMap.addTile(index, item);
-    }
 
-    public GameObject getTileManagerGameObject()
-    {
-        return contInst.tileMap.getTileMapGameObject();
-    }
-
-    public void countTileDims()
-    {
-        contInst.tileMap.countTileDims();
-    }
-}

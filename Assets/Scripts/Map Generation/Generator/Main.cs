@@ -12,6 +12,11 @@ public class Main : MonoBehaviour
 
     void Start()
     {
+        int seed = 1550803247;// (int)System.DateTime.Now.Ticks;
+        seed = seed < 0 ? seed * -1 : seed;
+        Random.InitState(seed);
+        Debug.Log("Seed: " + seed);
+
         Singleton.Init();
         generatorManager = new GeneratorWrapper(generateTileGameObject, tileMapGameObject, garbage);
 
