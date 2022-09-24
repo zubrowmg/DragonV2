@@ -97,18 +97,30 @@ public class VeinManager : ContainerAccessor
     {
         // Create Vein with basic settings
         Queue<Vein> veinQueue = new Queue<Vein>();
-        veinQueue.Enqueue(getSendOffVeinInitProps(Direction.West)); // Left vein
-        veinQueue.Enqueue(getSendOffVeinInitProps(Direction.South)); // Middle vein
-        veinQueue.Enqueue(getSendOffVeinInitProps(Direction.East)); // Right vein
+        veinQueue.Enqueue(configSendOffVeinProps(Direction.West)); // Left vein
+        veinQueue.Enqueue(configSendOffVeinProps(Direction.South)); // Middle vein
+        veinQueue.Enqueue(configSendOffVeinProps(Direction.East)); // Right vein
 
         // Function that will call createVein(vein)
+        foreach (var vein in veinQueue)
+        {
+            createVein(vein);
+        }
     }
 
-    Vein getSendOffVeinInitProps(Direction dir)
+    void createVein(Vein newVein)
+    {
+
+    }
+
+    Vein configSendOffVeinProps(Direction dir)
     {
         Vein initVein = null;
         int xChange = 0;
         int yChange = 0;
+        bool varyVeinLength = true;
+        bool varyVeinWidth = true;
+        bool varyVeinSlope = true;
 
         switch (dir)
         {
@@ -120,7 +132,7 @@ public class VeinManager : ContainerAccessor
                             new RandomProbability.RandomSelection(yAxisOneThird + 1, yAxisTwoThird, .5f),
                             new RandomProbability.RandomSelection(yAxisTwoThird + 1, yAxis - 1, .0f));
 
-                initVein = new Vein(Direction.West, leftVeinStart, new Slope(xChange, yChange));
+                initVein = new Vein(Direction.West, leftVeinStart, new Slope(xChange, yChange), varyVeinWidth, varyVeinLength, varyVeinSlope);
                 break;
             case Direction.South:
                 xChange = randProb.getIntBasedOnPercentage(
@@ -129,7 +141,7 @@ public class VeinManager : ContainerAccessor
                             new RandomProbability.RandomSelection(xAxisTwoThird + 1, xAxisThreeFourth, .0f));
                 yChange = 0;
 
-                initVein = new Vein(Direction.South, middleVeinStart, new Slope(xChange, yChange));
+                initVein = new Vein(Direction.South, middleVeinStart, new Slope(xChange, yChange), varyVeinWidth, varyVeinLength, varyVeinSlope);
                 break;
             case Direction.East:
                 xChange = getTileMapDims().getMaxX() - 1;
@@ -138,7 +150,7 @@ public class VeinManager : ContainerAccessor
                             new RandomProbability.RandomSelection(yAxisOneThird + 1, yAxisTwoThird, .5f),
                             new RandomProbability.RandomSelection(yAxisTwoThird + 1, yAxis - 1, .0f));
 
-                initVein = new Vein(Direction.East, rightVeinStart, new Slope(xChange, yChange));
+                initVein = new Vein(Direction.East, rightVeinStart, new Slope(xChange, yChange), varyVeinWidth, varyVeinLength, varyVeinSlope);
                 break;
         }
 
