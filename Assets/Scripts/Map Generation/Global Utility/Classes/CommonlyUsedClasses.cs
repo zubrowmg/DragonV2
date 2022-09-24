@@ -57,4 +57,39 @@ namespace CommonlyUsedClasses
             return maxCoords.getY();
         }
     }
+
+    public class TwoDList<T>
+    {
+        List<List<T>> array;
+
+        public TwoDList()
+        {
+            this.array = new List<List<T>>();
+        }
+
+        public TwoDList(List<List<T>> newArray)
+        {
+            this.array = newArray;
+        }
+
+        public void addElement(Coords<int> index, T item)
+        {
+            // If the x index is greater than x axis need a new x row
+            if (array.Count - 1 < index.getX())
+                array.Add(new List<T> { item });
+            else
+                array[index.getX()].Add(item);
+        }
+
+        public int getXCount()
+        {
+            return array.Count;
+        }
+
+        public int getYCount()
+        {
+            return array[0].Count;
+        }
+    }
+
 }

@@ -9,41 +9,80 @@ namespace TileManagerClasses
     // Tile map is used in the generation proccess to place room pieces and veins on
     public class TileMap
     {
-        List<int> tileMap;
+        TwoDList<Tile> tileMap;
+        GameObject tileMapGameObject;
 
-        public TileMap()
+        public TileMap(GameObject tileMapGameObject)
         {
-            tileMap = new List<int>();
+            this.tileMap = new TwoDList<Tile>();
+            this.tileMapGameObject = tileMapGameObject;
         }
 
-        public void setTileMap(List<int> test)
+        public void addTile(Coords<int> index, Tile item)
         {
-            tileMap = test;
+            tileMap.addElement(index, item);
         }
 
-        public List<int> getTileMap()
+        public GameObject getTileMapGameObject()
         {
-            return tileMap;
+            return tileMapGameObject;
+        }
+
+        public void countTileDims()
+        {
+            Debug.Log("TileMap X Count: " + tileMap.getXCount() + 
+                    "\n        Y Count: " + tileMap.getYCount());
         }
     }
 
     public class Tile
     {
-        GameObject gameObject = new GameObject();
-        bool gameObjectExists;
+        GameObject gameObject;
+        bool gameObjectTilesAreOn;
 
         float tileHeight;
         float tileWidth;
 
+        Coords<int> tileMapCoords;
+        Coords<float> worldCoords;
 
+        string name;
 
-        public Tile(bool gameObjectExists, GameObject tile, float height, float width)
+        public Tile()
+        {
+            this.gameObject = null;
+            this.gameObjectTilesAreOn = false;
+
+            this.tileHeight = 0f;
+            this.tileWidth = 0f;
+
+            this.tileMapCoords = null;
+            this.worldCoords = null;
+
+            this.name = "NULL";
+        }
+
+        public Tile(bool gameObjectTilesAreOn, GameObject tile, float height, float width, 
+                    Coords<float> worldCoords, Coords<int> tileMapCoords, ref GameObject tileMapGameObject)
         {
             this.gameObject = tile;
-            this.gameObjectExists = gameObjectExists;
+            this.gameObjectTilesAreOn = gameObjectTilesAreOn;
 
             this.tileHeight = height;
             this.tileWidth = width;
+
+            this.tileMapCoords = tileMapCoords;
+            this.worldCoords = worldCoords;
+
+            this.name = "Tile";
+
+            // If gameobject tils are on, then we need to set additional gameobject setting
+            if (gameObjectTilesAreOn == true)
+            {
+                this.gameObject.transform.position = new Vector3(worldCoords.getX(), worldCoords.getY(), 0);
+                this.gameObject.transform.SetParent(tileMapGameObject.transform);
+                this.gameObject.name = this.name;
+            }
         }
     }
 }

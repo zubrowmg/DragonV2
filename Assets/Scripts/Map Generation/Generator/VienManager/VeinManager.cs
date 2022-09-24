@@ -13,17 +13,5 @@ public class VeinManager : ContainerAccessor
     {
     }
 
-    public void test1()
-    {
-        List<int> test1 = getTileMap();
 
-        foreach (var i in test1)
-        {
-            Debug.Log(i);
-        }
-
-        test1 = new List<int> { 9, 8, 6 };
-
-        setTileMap(test1);
-    }
 }

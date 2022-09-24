@@ -4,6 +4,8 @@ using UnityEngine;
 
 // Common class to access common variables in GeneratorContainer
 //      Each manager that needs access to anything in the GeneratorContainer needs to inherit this class
+//      Only put the shared components here, accessor functions should be implemented in their respective files
+//          Ex. TileManagerClass.cs should have a partial ContainerAccessor class 
 public partial class ContainerAccessor
 {
     GeneratorContainer contInst;
@@ -14,19 +16,14 @@ public partial class ContainerAccessor
     }
 }
 
-
-// ==========================================================
-//              Tile Manager Accessors
-// ==========================================================
+// Accessor functions that don't have a file
 public partial class ContainerAccessor
 {
-    public void setTileMap(List<int> test)
+    public GameObject getGarbageGameObject()
     {
-        contInst.tileMap.setTileMap(test);
+        return contInst.garbage;
     }
-
-    public List<int> getTileMap()
-    {
-        return contInst.tileMap.getTileMap();
-    }
+    
 }
+
+
