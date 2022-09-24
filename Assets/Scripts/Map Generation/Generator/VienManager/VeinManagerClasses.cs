@@ -16,10 +16,15 @@ namespace VeinManagerClasses
 
     public class Vein
     {
+        // Type
+        VeinType veinType = VeinType.None_Set;
+
         // Direction
-        Direction generalDirection;
+        Direction generalDirection; // Not really used in calculations, only to help for debug
+        VeinDirection intendedVeinDirection = VeinDirection.None_Set;
         Slope veinSlope;
         Coords<int> startCoords;
+        Coords<int> endCoords;
 
         // Width and Distance
         int approxWidth = 6;
@@ -31,54 +36,141 @@ namespace VeinManagerClasses
         bool varyVeinSlope = false;
 
         // Vein properties used during vein creation time
-        VeinDirection veinDirection = VeinDirection.None_Set;
+        int currentWidth;
+        int currentDistance = 0;
+        VeinDirection currentVeinDirection = VeinDirection.None_Set;
 
 
         // List of Tiles
         // List of Tile Bookmarks, Bookmarks are meant for future vein expansion
 
-        public Vein(Direction generalDirection, Coords<int> startCoords, Slope veinSlope, bool varyWidth, bool varyLength, bool varySlope)
+        public Vein(VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords, Slope veinSlope, bool varyWidth, bool varyLength, bool varySlope)
         {
+            this.veinType = type;
+
             this.generalDirection = generalDirection;
             this.startCoords = startCoords;
+            this.endCoords = endCoords;
             this.veinSlope = veinSlope;
 
             this.varyVeinWidth = varyWidth;
             this.varyVeinLength = varyLength;
             this.varyVeinSlope = varySlope;
+
+            this.currentWidth = approxWidth;
+            this.currentVeinDirection = calculateCurrentVeinDirection();
+            this.intendedVeinDirection = this.currentVeinDirection;
+
+            this.approxDistance = initVaryLength(varyLength, approxDistance);
         }
 
-        public Vein(Direction generalDirection, Coords<int> startCoords, Slope veinSlope, bool varyWidth, bool varyLength, bool varySlope, int width, int distance)
+        public Vein(VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords, Slope veinSlope, bool varyWidth, bool varyLength, bool varySlope, int width, int distance)
         {
+            this.veinType = type;
+
             this.generalDirection = generalDirection;
             this.startCoords = startCoords;
+            this.endCoords = endCoords;
             this.veinSlope = veinSlope;
 
             this.varyVeinWidth = varyWidth;
             this.varyVeinLength = varyLength;
             this.varyVeinSlope = varySlope;
+
+            this.currentWidth = approxWidth;
+            this.currentVeinDirection = calculateCurrentVeinDirection();
+            this.intendedVeinDirection = this.currentVeinDirection;
 
             this.approxWidth = width;
-            this.approxDistance = distance;
+            this.approxDistance = initVaryLength(varyLength, distance);
         }
 
+        int initVaryLength(bool varyLength, int distance)
+        {
+            if (varyLength == false)
+            {
+                return distance;
+            }
+            else
+            {
+                return distance + RandomProbability.getIntBasedOnPercentage(
+                                    new RandomProbability.RandomSelection(0, 25, .25f),
+                                    new RandomProbability.RandomSelection(26, 45, .75f),
+                                    new RandomProbability.RandomSelection(46, 65, .0f));
+            }
+        }
 
         // ===================================================================================================
         //                               Setters/Getters
         // ===================================================================================================
-        public void setCurrentVeinDirection(VeinDirection currentVeinDirection)
+        public VeinDirection getIntendedVeinDirection()
         {
-            this.veinDirection = currentVeinDirection;
+            return this.intendedVeinDirection;
         }
 
         public VeinDirection getCurrentVeinDirection()
         {
-            return this.veinDirection;
+            return this.currentVeinDirection;
+        }
+
+        public VeinType getVeinType()
+        {
+            return this.veinType;
+        }
+
+        public VeinDirection calculateCurrentVeinDirection()
+        {
+            VeinDirection veinDirection = VeinDirection.None_Set;
+
+            if (startCoords.getX() < endCoords.getX() || startCoords.getX() == endCoords.getX())
+            {
+                veinDirection = VeinDirection.Right;
+            }
+            else
+            {
+                veinDirection = VeinDirection.Left;
+            }
+
+            return veinDirection;
+        }
+
+        public Coords<int> getStartCoords()
+        {
+            return startCoords;
+        }
+
+        public Coords<int> getEndCoords()
+        {
+            return endCoords;
+        }
+
+        public int getCurrentWidth()
+        {
+            return currentWidth;
+        }
+
+        public int getCurrentDistance()
+        {
+            return this.currentDistance;
+        }
+
+        public void setCurrentDistance(int newDistance)
+        {
+            this.currentDistance = newDistance;
+        }
+
+        public int getDistanceGoal()
+        {
+            return approxDistance;
         }
     }
 
     public class Slope
     {
+        // Hard coded limits
+        float maxSlope = 5f;
+        float maxNonVerticalSlope = 4.9f;
+
         int xChange;
         int yChange;
 
@@ -88,16 +180,50 @@ namespace VeinManagerClasses
         {
             this.xChange = 1;
             this.yChange = 1;
-            this.slopeFloat = (float)this.yChange / (float)this.xChange;
+            this.slopeFloat = 1f;
         }
 
-        public Slope(int xChange, int yChange)
+        public Slope(Coords<int> startDestination, Coords<int> endDestination)
         {
-            this.xChange = xChange;
-            this.yChange = yChange;
-            this.slopeFloat = (float)this.yChange / (float)this.xChange;
+            this.xChange = endDestination.getX() - startDestination.getX();
+            this.yChange = endDestination.getY() - startDestination.getY();
+            this.slopeFloat = calculateSlope(xChange, yChange, startDestination, endDestination);
         }
 
+        // Calculates slope, also if slope is beyond limits this will fix that
+        public float calculateSlope(int xChange, int yChange, Coords<int> startDestination, Coords<int> endDestination)
+        {
+            float slope = (float)this.yChange / (float)this.xChange;
+
+            if (slope > maxSlope)
+            {
+                if (Mathf.Abs(startDestination.getX() - endDestination.getX()) > 30)
+                {
+                    slope = maxNonVerticalSlope - .05f;
+                }
+                else
+                {
+                    slope = maxSlope;
+                }
+            }
+            else if (slope < -maxSlope)
+            {
+                if (Mathf.Abs(startDestination.getX() - endDestination.getX()) > 30)
+                {
+                    slope = -maxNonVerticalSlope + .05f;
+                }
+                else
+                {
+                    slope = -maxSlope;
+                }
+            }
+            else if (-.05f < slope && slope < .05f)
+            {
+                slope = .01f;
+            }
+
+            return slope;
+        }
 
 
         // ===================================================================================================

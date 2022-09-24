@@ -15,6 +15,11 @@ namespace CommonlyUsedClasses
             this.y = y;
         }
 
+        public Coords<T> deepCopy()
+        {
+            return new Coords<T>(this.x, this.y);
+        }
+
         public T getX()
         {
             return x;
@@ -23,6 +28,16 @@ namespace CommonlyUsedClasses
         public T getY()
         {
             return y;
+        }
+
+        public void setX(T x)
+        {
+            this.x = x;
+        }
+
+        public void setY(T y)
+        {
+            this.y = y;
         }
     }
 
@@ -112,7 +127,7 @@ namespace CommonlyUsedClasses
 
 
         // Probabilities need to add up to 1
-        public int getIntBasedOnPercentage(params RandomSelection[] selections)
+        public static int getIntBasedOnPercentage(params RandomSelection[] selections)
         {
             float rand = Random.value;
             float currentProb = 0;

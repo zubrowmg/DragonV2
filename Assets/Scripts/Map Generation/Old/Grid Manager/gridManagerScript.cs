@@ -360,9 +360,6 @@ public class gridManagerScript : MonoBehaviour
             // Every 1/6 of the total distance, there is some variance introduced to the bias percents
 
         }
-
-       
-
     }
 
     void handleSplitVein(ref distanceTraveled state, ref bool justChangedStates, int xStart, int yStart, int xMainVeinStart, int yMainVeinStart, float currentSlope, GeneralVeinDirection generalVeinDir)
