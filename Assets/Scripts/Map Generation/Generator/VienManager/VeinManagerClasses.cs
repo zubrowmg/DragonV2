@@ -163,6 +163,11 @@ namespace VeinManagerClasses
         {
             return approxDistance;
         }
+
+        public float getVeinSlope()
+        {
+            return veinSlope.getSlope();
+        }
     }
 
     public class Slope

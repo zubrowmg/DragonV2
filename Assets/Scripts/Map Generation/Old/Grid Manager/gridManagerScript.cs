@@ -281,7 +281,6 @@ public class gridManagerScript : MonoBehaviour
         int newDistance = approxDistance + randomDistanceChange;
 
         bool isUpDown = Random.Range(0, 1+1) == 1 ? true : false;
-        //Debug.Log(isUpDown);
         int shiftStart = 2;
         const int totalUParts = 4;
         const int totalSections = 8;

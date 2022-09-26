@@ -16,7 +16,7 @@ public partial class ContainerAccessor
     }
 }
 
-// Accessor functions that don't have a file
+// Accessor functions that don't have a .cs file
 public partial class ContainerAccessor
 {
     public GameObject getGarbageGameObject()

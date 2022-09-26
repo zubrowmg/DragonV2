@@ -10,7 +10,7 @@ public partial class GeneratorWrapper
     TileManager tileManager;
     VeinManager veinManager;
 
-    // Contains any classes that map generator managers will need to share, don't abuse this by placing a lot in here
+    // Contains any classes that map generator managers will need to share, don't abuse this by placing everything and anything in here
     GeneratorContainer commonContainer;
 
     public GeneratorWrapper(bool generateGridManagerTile, GameObject tileMapGameObject, GameObject garbage)

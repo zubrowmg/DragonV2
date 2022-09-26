@@ -110,6 +110,7 @@ public class VeinManager : ContainerAccessor
         foreach (var vein in veinQueue)
         {
             createVein(vein);
+            // vein.triggerVeinGeneration();
         }
     }
 
@@ -162,8 +163,7 @@ public class VeinManager : ContainerAccessor
 
             if (newVein.getVeinType() == VeinType.Simple)
             {
-                simpleVein(ref i, ref x, ref y, ref yPrev, ref yStart, ref newDistance, ref width, 
-                                        ref slope, ref exitLoop, ref dir, ref xBreakOut, ref yBreakOut, intendedDir, generalVeinDir);
+                simpleVein(ref i, currentCoords, prevCoords, ref newVein, ref exitLoop, ref xBreakOut, ref yBreakOut);
                 if (exitLoop) break;
             }
             //else if (vein == veinType.U)
@@ -197,191 +197,188 @@ public class VeinManager : ContainerAccessor
 
         }
 
+    }
+    void simpleVein(ref int i, Coords<int> currentCoords, Coords<int> prevCoords, ref Vein vein, ref bool exitLoop, ref int xBreakOut, ref int yBreakOut)
+    {
+        int yTempi;
+        int yTempiMinus;
 
-        void simpleVein(ref int i, ref int x, ref int y, ref int yPrev, ref int yStart, ref int newDistance,
-                                   ref int width, ref float slope, ref bool exitLoop, ref veinDirection dir,
-                                   ref int xBreakOut, ref int yBreakOut, veinDirection intendedDir, GeneralVeinDirection generalVeinDir)
+        if (i > vein.getDistanceGoal())
         {
-            int yTempi;
-            int yTempiMinus;
+            //Debug.Log("OUT: ");
+            exitLoop = true;
+            return;
+        }
 
-            if (i > newDistance)
+        //Debug.Log("========== Top: " + x + "," + y + "   ==========");
+        createStrip(x, y, width, ref slope, ref dir, generalVeinDir);
+
+        // Fill in the gaps of extreme slopes
+        for (int change = 0; change < (Mathf.Abs(y - yPrev)); change++)
+        {
+            if (vein.getVeinSlope() > 0f)
             {
-                //Debug.Log("OUT: ");
-                exitLoop = true;
-                return;
-            }
 
-            //Debug.Log("========== Top: " + x + "," + y + "   ==========");
-            createStrip(x, y, width, ref slope, ref dir, generalVeinDir);
-
-            // Fill in the gaps of extreme slopes
-            for (int change = 0; change < (Mathf.Abs(y - yPrev)); change++)
-            {
-                //Debug.Log(y + "," + yPrev);
-                if (slope > 0f)
+                if (vein.getCurrentVeinDirection() == VeinDirection.Right)
                 {
-
-                    if (dir == veinDirection.Right)
-                    {
-                        //Debug.Log("IN0: " + x + "," + (y - change - 1));
-                        createStrip(x, y - change - 1, width, ref slope, ref dir, generalVeinDir);
-                    }
-                    else
-                    {
-                        //Debug.Log("IN1: " + x + "," + (y + change + 1));
-                        createStrip(x, y + change + 1, width, ref slope, ref dir, generalVeinDir);
-                    }
+                    //Debug.Log("IN0: " + x + "," + (y - change - 1));
+                    createStrip(x, y - change - 1, width, ref slope, ref dir, generalVeinDir);
                 }
                 else
                 {
-                    if (dir == veinDirection.Right)
-                    {
-                        //Debug.Log("IN2: " + x + "," + (y + change + 1));
-                        createStrip(x, y + change + 1, width, ref slope, ref dir, generalVeinDir);
-                    }
-                    else
-                    {
-                        //Debug.Log("IN3: " + x + "," + (y - change - 1));
-                        createStrip(x, y - change - 1, width, ref slope, ref dir, generalVeinDir);
-                    }
+                    //Debug.Log("IN1: " + x + "," + (y + change + 1));
+                    createStrip(x, y + change + 1, width, ref slope, ref dir, generalVeinDir);
                 }
-                //newDistance--;
-            }
-            xBreakOut = x;
-            yBreakOut = y;
-
-            if (dir == veinDirection.Right)
-            {
-                if (-maxNonVerticalSlope < slope && slope < maxNonVerticalSlope)
-                {
-                    x++;
-                }
-
-                // In case the slope changes we have to chang y based on the difference of the previous y
-                yTempiMinus = (int)Mathf.Floor((float)(i - 1) * slope) + yStart;
-                yTempi = (int)Mathf.Floor((float)i * slope) + yStart;
-
-                y = y + (yTempi - yTempiMinus);
             }
             else
             {
-                if (-maxNonVerticalSlope < slope && slope < maxNonVerticalSlope)
+                if (vein.getCurrentVeinDirection() == VeinDirection.Right)
                 {
-                    x--;
-                }
-
-                // In case the slope changes we have to chang y based on the difference of the previous y
-                yTempiMinus = (int)Mathf.Floor((float)(i - 1) * slope * -1) + yStart;
-                yTempi = (int)Mathf.Floor((float)i * slope * -1) + yStart;
-
-                y = y + (yTempi - yTempiMinus);
-            }
-
-
-
-            // If the slope is extreme we will have a really tall vien, need to trim that here
-            // Ex: slope = .01, widthSlope = -100
-            if (Mathf.Abs(y - yPrev) > (newDistance - i))
-            {
-                //Debug.Log("IN1   y: " + y + "    yPrev: " + yPrev + "   Change:" + (newDistance - i));
-                if (slope < 0f)
-                {
-                    if (dir == veinDirection.Right)
-                    {
-                        y = yPrev - (newDistance - i);
-                    }
-                    else
-                    {
-                        y = yPrev + (newDistance - i);
-                    }
-
+                    //Debug.Log("IN2: " + x + "," + (y + change + 1));
+                    createStrip(x, y + change + 1, width, ref slope, ref dir, generalVeinDir);
                 }
                 else
                 {
-                    if (dir == veinDirection.Right)
-                    {
-                        y = yPrev + (newDistance - i);
-                    }
-                    else
-                    {
-                        y = yPrev - (newDistance - i);
-                    }
-                    //y = yPrev + (newDistance - i);
+                    //Debug.Log("IN3: " + x + "," + (y - change - 1));
+                    createStrip(x, y - change - 1, width, ref slope, ref dir, generalVeinDir);
                 }
             }
+            //newDistance--;
+        }
+        xBreakOut = currentCoords.getX();
+        yBreakOut = currentCoords.getY();
+
+        if (vein.getCurrentVeinDirection() == VeinDirection.Right)
+        {
+            if (-maxNonVerticalSlope < slope && slope < maxNonVerticalSlope)
+            {
+                currentCoords.setX(currentCoords.getX() + 1);
+            }
+
+            // In case the slope changes we have to chang y based on the difference of the previous y
+            yTempiMinus = (int)Mathf.Floor((float)(i - 1) * slope) + yStart;
+            yTempi = (int)Mathf.Floor((float)i * slope) + yStart;
+
+            y = y + (yTempi - yTempiMinus);
+        }
+        else
+        {
+            if (-maxNonVerticalSlope < slope && slope < maxNonVerticalSlope)
+            {
+                currentCoords.setX(currentCoords.getX() - 1);
+            }
+
+            // In case the slope changes we have to chang y based on the difference of the previous y
+            yTempiMinus = (int)Mathf.Floor((float)(i - 1) * slope * -1) + yStart;
+            yTempi = (int)Mathf.Floor((float)i * slope * -1) + yStart;
+
+            y = y + (yTempi - yTempiMinus);
         }
 
 
-        void handleDistanceState(Coords<int> currentCoords, Coords<int> prevCoords, ref Vein vein, ref VeinDistanceTraveled state, ref bool justChangedStates)
+
+        // If the slope is extreme we will have a really tall vien, need to trim that here
+        // Ex: slope = .01, widthSlope = -100
+        if (Mathf.Abs(currentCoords.getY() - prevCoords.getY()) > (vein.getDistanceGoal() - i))
         {
-            // Calculate how far this vein has traveled
-            int xChange = Mathf.Abs(currentCoords.getX() - prevCoords.getX());
-            int yChange = Mathf.Abs(currentCoords.getY() - prevCoords.getY());
-            int newTraveledDistance = vein.getCurrentDistance() + (int)Mathf.Floor(Mathf.Sqrt((xChange * xChange) + (yChange * yChange)));
-            vein.setCurrentDistance(newTraveledDistance);
-            
-            //Debug.Log(xChange + "," + yChange);
-            //Debug.Log("Distance: " + totalDistanceTraveled + "   totalDistance: " + totalDistance);
-            if (state == VeinDistanceTraveled.None)
+            //Debug.Log("IN1   y: " + y + "    yPrev: " + yPrev + "   Change:" + (newDistance - i));
+            if (vein.getVeinSlope() < 0f)
             {
-                if (vein.getCurrentDistance() >= (vein.getDistanceGoal() / 6))
+                if (vein.getCurrentVeinDirection() == VeinDirection.Right)
                 {
-                    state = VeinDistanceTraveled.One_Sixths;
-                    justChangedStates = true;
+                    currentCoords.setY(prevCoords.getY() - (vein.getDistanceGoal() - i));
                 }
                 else
-                    justChangedStates = false;
-            }
-            else if (state == VeinDistanceTraveled.One_Sixths)
-            {
-                if (vein.getCurrentDistance() >= (2 * (vein.getDistanceGoal() / 6)))
                 {
-                    state = VeinDistanceTraveled.Two_Sixths;
-                    justChangedStates = true;
+                    currentCoords.setY(prevCoords.getY() + (vein.getDistanceGoal() - i));
                 }
-                else
-                    justChangedStates = false;
-            }
-            else if (state == VeinDistanceTraveled.Two_Sixths)
-            {
-                if (vein.getCurrentDistance() >= (3 * (vein.getDistanceGoal() / 6)))
-                {
-                    state = VeinDistanceTraveled.Three_Sixths;
-                    justChangedStates = true;
-                }
-                else
-                    justChangedStates = false;
-            }
-            else if (state == VeinDistanceTraveled.Three_Sixths)
-            {
-                if (vein.getCurrentDistance() >= (4 * (vein.getDistanceGoal() / 6)))
-                {
-                    state = VeinDistanceTraveled.Four_Sixths;
-                    justChangedStates = true;
-                }
-                else
-                    justChangedStates = false;
-            }
-            else if (state == VeinDistanceTraveled.Four_Sixths)
-            {
-                if (vein.getCurrentDistance() >= (5 * (vein.getDistanceGoal() / 6)))
-                {
-                    state = VeinDistanceTraveled.Five_Sixths;
-                    justChangedStates = true;
-                }
-                else
-                    justChangedStates = false;
-            }
-            else if (state == VeinDistanceTraveled.Five_Sixths)
-            {
-
-                justChangedStates = false;
 
             }
-
+            else
+            {
+                if (vein.getCurrentVeinDirection() == VeinDirection.Right)
+                {
+                    currentCoords.setY(prevCoords.getY() + (vein.getDistanceGoal() - i));
+                }
+                else
+                {
+                    currentCoords.setY(prevCoords.getY() - (vein.getDistanceGoal() - i));
+                }
+                //y = yPrev + (newDistance - i);
+            }
         }
     }
+
+
+    void handleDistanceState(Coords<int> currentCoords, Coords<int> prevCoords, ref Vein vein, ref VeinDistanceTraveled state, ref bool justChangedStates)
+    {
+        // Calculate how far this vein has traveled
+        int xChange = Mathf.Abs(currentCoords.getX() - prevCoords.getX());
+        int yChange = Mathf.Abs(currentCoords.getY() - prevCoords.getY());
+        int newTraveledDistance = vein.getCurrentDistance() + (int)Mathf.Floor(Mathf.Sqrt((xChange * xChange) + (yChange * yChange)));
+        vein.setCurrentDistance(newTraveledDistance);
+            
+        //Debug.Log(xChange + "," + yChange);
+        //Debug.Log("Distance: " + totalDistanceTraveled + "   totalDistance: " + totalDistance);
+        if (state == VeinDistanceTraveled.None)
+        {
+            if (vein.getCurrentDistance() >= (vein.getDistanceGoal() / 6))
+            {
+                state = VeinDistanceTraveled.One_Sixths;
+                justChangedStates = true;
+            }
+            else
+                justChangedStates = false;
+        }
+        else if (state == VeinDistanceTraveled.One_Sixths)
+        {
+            if (vein.getCurrentDistance() >= (2 * (vein.getDistanceGoal() / 6)))
+            {
+                state = VeinDistanceTraveled.Two_Sixths;
+                justChangedStates = true;
+            }
+            else
+                justChangedStates = false;
+        }
+        else if (state == VeinDistanceTraveled.Two_Sixths)
+        {
+            if (vein.getCurrentDistance() >= (3 * (vein.getDistanceGoal() / 6)))
+            {
+                state = VeinDistanceTraveled.Three_Sixths;
+                justChangedStates = true;
+            }
+            else
+                justChangedStates = false;
+        }
+        else if (state == VeinDistanceTraveled.Three_Sixths)
+        {
+            if (vein.getCurrentDistance() >= (4 * (vein.getDistanceGoal() / 6)))
+            {
+                state = VeinDistanceTraveled.Four_Sixths;
+                justChangedStates = true;
+            }
+            else
+                justChangedStates = false;
+        }
+        else if (state == VeinDistanceTraveled.Four_Sixths)
+        {
+            if (vein.getCurrentDistance() >= (5 * (vein.getDistanceGoal() / 6)))
+            {
+                state = VeinDistanceTraveled.Five_Sixths;
+                justChangedStates = true;
+            }
+            else
+                justChangedStates = false;
+        }
+        else if (state == VeinDistanceTraveled.Five_Sixths)
+        {
+
+            justChangedStates = false;
+
+        }
+
+    }
+
 
     Vein configSendOffVeinProps(Direction dir)
     {
