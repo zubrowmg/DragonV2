@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CommonlyUsedClasses;
+using VeinManagerClasses;
+using CommonlyUsedEnums;
 
 namespace TileManagerClasses
 {
@@ -11,6 +13,8 @@ namespace TileManagerClasses
     {
         TwoDList<Tile> tileMap;
         GameObject tileMapGameObject;
+
+        Tile selectedTile = null;
 
         // Properties
         public Coords<int> minDim = new Coords<int>(0, 0);
@@ -34,9 +38,9 @@ namespace TileManagerClasses
             tileMap.addElement(index, item);
         }
 
-        public GameObject getTileMapGameObject()
+        public ref GameObject getTileMapGameObject()
         {
-            return tileMapGameObject;
+            return ref tileMapGameObject;
         }
 
         public void countTileDims()
@@ -44,45 +48,76 @@ namespace TileManagerClasses
             Debug.Log("TileMap X Count: " + tileMap.getXCount() + 
                     "\n        Y Count: " + tileMap.getYCount());
         }
+
+        public ref Tile getTile(Coords<int> coords, ref bool accessSuccessful)
+        {
+            if (tileMapDimensions.getMinX() <= coords.getX() && coords.getX() < tileMapDimensions.getMaxX() &&
+                tileMapDimensions.getMinY() <= coords.getY() && coords.getY() < tileMapDimensions.getMaxY())
+            {
+                selectedTile = tileMap.getElement(coords);
+                accessSuccessful = true;
+            }
+            else
+            {
+                Debug.Log("Tile Class - getTile() attempted to access out of bounds tile: " + coords.getX() + ", " + coords.getY());
+                accessSuccessful = false;
+            }
+
+            return ref selectedTile;
+        }
     }
 
     public class Tile
     {
         GameObject gameObject;
+        GameObject tileMapGameObject;
         bool gameObjectTilesAreOn;
+        bool enabledGameObjectIfTouched;
 
+        // Coords
+        Coords<int> tileMapIndex;
+        Coords<float> worldCoords;
+
+        // Properties
+        string name;
         float tileHeight;
         float tileWidth;
 
-        Coords<int> tileMapCoords;
-        Coords<float> worldCoords;
+        // Debug and Generation
+        bool isTouched = false;
+        TileRoomType intendedRoomType = TileRoomType.None_Set; // Zone specific room, normal vein room, a vein biome room (GreatTunnel)
 
-        string name;
+        bool isVein = false;
+        bool isVeinMain = false;
+        Vein associatedVein = null;
 
         public Tile()
         {
             this.gameObject = null;
+            this.tileMapGameObject = null;
             this.gameObjectTilesAreOn = false;
 
             this.tileHeight = 0f;
             this.tileWidth = 0f;
 
-            this.tileMapCoords = null;
+            this.tileMapIndex = null;
             this.worldCoords = null;
 
             this.name = "NULL";
         }
 
-        public Tile(bool gameObjectTilesAreOn, GameObject tile, float height, float width, 
+        public Tile(bool gameObjectTilesAreOn, bool enabledGameObjectIfTouched, GameObject tile, float height, float width, 
                     Coords<float> worldCoords, Coords<int> tileMapCoords, ref GameObject tileMapGameObject)
         {
             this.gameObject = tile;
             this.gameObjectTilesAreOn = gameObjectTilesAreOn;
+            this.tileMapGameObject = tileMapGameObject;
+            this.enabledGameObjectIfTouched = enabledGameObjectIfTouched;
 
             this.tileHeight = height;
             this.tileWidth = width;
 
-            this.tileMapCoords = tileMapCoords;
+            this.tileMapIndex = tileMapCoords;
             this.worldCoords = worldCoords;
 
             this.name = "Tile";
@@ -90,10 +125,44 @@ namespace TileManagerClasses
             // If gameobject tils are on, then we need to set additional gameobject setting
             if (gameObjectTilesAreOn == true)
             {
-                this.gameObject.transform.position = new Vector3(worldCoords.getX(), worldCoords.getY(), 0);
-                this.gameObject.transform.SetParent(tileMapGameObject.transform);
-                this.gameObject.name = this.name;
+                instantiateTileGameObject(this.gameObject);
             }
+        }
+
+        public void instantiateTileGameObject(GameObject tile)
+        {
+            this.gameObject = tile;
+            //Debug.Log("TEST___0");
+            this.gameObject.transform.position = new Vector3(worldCoords.getX(), worldCoords.getY(), 0);
+            //Debug.Log("TEST___1");
+
+            this.gameObject.transform.SetParent(tileMapGameObject.transform);
+            //Debug.Log("TEST___2");
+            this.gameObject.name = this.name;
+        }
+
+        public void setTileAsVein(Vein veinInst)
+        {
+            this.isVein = true;
+            this.isTouched = true;
+            this.associatedVein = veinInst;
+            this.intendedRoomType = TileRoomType.Vein;
+
+            if (gameObjectTilesAreOn == false)
+            {
+                instantiateTileGameObject(Singleton.instantiateTile());
+            }
+        }
+
+        public void setTileAsVeinMain(Vein veinInst)
+        {
+            this.isVeinMain = true;
+            setTileAsVein(veinInst);
+        }
+
+        public ref GameObject getTileGameObject()
+        {
+            return ref gameObject;
         }
     }
 }

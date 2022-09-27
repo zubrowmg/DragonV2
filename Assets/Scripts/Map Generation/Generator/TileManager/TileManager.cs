@@ -9,16 +9,23 @@ using TileManagerClasses;
 // ==========================================================
 //              Tile Manager Accessors
 // ==========================================================
-public partial class ContainerAccessor
+public class TileAccessor
 {
+    GeneratorContainer contInst;
+
+    public TileAccessor(ref GeneratorContainer contInst)
+    {
+        this.contInst = contInst;
+    }
+
     public void addTileToTileMap(Coords<int> index, Tile item)
     {
         contInst.tileMap.addTile(index, item);
     }
 
-    public GameObject getTileManagerGameObject()
+    public ref GameObject getTileManagerGameObject()
     {
-        return contInst.tileMap.getTileMapGameObject();
+        return ref contInst.tileMap.getTileMapGameObject();
     }
 
     public void countTileDims()
@@ -35,6 +42,11 @@ public partial class ContainerAccessor
     {
         return contInst.tileMap.tileMapCenter;
     }
+
+    public ref Tile getTile(Coords<int> coords, ref bool accessSuccessful)
+    {
+        return ref contInst.tileMap.getTile(coords, ref accessSuccessful);
+    }
 }
 
 // Tile Manager will create the tile map
@@ -43,13 +55,15 @@ public partial class TileManager : ContainerAccessor
     GameObject exampleTile;
 
     bool generateTileGameObjects;
+    bool enabledGameObjectIfTouched;
 
     // Tile Map Properties
     Coords<float> tileMapStartCoords = new Coords<float>(-.3f, 0f);
     
-    public TileManager(bool generateTiles, ref GeneratorContainer contInst) : base(ref contInst)
+    public TileManager(bool generateTiles, bool enabledGameObjectIfTouched, ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.generateTileGameObjects = generateTiles;
+        this.enabledGameObjectIfTouched = enabledGameObjectIfTouched;
 
         this.exampleTile = Singleton.instantiateTile();
         this.exampleTile.transform.position = getGarbageGameObject().transform.position;
@@ -59,17 +73,14 @@ public partial class TileManager : ContainerAccessor
 
     ~TileManager() { }
 
-
-
-
     public void createTileMap()
     {
         float tileHeight = exampleTile.GetComponent<SpriteRenderer>().bounds.size.x;
         float tileWidth = exampleTile.GetComponent<SpriteRenderer>().bounds.size.y;
 
-        for (int x = 0; x < getTileMapDims().getMaxX(); x++)
+        for (int x = 0; x < tileAccessor.getTileMapDims().getMaxX(); x++)
         {
-            for (int y = 0; y < getTileMapDims().getMaxY(); y++)
+            for (int y = 0; y < tileAccessor.getTileMapDims().getMaxY(); y++)
             {
                 // Get new position
                 Coords<float> newWorldCoords = 
@@ -78,20 +89,20 @@ public partial class TileManager : ContainerAccessor
                 Coords<int> newTileMapCoords = new Coords<int>(x, y);
 
                 Tile newTile = new Tile();
-                GameObject tileManagerGameObject = getTileManagerGameObject();
+                GameObject tileManagerGameObject = tileAccessor.getTileManagerGameObject();
                 // Create tile
                 if (generateTileGameObjects == true)
                 {
-                    newTile = new Tile(generateTileGameObjects, Singleton.instantiateTile(), tileHeight, tileWidth,
+                    newTile = new Tile(generateTileGameObjects, enabledGameObjectIfTouched, Singleton.instantiateTile(), tileHeight, tileWidth,
                                         newWorldCoords, newTileMapCoords, ref tileManagerGameObject);
                 }
                 else
                 {
-                    newTile = new Tile(generateTileGameObjects, null, tileHeight, tileWidth,
+                    newTile = new Tile(generateTileGameObjects, enabledGameObjectIfTouched, null, tileHeight, tileWidth,
                                         newWorldCoords, newTileMapCoords, ref tileManagerGameObject);
                 }
 
-                addTileToTileMap(newTileMapCoords, newTile);
+                tileAccessor.addTileToTileMap(newTileMapCoords, newTile);
             }
         }
         //countTileDims();

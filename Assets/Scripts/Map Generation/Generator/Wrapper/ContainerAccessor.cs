@@ -9,10 +9,17 @@ using UnityEngine;
 public partial class ContainerAccessor
 {
     GeneratorContainer contInst;
+    public TileAccessor tileAccessor;
 
     public ContainerAccessor(ref GeneratorContainer contInst)
     {
         this.contInst = contInst;
+        this.tileAccessor = new TileAccessor(ref contInst);
+    }
+
+    public ref GeneratorContainer getContainerInst()
+    {
+        return ref contInst;
     }
 }
 

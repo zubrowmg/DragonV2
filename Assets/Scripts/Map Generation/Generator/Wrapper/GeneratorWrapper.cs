@@ -13,10 +13,10 @@ public partial class GeneratorWrapper
     // Contains any classes that map generator managers will need to share, don't abuse this by placing everything and anything in here
     GeneratorContainer commonContainer;
 
-    public GeneratorWrapper(bool generateGridManagerTile, GameObject tileMapGameObject, GameObject garbage)
+    public GeneratorWrapper(bool generateGridManagerTile, bool enabledGameObjectIfTouched, GameObject tileMapGameObject, GameObject garbage)
     {
         commonContainer = new GeneratorContainer(tileMapGameObject, garbage);
-        tileManager = new TileManager(generateGridManagerTile, ref commonContainer);
+        tileManager = new TileManager(generateGridManagerTile, enabledGameObjectIfTouched, ref commonContainer);
         veinManager = new VeinManager(ref commonContainer);
     }
     ~GeneratorWrapper() { }
@@ -27,6 +27,17 @@ public partial class GeneratorWrapper
         // First we need to create the tile map that's the base for all generation
         tileManager.createTileMap();
         veinManager.startVeinGeneration();
+    }
+
+    // Debug Controller Functions
+    public TileManager getTileManager()
+    {
+        return tileManager;
+    }
+
+    public VeinManager getVeinManager()
+    {
+        return veinManager;
     }
 }
 

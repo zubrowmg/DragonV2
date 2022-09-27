@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    const bool generateTileGameObject = true;
+    const bool generateTileGameObject = false;
+    const bool enabledGameObjectIfTouched = true;
     GeneratorWrapper generatorManager;
 
+    // Game Objects
     public GameObject tileMapGameObject;
     public GameObject garbage;
+    public GameObject debugManager;
 
     void Start()
     {
@@ -18,10 +21,12 @@ public class Main : MonoBehaviour
         Debug.Log("Seed: " + seed);
 
         Singleton.Init();
-        generatorManager = new GeneratorWrapper(generateTileGameObject, tileMapGameObject, garbage);
+        generatorManager = new GeneratorWrapper(generateTileGameObject, enabledGameObjectIfTouched, tileMapGameObject, garbage);
 
         generatorManager.startGeneration();
 
+        // Give the debug manager access to generation manager
+        debugManager.GetComponent<DebugControllerManager>().init(ref generatorManager);
     }
 
 

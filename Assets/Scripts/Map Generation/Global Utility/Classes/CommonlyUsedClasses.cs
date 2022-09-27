@@ -77,6 +77,7 @@ namespace CommonlyUsedClasses
     public class TwoDList<T>
     {
         List<List<T>> array;
+        T selectedItem = default(T);
 
         public TwoDList()
         {
@@ -95,6 +96,12 @@ namespace CommonlyUsedClasses
                 array.Add(new List<T> { item });
             else
                 array[index.getX()].Add(item);
+        }
+
+        public ref T getElement(Coords<int> index)
+        {
+            selectedItem = array[index.getX()][index.getY()];
+            return ref selectedItem;
         }
 
         public int getXCount()

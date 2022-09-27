@@ -499,6 +499,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileMapGameObject: {fileID: 924583818}
   garbage: {fileID: 1752450708}
+  debugManager: {fileID: 971668954}
 --- !u!4 &106821876
 Transform:
   m_ObjectHideFlags: 0
@@ -721,7 +722,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectZoneLocks
         m_Mode: 1
@@ -780,9 +781,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 185432537}
-  - component: {fileID: 185432538}
   m_Layer: 0
-  m_Name: GridController
+  m_Name: DebugButtons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -808,18 +808,6 @@ Transform:
   m_Father: {fileID: 450497428}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &185432538
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 185432536}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 118279ec34cc7bc49acba1fce24b9613, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &189761972
 GameObject:
   m_ObjectHideFlags: 0
@@ -907,7 +895,7 @@ GameObject:
   - component: {fileID: 194685843}
   - component: {fileID: 194685842}
   m_Layer: 5
-  m_Name: Select Grids
+  m_Name: Select Tiles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -965,7 +953,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Select Grids
+  m_Text: Select Tiles
 --- !u!222 &194685843
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1362,7 +1350,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectCommonPath
         m_Mode: 1
@@ -1539,7 +1527,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: hideGrid
         m_Mode: 1
@@ -1752,7 +1740,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectNextMainGridType
         m_Mode: 1
@@ -1995,7 +1983,7 @@ GameObject:
   - component: {fileID: 971668955}
   - component: {fileID: 971668956}
   m_Layer: 0
-  m_Name: GridManager
+  m_Name: DebugManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2027,28 +2015,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 971668954}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 746040e23abd10d4183ae59032a77206, type: 3}
+  m_Script: {fileID: 11500000, guid: d9388618bfb7b8d4eab4d9149088f92c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  varyVeinWidth: 1
-  dontVaryWeinWidth: 0
-  varyVeinLength: 1
-  dontVaryVeinLength: 0
-  varyVeinSlope: 1
-  dontVaryVeinSlope: 0
-  splitVein: 1
-  dontSplitVein: 0
-  markEndAsPOICore: 1
-  dontMarkEndAsPOICore: 0
-  gridHeight: 0
-  gridWidth: 0
-  gridUnitTemplate: {fileID: 4199989436162208389, guid: 06d0abd9d1c05144dbce6e5d092bb3bd, type: 3}
-  randProbabiliryManager: {fileID: 2128201580}
-  veinPresetManager: {fileID: 876748227}
-  xPOI: 
-  yPOI: 
-  xPOICore: 
-  yPOICore: 
 --- !u!1 &1001951845
 GameObject:
   m_ObjectHideFlags: 0
@@ -2170,7 +2139,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectNextZone
         m_Mode: 1
@@ -2457,7 +2426,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: clearGrid
         m_Mode: 1
@@ -2670,7 +2639,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: viewProgression
         m_Mode: 1
@@ -2804,7 +2773,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectNextSubArea
         m_Mode: 1
@@ -3280,7 +3249,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: printAllLockedRooms
         m_Mode: 1
@@ -4073,7 +4042,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: clearZoneLocks
         m_Mode: 1
@@ -4282,8 +4251,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
-        m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
+      - m_Target: {fileID: 971668956}
+        m_TargetAssemblyTypeName: DebugControllerManager, Assembly-CSharp
         m_MethodName: selectVeins
         m_Mode: 1
         m_Arguments:
@@ -4415,7 +4384,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: hideMap
         m_Mode: 1
@@ -4549,7 +4518,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectNextBranchPath
         m_Mode: 1
@@ -5159,7 +5128,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectIsOccupied
         m_Mode: 1
@@ -5293,7 +5262,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectDoors
         m_Mode: 1
@@ -5744,7 +5713,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: showAdjacentRooms
         m_Mode: 1
@@ -5961,7 +5930,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectRoomsInZone
         m_Mode: 1
@@ -6216,7 +6185,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 185432538}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
         m_MethodName: selectZone
         m_Mode: 1
