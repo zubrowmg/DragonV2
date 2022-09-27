@@ -33,8 +33,12 @@ public class DebugControllerManager : MonoBehaviour
 
         foreach (var vein in veinList)
         {
+            
+
             var veinRef = vein;
-            foreach (var tile in veinRef.getAssociatedTiles())
+            List<Tile> associatedTiles = veinRef.getAssociatedTiles();
+
+            foreach (var tile in associatedTiles)
             {
                 var tileRef = tile;
                 if (toggleVeins)

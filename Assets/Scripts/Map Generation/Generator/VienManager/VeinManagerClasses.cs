@@ -16,6 +16,9 @@ namespace VeinManagerClasses
 
     public class Vein : TileAccessor
     {
+        // Test Vars
+        public string name = "TEST____0";
+
         // Type
         VeinType veinType = VeinType.None_Set;
 

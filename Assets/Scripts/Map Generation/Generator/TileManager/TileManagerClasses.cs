@@ -109,7 +109,6 @@ namespace TileManagerClasses
         public Tile(bool gameObjectTilesAreOn, bool enabledGameObjectIfTouched, GameObject tile, float height, float width, 
                     Coords<float> worldCoords, Coords<int> tileMapCoords, ref GameObject tileMapGameObject)
         {
-            this.gameObject = tile;
             this.gameObjectTilesAreOn = gameObjectTilesAreOn;
             this.tileMapGameObject = tileMapGameObject;
             this.enabledGameObjectIfTouched = enabledGameObjectIfTouched;
@@ -125,19 +124,15 @@ namespace TileManagerClasses
             // If gameobject tils are on, then we need to set additional gameobject setting
             if (gameObjectTilesAreOn == true)
             {
-                instantiateTileGameObject(this.gameObject);
+                instantiateTileGameObject(tile);
             }
         }
 
         public void instantiateTileGameObject(GameObject tile)
         {
             this.gameObject = tile;
-            //Debug.Log("TEST___0");
             this.gameObject.transform.position = new Vector3(worldCoords.getX(), worldCoords.getY(), 0);
-            //Debug.Log("TEST___1");
-
             this.gameObject.transform.SetParent(tileMapGameObject.transform);
-            //Debug.Log("TEST___2");
             this.gameObject.name = this.name;
         }
 
@@ -163,6 +158,12 @@ namespace TileManagerClasses
         public ref GameObject getTileGameObject()
         {
             return ref gameObject;
+        }
+
+        // Test function, not used in generation
+        public void changeVeinName()
+        {
+            associatedVein.name = "TEST_______111";
         }
     }
 }
