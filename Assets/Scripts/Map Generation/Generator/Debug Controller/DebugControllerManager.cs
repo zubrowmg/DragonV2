@@ -42,7 +42,12 @@ public class DebugControllerManager : MonoBehaviour
             {
                 var tileRef = tile;
                 if (toggleVeins)
-                    changeTileColor(ref tileRef, green);
+                {
+                    if (tileRef.getIsVeinMain() == false)
+                        changeTileColor(ref tileRef, green);
+                    else
+                        changeTileColor(ref tileRef, red);
+                }
                 else
                     changeTileColor(ref tileRef, white);
             }

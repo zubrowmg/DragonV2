@@ -119,7 +119,7 @@ namespace TileManagerClasses
             this.tileMapIndex = tileMapCoords;
             this.worldCoords = worldCoords;
 
-            this.name = "Tile";
+            this.name = "Tile__(" + tileMapIndex.getX().ToString() + "," + tileMapIndex.getY().ToString() + ")";
 
             // If gameobject tils are on, then we need to set additional gameobject setting
             if (gameObjectTilesAreOn == true)
@@ -138,21 +138,27 @@ namespace TileManagerClasses
 
         public void setTileAsVein(Vein veinInst)
         {
-            this.isVein = true;
-            this.isTouched = true;
-            this.associatedVein = veinInst;
-            this.intendedRoomType = TileRoomType.Vein;
-
-            if (gameObjectTilesAreOn == false)
+            if (this.isVein == false)
             {
-                instantiateTileGameObject(Singleton.instantiateTile());
+                this.isVein = true;
+                this.isTouched = true;
+                this.associatedVein = veinInst;
+                this.intendedRoomType = TileRoomType.Vein;
+
+                if (gameObjectTilesAreOn == false)
+                {
+                    instantiateTileGameObject(Singleton.instantiateTile());
+                }
             }
         }
 
         public void setTileAsVeinMain(Vein veinInst)
         {
-            this.isVeinMain = true;
-            setTileAsVein(veinInst);
+            if (this.isVeinMain == false)
+            {
+                this.isVeinMain = true;
+                setTileAsVein(veinInst);
+            }
         }
 
         public ref GameObject getTileGameObject()
@@ -164,6 +170,11 @@ namespace TileManagerClasses
         public void changeVeinName()
         {
             associatedVein.name = "TEST_______111";
+        }
+
+        public bool getIsVeinMain()
+        {
+            return this.isVeinMain;
         }
     }
 }

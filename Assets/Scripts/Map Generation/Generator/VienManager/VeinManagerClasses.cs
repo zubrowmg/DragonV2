@@ -151,7 +151,7 @@ namespace VeinManagerClasses
             {
 
                 handleDistanceState(currentCoords, prevCoords, ref veinDistanceState, ref justChangedStates);
-                prevCoords = currentCoords.deepCopy();
+                prevCoords.setX(currentCoords.getX());
 
                 // If we reach the distance goal, then stop here
                 if (getCurrentDistance() > getDistanceGoal())
@@ -161,7 +161,7 @@ namespace VeinManagerClasses
 
                 if (getVeinType() == VeinType.Simple)
                 {
-                    simpleVein(ref i, ref currentCoords, prevCoords, startCoords, ref exitLoop, ref xBreakOut, ref yBreakOut);
+                    simpleVein(ref i, ref currentCoords, ref prevCoords, startCoords, ref exitLoop, ref xBreakOut, ref yBreakOut);
                     if (exitLoop) break;
                 }
                 //else if (vein == veinType.U)
@@ -196,7 +196,7 @@ namespace VeinManagerClasses
             }
         }
 
-        void simpleVein(ref int i, ref Coords<int> currentCoords, Coords<int> prevCoords, Coords<int> startCoords, ref bool exitLoop, ref int xBreakOut, ref int yBreakOut)
+        void simpleVein(ref int i, ref Coords<int> currentCoords, ref Coords<int> prevCoords, Coords<int> startCoords, ref bool exitLoop, ref int xBreakOut, ref int yBreakOut)
         {
             int yTempi;
             int yTempiMinus;
@@ -213,20 +213,28 @@ namespace VeinManagerClasses
             Coords<int> index = new Coords<int>(x, y);
             createStrip(currentCoords);
 
+            //Debug.Log("CURRENT: " + currentCoords.getX() + "," + currentCoords.getY());
+            //Debug.Log("PREV   : " + prevCoords.getX() + "," + prevCoords.getY());
+
+
             // Fill in the gaps of extreme slopes
             for (int change = 0; change < (Mathf.Abs(y - prevCoords.getY())); change++)
             {
+                //Debug.Log("GAP FILLER SLOPE: " + getVeinSlope());
+
                 if (getVeinSlope() > 0f)
                 {
 
                     if (getCurrentVeinDirection() == VeinDirection.Right)
                     {
                         index = new Coords<int>(x, y - change - 1);
+                        //Debug.Log("GAP FILLER 0: " + index.getX() + "," + index.getY());
                         createStrip(index);
                     }
                     else
                     {
                         index = new Coords<int>(x, y + change + 1);
+                        //Debug.Log("GAP FILLER 1: " + index.getX() + "," + index.getY());
                         createStrip(index);
                     }
                 }
@@ -247,6 +255,7 @@ namespace VeinManagerClasses
             }
             xBreakOut = currentCoords.getX();
             yBreakOut = currentCoords.getY();
+            prevCoords.setY(currentCoords.getY());
 
             if (getCurrentVeinDirection() == VeinDirection.Right)
             {
@@ -297,6 +306,79 @@ namespace VeinManagerClasses
                         currentCoords.setY(prevCoords.getY() - (getDistanceGoal() - i));
                 }
             }
+        }
+
+
+        public void triggerVeinGeneration2()
+        {
+            // U VEINS ARE NOT SUPPORTED
+            //bool isUpDown = Random.Range(0, 1 + 1) == 1 ? true : false;
+            //int shiftStart = 2;
+            //const int totalUParts = 4;
+            //const int totalSections = 8;
+            //int[] partWidths = new int[totalUParts];
+            //int[] lowerBoundries = new int[totalUParts];
+            //int[] upperBoundries = new int[totalUParts];
+
+            //if (vein == veinType.U)
+            //{
+            //    configureUVein(ref shiftStart, ref partWidths, totalUParts, totalSections, ref newDistance, ref lowerBoundries, ref upperBoundries);
+            //}
+
+            Coords<int> prevCoords = new Coords<int>(getStartCoords().getX(), getStartCoords().getY());
+            Coords<int> currentCoords = new Coords<int>(getStartCoords().getX(), getStartCoords().getY());
+
+            //int width = approxWidth;
+            int prevWidth = getCurrentWidth();
+            int xBreakOut = getStartCoords().getX(); // Will probably depricate breakout
+            int yBreakOut = getStartCoords().getY();
+
+            bool hitDistanceGoal = false;
+            int currentSlopeIndex = 0; // Keeps count of how many (Vein Main) points were ploted with the current slope. Resets to 0 when slope changes
+
+            while (hitDistanceGoal == false)
+            {
+                createStrip(currentCoords);
+                currentCoords = calculateIndexToCoords(currentCoords, currentSlopeIndex);
+
+                // Calculate distance that next coord would put the vein at
+                //      If it goes over the distance goal end while loop here
+                currentSlopeIndex++;
+                if (currentSlopeIndex > 110)
+                    break;
+            }
+        }
+
+        Coords<int> calculateIndexToCoords(Coords<int> currentCoords, int currentSlopeIndex)
+        {
+            float currentSlope = veinSlope.getSlope();
+            int nextX = 0;
+            int nextY = 0;
+
+            if (currentSlope <= 1f)
+            {
+                // If the slope is less than or equal to one, we can treat slope index as X
+                nextX++;
+                nextY = Mathf.FloorToInt(currentSlopeIndex * currentSlope);
+            }
+            else
+            {
+                // If the slope is greater than one, need to increment Y and calculate next X
+                float choppedUpSlope = (float)(1f / currentSlope);
+                nextX = Mathf.FloorToInt(currentSlopeIndex * choppedUpSlope);
+                nextY++;
+            }
+
+            nextX += currentCoords.getX();
+            nextY += currentCoords.getY();
+            Coords<int> nextCoords = new Coords<int>(nextX, nextY);
+
+            return nextCoords;
+        }
+
+        void markCurrentVeinPosition()
+        {
+
         }
 
         void createStrip(Coords<int> currentCoords)

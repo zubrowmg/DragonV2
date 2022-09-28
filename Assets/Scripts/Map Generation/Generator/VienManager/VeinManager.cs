@@ -111,7 +111,8 @@ public class VeinManager : ContainerAccessor
         // Function that will call createVein(vein)
         foreach (var vein in veinQueue)
         {
-            vein.triggerVeinGeneration();
+            Debug.Log("VEIN SLOPE: " + vein.getVeinSlope());
+            vein.triggerVeinGeneration2();
             veinList.Add(vein);
         }
     }
