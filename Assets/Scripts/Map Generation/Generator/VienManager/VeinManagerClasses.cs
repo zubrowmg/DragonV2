@@ -335,11 +335,12 @@ namespace VeinManagerClasses
 
             bool hitDistanceGoal = false;
             int currentSlopeIndex = 0; // Keeps count of how many (Vein Main) points were ploted with the current slope. Resets to 0 when slope changes
+            Coords<int> currentSlopeStartCoords = currentCoords.deepCopy(); // Resets to current coords when slope changes
 
             while (hitDistanceGoal == false)
             {
                 createStrip(currentCoords);
-                currentCoords = calculateIndexToCoords(currentCoords, currentSlopeIndex);
+                currentCoords = calculateIndexToCoords(currentSlopeStartCoords, currentSlopeIndex);
 
                 // Calculate distance that next coord would put the vein at
                 //      If it goes over the distance goal end while loop here
@@ -349,7 +350,7 @@ namespace VeinManagerClasses
             }
         }
 
-        Coords<int> calculateIndexToCoords(Coords<int> currentCoords, int currentSlopeIndex)
+        Coords<int> calculateIndexToCoords(Coords<int> currentSlopeStartCoords, int currentSlopeIndex)
         {
             float currentSlope = veinSlope.getSlope();
             int nextX = 0;
@@ -358,7 +359,7 @@ namespace VeinManagerClasses
             if (currentSlope <= 1f)
             {
                 // If the slope is less than or equal to one, we can treat slope index as X
-                nextX++;
+                nextX = currentSlopeIndex;
                 nextY = Mathf.FloorToInt(currentSlopeIndex * currentSlope);
             }
             else
@@ -366,11 +367,11 @@ namespace VeinManagerClasses
                 // If the slope is greater than one, need to increment Y and calculate next X
                 float choppedUpSlope = (float)(1f / currentSlope);
                 nextX = Mathf.FloorToInt(currentSlopeIndex * choppedUpSlope);
-                nextY++;
+                nextY = currentSlopeIndex;
             }
 
-            nextX += currentCoords.getX();
-            nextY += currentCoords.getY();
+            nextX += currentSlopeStartCoords.getX();
+            nextY += currentSlopeStartCoords.getY();
             Coords<int> nextCoords = new Coords<int>(nextX, nextY);
 
             return nextCoords;
