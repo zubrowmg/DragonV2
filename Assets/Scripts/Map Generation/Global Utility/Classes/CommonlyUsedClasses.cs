@@ -40,6 +40,10 @@ namespace CommonlyUsedClasses
             this.y = y;
         }
 
+        public void print(string msg)
+        {
+            Debug.Log(msg + x + "," + y);
+        }
     }
 
     public class Dimensions

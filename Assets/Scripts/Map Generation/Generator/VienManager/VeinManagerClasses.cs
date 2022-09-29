@@ -40,7 +40,10 @@ namespace VeinManagerClasses
 
         // Vein properties used during vein creation time
         int currentWidth;
-        int currentDistance = 0;
+        float currentDistance = 0f;
+        Coords<int> prevCoords;
+        Coords<int> currentCoords;
+
         VeinDirection currentVeinDirection = VeinDirection.None_Set;
 
 
@@ -58,47 +61,46 @@ namespace VeinManagerClasses
         bool justChangedStates = false;
 
 
-        
-
         bool exitLoop = false;
 
-        public Vein(ref GeneratorContainer contInst, VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords, 
-                        Slope veinSlope, bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst)
+        void initGeneralProperties(VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+                                bool varyWidth, bool varyLength, bool varySlope)
         {
             this.veinType = type;
 
             this.generalVeinDirection = generalDirection;
-            this.startCoords = startCoords;
+            this.startCoords = startCoords.deepCopy();
             this.endCoords = endCoords;
-            this.veinSlope = veinSlope;
+            this.veinSlope = new Slope(startCoords, endCoords);
 
             this.varyVeinWidth = varyWidth;
             this.varyVeinLength = varyLength;
             this.varyVeinSlope = varySlope;
 
+            this.prevCoords = startCoords.deepCopy();
+            this.currentCoords = startCoords.deepCopy();
+        }
+
+        public Vein(ref GeneratorContainer contInst, VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords, 
+                        bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst)
+        {
+            initGeneralProperties(type, generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
+
             this.currentWidth = approxWidth;
-            this.currentVeinDirection = calculateCurrentVeinDirection();
+            this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);
             this.intendedVeinDirection = this.currentVeinDirection;
 
             this.approxDistance = initVaryLength(varyLength, approxDistance);
         }
 
+        // If you want to set width/distance
         public Vein(ref GeneratorContainer contInst, VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords, 
-                        Slope veinSlope, bool varyWidth, bool varyLength, bool varySlope, int width, int distance) : base(ref contInst)
+                        bool varyWidth, bool varyLength, bool varySlope, int width, int distance) : base(ref contInst)
         {
-            this.veinType = type;
-
-            this.generalVeinDirection = generalDirection;
-            this.startCoords = startCoords;
-            this.endCoords = endCoords;
-            this.veinSlope = veinSlope;
-
-            this.varyVeinWidth = varyWidth;
-            this.varyVeinLength = varyLength;
-            this.varyVeinSlope = varySlope;
+            initGeneralProperties(type, generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
 
             this.currentWidth = approxWidth;
-            this.currentVeinDirection = calculateCurrentVeinDirection();
+            this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);
             this.intendedVeinDirection = this.currentVeinDirection;
 
             this.approxWidth = width;
@@ -325,8 +327,7 @@ namespace VeinManagerClasses
             //    configureUVein(ref shiftStart, ref partWidths, totalUParts, totalSections, ref newDistance, ref lowerBoundries, ref upperBoundries);
             //}
 
-            Coords<int> prevCoords = new Coords<int>(getStartCoords().getX(), getStartCoords().getY());
-            Coords<int> currentCoords = new Coords<int>(getStartCoords().getX(), getStartCoords().getY());
+            
 
             //int width = approxWidth;
             int prevWidth = getCurrentWidth();
@@ -336,38 +337,62 @@ namespace VeinManagerClasses
             bool hitDistanceGoal = false;
             int currentSlopeIndex = 0; // Keeps count of how many (Vein Main) points were ploted with the current slope. Resets to 0 when slope changes
             Coords<int> currentSlopeStartCoords = currentCoords.deepCopy(); // Resets to current coords when slope changes
+            Coords<int> nextCoords = currentCoords.deepCopy();
 
             while (hitDistanceGoal == false)
             {
-                createStrip(currentCoords);
-                currentCoords = calculateIndexToCoords(currentSlopeStartCoords, currentSlopeIndex);
-
                 // Calculate distance that next coord would put the vein at
                 //      If it goes over the distance goal end while loop here
-                currentSlopeIndex++;
-                if (currentSlopeIndex > 110)
+                updatePosition(nextCoords);
+                if (getCurrentDistance() > (float)getDistanceGoal())
                     break;
+
+                // Mark a strip of tiles as veins
+                createStrip(currentCoords);
+
+                // Calculate next coords
+                nextCoords = calculateIndexToCoords(currentSlopeStartCoords, currentSlopeIndex);
+                
+                currentSlopeIndex++;
             }
         }
 
         Coords<int> calculateIndexToCoords(Coords<int> currentSlopeStartCoords, int currentSlopeIndex)
         {
             float currentSlope = veinSlope.getSlope();
+            VeinDirection currentVeinDir = getCurrentVeinDirection();
             int nextX = 0;
             int nextY = 0;
 
-            if (currentSlope <= 1f)
+            //  If the direction is to the left then set the dirModifier to the left
+            float dirModifier = 1f;
+            if (currentVeinDir == VeinDirection.Left)
+                dirModifier = -1f;
+
+            // If the slope is less than or equal to one, we can treat slope index as X
+            if (Mathf.Abs(currentSlope) <= 1f)
             {
-                // If the slope is less than or equal to one, we can treat slope index as X
-                nextX = currentSlopeIndex;
-                nextY = Mathf.FloorToInt(currentSlopeIndex * currentSlope);
+                // If the direction is to the left then we need to adjust the y direction (up/down)
+                float slopeModifier = 1f;
+                if (currentSlope < 0f && currentVeinDir == VeinDirection.Left)
+                    slopeModifier = -1f;
+                else if (currentSlope > 0f && currentVeinDir == VeinDirection.Left)
+                    slopeModifier = -1f;
+
+                nextX = currentSlopeIndex * (int)dirModifier;
+                nextY = Mathf.FloorToInt(currentSlopeIndex * currentSlope * slopeModifier);
             }
+            // If the slope is greater than one, need to increment Y and calculate next X
             else
             {
-                // If the slope is greater than one, need to increment Y and calculate next X
+                // Because currentSlope is not used in nextY (unlike above), manually set the slopeModifier
+                float slopeModifier = 1f;
+                if ((currentSlope < 0f && currentVeinDir == VeinDirection.Right) || (currentSlope > 0f && currentVeinDir == VeinDirection.Left))
+                    slopeModifier = -1f;
+
                 float choppedUpSlope = (float)(1f / currentSlope);
-                nextX = Mathf.FloorToInt(currentSlopeIndex * choppedUpSlope);
-                nextY = currentSlopeIndex;
+                nextX = Mathf.FloorToInt(currentSlopeIndex * Mathf.Abs(choppedUpSlope) * dirModifier);
+                nextY = currentSlopeIndex * (int)slopeModifier;
             }
 
             nextX += currentSlopeStartCoords.getX();
@@ -377,9 +402,22 @@ namespace VeinManagerClasses
             return nextCoords;
         }
 
-        void markCurrentVeinPosition()
+        void updatePosition(Coords<int> nextCoords)
         {
 
+            prevCoords = currentCoords.deepCopy();
+            currentCoords = nextCoords.deepCopy();
+
+           
+
+            float xChange = (float)Mathf.Abs(currentCoords.getX() - prevCoords.getX());
+            float yChange = (float)Mathf.Abs(currentCoords.getY() - prevCoords.getY());
+            float distanceChange = Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
+            currentDistance = currentDistance + distanceChange;
+
+            //Debug.Log("Prev: " + prevCoords.getX() + "," + prevCoords.getY() + "\n" +
+            //         "Curr: " + currentCoords.getX() + "," + currentCoords.getY() + "\n" +
+            //         "Dis: " + currentDistance + "\n _______________________");
         }
 
         void createStrip(Coords<int> currentCoords)
@@ -537,7 +575,10 @@ namespace VeinManagerClasses
             // Calculate how far this vein has traveled
             int xChange = Mathf.Abs(currentCoords.getX() - prevCoords.getX());
             int yChange = Mathf.Abs(currentCoords.getY() - prevCoords.getY());
-            int newTraveledDistance = getCurrentDistance() + (int)Mathf.Floor(Mathf.Sqrt((xChange * xChange) + (yChange * yChange)));
+            //int newTraveledDistance = getCurrentDistance() + (int)Mathf.Floor(Mathf.Sqrt((xChange * xChange) + (yChange * yChange)));
+            int newTraveledDistance = (int)getCurrentDistance() + (int)Mathf.Floor(Mathf.Sqrt((xChange * xChange) + (yChange * yChange)));
+            //                 !!!!    ^^^    !!!!!!
+
             setCurrentDistance(newTraveledDistance);
 
             //Debug.Log(xChange + "," + yChange);
@@ -619,11 +660,11 @@ namespace VeinManagerClasses
             return this.veinType;
         }
 
-        public VeinDirection calculateCurrentVeinDirection()
+        public VeinDirection calculateCurrentVeinDirection(Coords<int> currentCoords)
         {
             VeinDirection veinDirection = VeinDirection.None_Set;
-
-            if (startCoords.getX() < endCoords.getX() || startCoords.getX() == endCoords.getX())
+            
+            if (currentCoords.getX() < endCoords.getX() || currentCoords.getX() == endCoords.getX())
             {
                 veinDirection = VeinDirection.Right;
             }
@@ -650,7 +691,7 @@ namespace VeinManagerClasses
             return currentWidth;
         }
 
-        public int getCurrentDistance()
+        public float getCurrentDistance()
         {
             return this.currentDistance;
         }
@@ -662,7 +703,7 @@ namespace VeinManagerClasses
 
         public int getDistanceGoal()
         {
-            return approxDistance;
+            return this.approxDistance;
         }
 
         public float getVeinSlope()
