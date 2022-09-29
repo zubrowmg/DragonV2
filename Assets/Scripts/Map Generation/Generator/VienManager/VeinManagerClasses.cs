@@ -163,7 +163,7 @@ namespace VeinManagerClasses
 
                 if (getVeinType() == VeinType.Simple)
                 {
-                    simpleVein(ref i, ref currentCoords, ref prevCoords, startCoords, ref exitLoop, ref xBreakOut, ref yBreakOut);
+                    //REMOVED simpleVein(ref i, ref currentCoords, ref prevCoords, startCoords, ref exitLoop, ref xBreakOut, ref yBreakOut);
                     if (exitLoop) break;
                 }
                 //else if (vein == veinType.U)
@@ -198,119 +198,6 @@ namespace VeinManagerClasses
             }
         }
 
-        void simpleVein(ref int i, ref Coords<int> currentCoords, ref Coords<int> prevCoords, Coords<int> startCoords, ref bool exitLoop, ref int xBreakOut, ref int yBreakOut)
-        {
-            int yTempi;
-            int yTempiMinus;
-            int x = currentCoords.getX();
-            int y = currentCoords.getY();
-
-            if (i > getDistanceGoal())
-            {
-                //Debug.Log("OUT: ");
-                exitLoop = true;
-                return;
-            }
-
-            Coords<int> index = new Coords<int>(x, y);
-            createStrip(currentCoords);
-
-            //Debug.Log("CURRENT: " + currentCoords.getX() + "," + currentCoords.getY());
-            //Debug.Log("PREV   : " + prevCoords.getX() + "," + prevCoords.getY());
-
-
-            // Fill in the gaps of extreme slopes
-            for (int change = 0; change < (Mathf.Abs(y - prevCoords.getY())); change++)
-            {
-                //Debug.Log("GAP FILLER SLOPE: " + getVeinSlope());
-
-                if (getVeinSlope() > 0f)
-                {
-
-                    if (getCurrentVeinDirection() == VeinDirection.Right)
-                    {
-                        index = new Coords<int>(x, y - change - 1);
-                        //Debug.Log("GAP FILLER 0: " + index.getX() + "," + index.getY());
-                        createStrip(index);
-                    }
-                    else
-                    {
-                        index = new Coords<int>(x, y + change + 1);
-                        //Debug.Log("GAP FILLER 1: " + index.getX() + "," + index.getY());
-                        createStrip(index);
-                    }
-                }
-                else
-                {
-                    if (getCurrentVeinDirection() == VeinDirection.Right)
-                    {
-                        index = new Coords<int>(x, y + change + 1);
-                        createStrip(index);
-                    }
-                    else
-                    {
-                        index = new Coords<int>(x, y - change - 1);
-                        createStrip(index);
-                    }
-                }
-                //newDistance--;
-            }
-            xBreakOut = currentCoords.getX();
-            yBreakOut = currentCoords.getY();
-            prevCoords.setY(currentCoords.getY());
-
-            if (getCurrentVeinDirection() == VeinDirection.Right)
-            {
-                if (-veinSlope.getMaxNonVerticalSlope() < veinSlope.getSlope() && veinSlope.getSlope() < veinSlope.getMaxNonVerticalSlope())
-                {
-                    currentCoords.setX(currentCoords.getX() + 1);
-                }
-
-                // In case the slope changes we have to chang y based on the difference of the previous y
-                yTempiMinus = (int)Mathf.Floor((float)(i - 1) * veinSlope.getSlope()) + startCoords.getY();
-                yTempi = (int)Mathf.Floor((float)i * veinSlope.getSlope()) + startCoords.getY();
-
-                currentCoords.setY(currentCoords.getY() + (yTempi - yTempiMinus));
-            }
-            else
-            {
-                if (-veinSlope.getMaxNonVerticalSlope() < veinSlope.getSlope() && veinSlope.getSlope() < veinSlope.getMaxNonVerticalSlope())
-                {
-                    currentCoords.setX(currentCoords.getX() - 1);
-                }
-
-                // In case the slope changes we have to chang y based on the difference of the previous y
-                yTempiMinus = (int)Mathf.Floor((float)(i - 1) * veinSlope.getSlope() * -1) + startCoords.getY();
-                yTempi = (int)Mathf.Floor((float)i * veinSlope.getSlope() * -1) + startCoords.getY();
-
-                currentCoords.setY(currentCoords.getY() + (yTempi - yTempiMinus));
-            }
-
-
-
-            // If the slope is extreme we will have a really tall vien, need to trim that here
-            // Ex: slope = .01, widthSlope = -100
-            if (Mathf.Abs(currentCoords.getY() - prevCoords.getY()) > (getDistanceGoal() - i))
-            {
-                if (getVeinSlope() < 0f)
-                {
-                    if (getCurrentVeinDirection() == VeinDirection.Right)
-                        currentCoords.setY(prevCoords.getY() - (getDistanceGoal() - i));
-                    else
-                        currentCoords.setY(prevCoords.getY() + (getDistanceGoal() - i));
-
-                }
-                else
-                {
-                    if (getCurrentVeinDirection() == VeinDirection.Right)
-                        currentCoords.setY(prevCoords.getY() + (getDistanceGoal() - i));
-                    else
-                        currentCoords.setY(prevCoords.getY() - (getDistanceGoal() - i));
-                }
-            }
-        }
-
-
         public void triggerVeinGeneration2()
         {
             // U VEINS ARE NOT SUPPORTED
@@ -343,24 +230,24 @@ namespace VeinManagerClasses
             {
                 // Calculate distance that next coord would put the vein at
                 //      If it goes over the distance goal end while loop here
-                updatePosition(nextCoords);
+                updatePosition(nextCoords, ref this.currentCoords, ref this.prevCoords, ref this.currentDistance);
                 if (getCurrentDistance() > (float)getDistanceGoal())
                     break;
 
                 // Mark a strip of tiles as veins
-                createStrip(currentCoords);
+                createVeinStrip(currentCoords);
 
                 // Calculate next coords
-                nextCoords = calculateIndexToCoords(currentSlopeStartCoords, currentSlopeIndex);
+                nextCoords = calculateIndexToCoords(currentSlopeStartCoords, currentSlopeIndex, veinSlope.getSlope(), getCurrentVeinDirection());
                 
                 currentSlopeIndex++;
             }
         }
 
-        Coords<int> calculateIndexToCoords(Coords<int> currentSlopeStartCoords, int currentSlopeIndex)
+        Coords<int> calculateIndexToCoords(Coords<int> currentSlopeStartCoords, int currentSlopeIndex, float currentSlope, VeinDirection currentVeinDir)
         {
-            float currentSlope = veinSlope.getSlope();
-            VeinDirection currentVeinDir = getCurrentVeinDirection();
+            //float currentSlope = veinSlope.getSlope();
+            //VeinDirection currentVeinDir = getCurrentVeinDirection();
             int nextX = 0;
             int nextY = 0;
 
@@ -402,25 +289,102 @@ namespace VeinManagerClasses
             return nextCoords;
         }
 
-        void updatePosition(Coords<int> nextCoords)
+        void updatePosition(Coords<int> nextCoords, ref Coords<int> currentCoords, ref Coords<int> prevCoords, ref float currentDistance)
         {
-
             prevCoords = currentCoords.deepCopy();
             currentCoords = nextCoords.deepCopy();
-
-           
 
             float xChange = (float)Mathf.Abs(currentCoords.getX() - prevCoords.getX());
             float yChange = (float)Mathf.Abs(currentCoords.getY() - prevCoords.getY());
             float distanceChange = Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
             currentDistance = currentDistance + distanceChange;
 
-            //Debug.Log("Prev: " + prevCoords.getX() + "," + prevCoords.getY() + "\n" +
-            //         "Curr: " + currentCoords.getX() + "," + currentCoords.getY() + "\n" +
-            //         "Dis: " + currentDistance + "\n _______________________");
         }
 
-        void createStrip(Coords<int> currentCoords)
+
+        // Uses same while loop logic used in triggerVeinGeneration()
+        void createVeinStrip(Coords<int> currentCoords)
+        {
+            // Mark the middle "main" vein
+            markTileAsVein(currentCoords, DebugVeinTileType.VeinMain);
+
+            // Width properties
+            float halfWidth = (float)currentWidth / 2f;
+            halfWidth++;
+            float widthSlope = ((float)-1 / veinSlope.getSlope());
+
+            Coords<int> startCoords = currentCoords.deepCopy();
+
+            float currentDistanceLeft = 0f;
+            float currentDistanceRight = 0f;
+
+            Coords<int> nextCoordsLeft = currentCoords.deepCopy();
+            Coords<int> nextCoordsRight = currentCoords.deepCopy();
+
+            Coords<int> currentCoordsLeft = currentCoords.deepCopy();
+            Coords<int> currentCoordsRight = currentCoords.deepCopy();
+
+            Coords<int> prevCoordsLeft = currentCoords.deepCopy();
+            Coords<int> prevCoordsRight = currentCoords.deepCopy();
+
+            int widthIndex = 0;
+
+            bool hitDistanceGoalLeft = false;
+            bool hitDistanceGoalRight = false;
+            while (hitDistanceGoalLeft == false || hitDistanceGoalRight == false)
+            {
+                if (hitDistanceGoalLeft && hitDistanceGoalRight)
+                    break;
+
+                if (hitDistanceGoalLeft == false)
+                {
+                    updatePosition(nextCoordsLeft, ref currentCoordsLeft, ref prevCoordsLeft, ref currentDistanceLeft);
+                    if (currentDistanceLeft > halfWidth)
+                    {
+                        hitDistanceGoalLeft = true;
+                        goto MidLoop;
+                    }
+
+                    // Mark a tiles as a vein
+                    markTilesAsVeinAroundPoint(currentCoordsLeft, DebugVeinTileType.Vein);
+
+                    // Calculate next coords
+                    nextCoordsLeft = calculateIndexToCoords(startCoords, widthIndex, widthSlope, VeinDirection.Left);
+                }
+                MidLoop:
+
+                if (hitDistanceGoalRight == false)
+                {
+                    updatePosition(nextCoordsRight, ref currentCoordsRight, ref prevCoordsRight, ref currentDistanceRight);
+                    if (currentDistanceRight > halfWidth)
+                    {
+                        hitDistanceGoalRight = true;
+                        goto EndLoop;
+                    }
+
+                    // Mark a tiles as a vein
+                    markTilesAsVeinAroundPoint(currentCoordsRight, DebugVeinTileType.Vein);
+
+                    // Calculate next coords
+                    nextCoordsRight = calculateIndexToCoords(startCoords, widthIndex, widthSlope, VeinDirection.Right);
+                }
+                EndLoop:
+                
+
+                widthIndex++;
+            }
+        }
+
+        void markTilesAsVeinAroundPoint(Coords<int> coords, DebugVeinTileType veinType)
+        {
+            markTileAsVein(coords, veinType);
+            markTileAsVein(new Coords<int>(coords.getX() - 1, coords.getY()), veinType);
+            markTileAsVein(new Coords<int>(coords.getX() + 1, coords.getY()), veinType);
+            markTileAsVein(new Coords<int>(coords.getX(), coords.getY() - 1), veinType);
+            markTileAsVein(new Coords<int>(coords.getX(), coords.getY() + 1), veinType);
+        }
+
+        void createStripOld(Coords<int> currentCoords)
         {
 
             int halfWidth = currentWidth / 2;
@@ -502,7 +466,10 @@ namespace VeinManagerClasses
 
             if (accessSuccessful == true)
             {
-                associatedTiles.Add(selectedTile);
+                if (associatedTiles.Contains(selectedTile) == false)
+                {
+                    associatedTiles.Add(selectedTile);
+                }
 
                 switch (type)
                 {
@@ -720,8 +687,8 @@ namespace VeinManagerClasses
     public class Slope
     {
         // Hard coded limits
-        float maxSlope = 5f;
-        float maxNonVerticalSlope = 4.9f;
+        float maxSlope = 8f; // Old value
+        float maxNonVerticalSlope = 7.9f; // New value
 
         int xChange;
         int yChange;
