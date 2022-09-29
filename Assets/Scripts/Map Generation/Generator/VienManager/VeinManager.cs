@@ -100,15 +100,15 @@ public class VeinManager : ContainerAccessor
         //      Can add mini bosses
     }
 
-    void getSimpleVeinTest(ref Queue<Vein> veinQueue)
+    void getSimpleTestVeins(ref Queue<Vein> veinQueue)
     {
         // Dims 588, 288
 
         // Up/ Down
         Coords<int> end = new Coords<int>(leftVeinStart.getX(), leftVeinStart.getY() + 50);
-        veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
         end = new Coords<int>(rightVeinStart.getX(), rightVeinStart.getY() - 50);
-        veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, rightVeinStart, end, true, true, true));
+        //veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, rightVeinStart, end, true, true, true));
 
         // Left Down
         if (true)
@@ -163,7 +163,7 @@ public class VeinManager : ContainerAccessor
         veinQueue.Enqueue(configSendOffVeinProps(Direction.South)); // Middle vein
         veinQueue.Enqueue(configSendOffVeinProps(Direction.East)); // Right vein
 
-        //getSimpleVeinTest(ref veinQueue);
+        //getSimpleTestVeins(ref veinQueue);
 
         // Function that will call createVein(vein)
         foreach (var vein in veinQueue)
