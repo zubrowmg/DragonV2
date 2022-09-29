@@ -10,12 +10,14 @@ public class DebugControllerManager : MonoBehaviour
     GeneratorWrapper generatorInst;
 
     // Colors
-    Color purple = new Color(.29f, .025f, .76f, .5f);
-    Color red = new Color(.9725f, 0f, .0412f, .76f);
-    Color green = new Color(.085f, .85f, .12f, .88f);
-    Color blue = new Color(0f, .56f, .87f, 1f);
-    Color white = new Color(1f, 1f, 1f, 1f);
-    Color black = new Color(0f, 0f, 0f, 1f);
+    Color purple      = new Color(.29f, .025f, .76f, .5f);
+    Color red         = new Color(.9725f, 0f, .0412f, .76f);
+    Color green       = new Color(.085f, .85f, .12f, .88f);
+    Color darkGreen   = new Color(.07f, .51f, .07f, .50f);
+    Color blue        = new Color(0f, .56f, .87f, 1f);
+    Color white       = new Color(1f, 1f, 1f, 1f);
+    Color black       = new Color(0f, 0f, 0f, 1f);
+    Color tileDefault = new Color(255f, 255f, 255f, .27f);
 
     // Button Toggles
     bool toggleVeins = false;
@@ -33,8 +35,6 @@ public class DebugControllerManager : MonoBehaviour
 
         foreach (var vein in veinList)
         {
-            
-
             var veinRef = vein;
             List<Tile> associatedTiles = veinRef.getAssociatedTiles();
 
@@ -46,10 +46,10 @@ public class DebugControllerManager : MonoBehaviour
                     if (tileRef.getIsVeinMain() == false)
                         changeTileColor(ref tileRef, green);
                     else
-                        changeTileColor(ref tileRef, red);
+                        changeTileColor(ref tileRef, darkGreen);
                 }
                 else
-                    changeTileColor(ref tileRef, white);
+                    changeTileColor(ref tileRef, tileDefault);
             }
         }
     }
