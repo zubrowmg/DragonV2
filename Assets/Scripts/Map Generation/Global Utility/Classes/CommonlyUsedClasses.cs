@@ -153,4 +153,92 @@ namespace CommonlyUsedClasses
             return -1;
         }
     }
+
+    // Meant to be used for variables that are randomly changed during generation
+    //      But you want some control of the randomization. Example, used for controlling Vein Slope for simple Veins
+    public class TargetProbabilityManager
+    {
+        float allocatedUnitOfChange;
+        float target;
+        float currentValue;
+
+        //int degreesOfPossibleChange; // { Inc, Dec, keep } = 3 degrees of possible change
+        List<float> percentagesList; // Passed in from Dec*2, Dec, Keep, Inc, Inc*2 etc
+        List<float> originalPercentagesList; // Passed in from Dec*2, Dec, Keep, Inc, Inc*2 etc
+        List<int> valuesList; // Passed in from Dec*2, Dec, Keep, Inc, Inc*2 etc
+        int keepIndex; // Keep index in the list
+        //bool keepNewPercentages; // When you inc/dec the percentage, do you store the new values in the percentages list?
+
+        // Calculation variables
+        float bias; // .5f is no bias
+        int amountOfDec;
+        int amountOfInc;
+
+        public TargetProbabilityManager(float allocatedUnitOfChange, float target, float currentValue,
+                                    List<float> percentages, List<int> values, int keepIndex, float bias)
+        {
+            this.allocatedUnitOfChange = allocatedUnitOfChange;
+            this.target = target;
+            this.currentValue = currentValue;
+            //this.degreesOfPossibleChange = degreesOfPossibleChange;
+            this.percentagesList = percentages;
+            this.originalPercentagesList = percentages;
+            //this.keepNewPercentages = keepNewPercentages;
+            this.valuesList = values;
+            this.keepIndex = keepIndex;
+            this.bias = bias;
+
+            for (int i = 0; i < valuesList.Count; i++)
+            {
+                if (i < keepIndex)
+                    amountOfDec++;
+                else if (i > keepIndex)
+                    amountOfInc++;
+            }
+        }
+
+        public int getControledRandomizedValue()
+        {
+            // If our current value is too high, make decrease percentage greater
+            if (currentValue > target)
+            {
+                float allocatedIncUnits = allocatedUnitOfChange * (1 - bias);
+                float allocatedDecUnits = allocatedUnitOfChange * bias;
+                calculateNewPercentages(allocatedIncUnits, allocatedDecUnits);
+            }
+            // If our current value is too low, make increase percentage greater
+            else if (currentValue < target)
+            {
+                float allocatedIncUnits = allocatedUnitOfChange * bias;
+                float allocatedDecUnits = allocatedUnitOfChange * (1 - bias);
+                calculateNewPercentages(allocatedIncUnits, allocatedDecUnits);
+            }
+            else
+            {
+                percentagesList = originalPercentagesList;
+            }
+
+            RandomProbability.RandomSelection[] selections = new RandomProbability.RandomSelection[valuesList.Count];
+            for (int i = 0; i < valuesList.Count; i++)
+            {
+                selections[i] = new RandomProbability.RandomSelection(valuesList[i], valuesList[i], percentagesList[i]);
+            }
+
+            int randValue = RandomProbability.getIntBasedOnPercentage(selections);
+
+            return randValue;
+        }
+
+        void calculateNewPercentages(float allocatedIncUnits, float allocatedDecUnits)
+        {
+            for (int i = 0; i < percentagesList.Count; i++)
+            {
+                if (i < keepIndex)
+                    percentagesList[i] = allocatedDecUnits / (float)amountOfDec;
+                else if (i > keepIndex)
+                    percentagesList[i] = allocatedIncUnits / (float)amountOfInc;
+            }
+        }
+
+    }
 }

@@ -79,6 +79,11 @@ namespace VeinManagerClasses
             this.slopeFloat = newValue;
         }
 
+        public void changeSlope(SlopeChange slopeChange)
+        {
+            
+        }
+
         // ===================================================================================================
         //                               Setters/Getters
         // ===================================================================================================

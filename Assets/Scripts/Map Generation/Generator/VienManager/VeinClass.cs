@@ -21,13 +21,20 @@ namespace VeinManagerClasses
         // Direction
         Direction generalVeinDirection; // Not really used in calculations, only to help for debug
         VeinDirection intendedVeinDirection = VeinDirection.None_Set;
-        Slope veinSlope;
         Coords<int> startCoords;
         Coords<int> endCoords;
 
         // Width and Distance
         int approxWidth = 6;
         int approxDistance = 6;
+
+        // Slope properties and percentages
+        Slope veinSlope;
+        Slope intendedVeinSlope;
+        TargetProbabilityManager slopeTargetManager;
+        float keepWidthPercent = .4f;
+        float incWidthPercent = .2f;
+        float decWidthPercent = .2f;
 
         // Vein varying properties
         bool varyVeinWidth = false;
@@ -48,10 +55,6 @@ namespace VeinManagerClasses
         // List of Tile Bookmarks, Bookmarks are meant for future vein expansion
 
 
-        // triggerVeinGeneration Variables
-        float keepWidthPercent = .50f;
-        float increaseWidthPercent = .25f;
-        float decreaseWidthPercent = .25f;
 
         VeinDistanceTraveled veinDistanceState = VeinDistanceTraveled.None;
         bool justChangedStates = false;
@@ -68,6 +71,7 @@ namespace VeinManagerClasses
             this.startCoords = startCoords.deepCopy();
             this.endCoords = endCoords;
             this.veinSlope = new Slope(startCoords, endCoords);
+            this.intendedVeinSlope = new Slope(startCoords, endCoords);
 
             this.varyVeinWidth = varyWidth;
             this.varyVeinLength = varyLength;
@@ -75,6 +79,14 @@ namespace VeinManagerClasses
 
             this.prevCoords = startCoords.deepCopy();
             this.currentCoords = startCoords.deepCopy();
+
+            this.slopeTargetManager = new TargetProbabilityManager(.1f, 
+                                                                   veinSlope.getSlope(), 
+                                                                   veinSlope.getSlope(), 
+                                                                   new List<float> { .3f, .4f, .3f }, 
+                                                                   new List<int> { -1, 0, 1 }, 
+                                                                   1, 
+                                                                   .5f);
         }
 
         public Vein(ref GeneratorContainer contInst, VeinType type, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
@@ -252,18 +264,41 @@ namespace VeinManagerClasses
 
         void changeSlopeEveryXDistance(ref int currentSlopeIndex, ref Coords<int> currentSlopeStartCoords, Coords<int> currentCoords, VeinDistanceTraveled distanceState)
         {
+            bool slopeChanged = true;
             // Check if slope needs to be changed
             if (distanceState == VeinDistanceTraveled.Three_Sixths)
             {
-                float currentSlope = this.veinSlope.getSlope();
-                this.veinSlope.changeSlope(currentSlope + 1.5f);
+                // First randomly decide if it needs to be changed
+                slopeChanged = decideSlopeChanges();
 
-                // If it's changed then reset these slope dependant variables
-                currentSlopeIndex = 0;
-                currentSlopeStartCoords = currentCoords.deepCopy();
+
+                //float currentSlope = this.veinSlope.getSlope();
+                //this.veinSlope.changeSlope(currentSlope + 1.5f);
+
+                // If slope changes then reset these slope dependant variables
+                if (slopeChanged)
+                {
+                    currentSlopeIndex = 0;
+                    currentSlopeStartCoords = currentCoords.deepCopy();
+                }
             }
         }
 
+        // The initial slope is the main target line, should randomly decide if we go back towards the target or not
+        bool decideSlopeChanges()
+        {
+            bool slopeChanged = true;
+            int slopeChange = slopeTargetManager.getControledRandomizedValue();
+
+            if (slopeChange == -1)
+                this.veinSlope.changeSlope(SlopeChange.Dec);
+            else if (slopeChange == 1)
+                this.veinSlope.changeSlope(SlopeChange.Inc);
+            else
+                slopeChanged = false;
+
+            return slopeChanged;
+        }
 
         Coords<int> calculateIndexToCoords(Coords<int> currentSlopeStartCoords, int currentSlopeIndex, float currentSlope, VeinDirection currentVeinDir)
         {

@@ -1290,54 +1290,22 @@ public class gridManagerScript : MonoBehaviour
             incOrDec = -1f;
         }
 
-        //Debug.Log("Pre Dir: " + dir);
-        //Debug.Log("Pre Slope: " + slope);
         if (Mathf.Abs(slope) < .5f)
-        {
             slope = slope + (fivePointSevenDegrees[0] * (incOrDec ));
-        }
         else if (Mathf.Abs(slope) < 1f)
-        {
             slope = slope + (fivePointSevenDegrees[1] * (incOrDec ));
-        }
         else if (Mathf.Abs(slope) < 1.5f)
-        {
             slope = slope + (fivePointSevenDegrees[2] * (incOrDec ));
-        }
         else if (Mathf.Abs(slope) < 2f)
-        {
             slope = slope + (fivePointSevenDegrees[3] * (incOrDec ));
-        }
         else if (Mathf.Abs(slope) < 2.5f)
-        {
             slope = slope + (fivePointSevenDegrees[4] * (incOrDec ));
-        }
         else if (Mathf.Abs(slope) < 3f)
-        {
             slope = slope + (fivePointSevenDegrees[5] * (incOrDec ));
-        }
         else if (Mathf.Abs(slope) < 3.5f)
-        {
             slope = slope + (fivePointSevenDegrees[6] * (incOrDec ));
-
-            /*if (Mathf.Abs(slope) < maxSlope)
-            {
-                slope = maxSlope * incOrDec;
-            }*/
-        }
         else if (Mathf.Abs(slope) < 4f)
-        {
             slope = slope + (fivePointSevenDegrees[7] * (incOrDec ));
-            /*if (Mathf.Abs(slope) < maxSlope)
-            {
-                slope = maxSlope * incOrDec;
-            }*/
-        }
-        /*else if (Mathf.Abs(slope) < maxNonVerticalSlope)
-        {
-            slope = maxNonVerticalSlope * incOrDec;
-            //slope = slope + (fivePointSevenDegrees[7] * incOrDec);
-        }*/
         else if (Mathf.Abs(slope) < maxSlope)
         {
             if (slope > 0)
@@ -1362,9 +1330,7 @@ public class gridManagerScript : MonoBehaviour
                 {
                     slope = slope + (fivePointSevenDegrees[7] * incOrDec);
                 }
-                //slope = maxSlope * incOrDec;
             }
-            //slope = slope + (fivePointSevenDegrees[7] * incOrDec);
         }
         else
         {          
@@ -1440,11 +1406,6 @@ public class gridManagerScript : MonoBehaviour
             }
             else if (slope > intendedSlope)
             {
-                //decrease = decrease + (float)((slope - intendedSlope) / intendedSlope);
-                //if (decrease > (2 * equal)) {
-                //    decrease = 2f * equal;
-                //}
-                //increase = (2f * equal) - decrease;
                 if (intendedSlope < 0 && slope > 0)
                 {
                     decrease = equal - .05f;
@@ -1459,13 +1420,6 @@ public class gridManagerScript : MonoBehaviour
             }
             else if (slope < intendedSlope)
             {
-                /*increase = increase + (float)(slope / intendedSlope);
-                if (increase > (2 * equal))
-                {
-                    increase = 2f * equal;
-                }
-                decrease = (2f * equal) - increase;
-                */
                 if (intendedSlope > 0 && slope < 0)
                 {
                     decrease = equal + .05f;
