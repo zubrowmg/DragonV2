@@ -12,4 +12,9 @@ namespace VeinEnums
     public enum DebugVeinTileType { None, Vein, VeinMain };
 
     public enum SlopeChange { None, Inc, Dec };
+
+    public enum UVeinType { Shift, Widen, Shift_Widen };
+    public enum UVeinStage { Part1, Part2, Part3, Part4 };
+
+
 }

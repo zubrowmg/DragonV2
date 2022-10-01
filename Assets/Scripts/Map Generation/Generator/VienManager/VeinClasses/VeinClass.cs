@@ -31,7 +31,7 @@ namespace VeinManagerClasses
 
         // Slope properties and percentages
         protected Slope veinSlope;
-        Slope intendedVeinSlope;
+        protected Slope intendedVeinSlope;
         TargetProbabilityManager slopeTargetManager;
 
 
@@ -45,7 +45,7 @@ namespace VeinManagerClasses
         protected Coords<int> prevCoords;
         protected Coords<int> currentCoords;
 
-        VeinDirection currentVeinDirection = VeinDirection.None_Set;
+        protected VeinDirection currentVeinDirection = VeinDirection.None_Set;
 
 
         // List of Tiles
@@ -646,7 +646,7 @@ namespace VeinManagerClasses
             return currentWidth;
         }
 
-        public float getCurrentDistance()
+        protected float getCurrentDistance()
         {
             return this.currentDistance;
         }
@@ -656,7 +656,7 @@ namespace VeinManagerClasses
             this.currentDistance = newDistance;
         }
 
-        public int getDistanceGoal()
+        protected int getDistanceGoal()
         {
             return this.approxDistance;
         }

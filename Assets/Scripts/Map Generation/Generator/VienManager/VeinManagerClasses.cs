@@ -41,6 +41,18 @@ namespace VeinManagerClasses
             this.slopeFloat = calculateSlope(xChange, yChange, startDestination, endDestination);
         }
 
+        public Slope(int xChange, int yChange, float slopeFloat)
+        {
+            this.xChange = xChange;
+            this.yChange = yChange;
+            this.slopeFloat = slopeFloat;
+        }
+
+        public Slope deepCopy()
+        {
+            return new Slope(this.xChange, this.yChange, this.slopeFloat);
+        }
+
         // Calculates slope, also if slope is beyond limits this will fix that
         public float calculateSlope(int xChange, int yChange, Coords<int> startDestination, Coords<int> endDestination)
         {
@@ -157,7 +169,7 @@ namespace VeinManagerClasses
             //          "SLOPE OUT: " + slopeFloat);
         }
 
-        bool slopeIsNegative(float slope)
+        public bool slopeIsNegative(float slope)
         {
             bool slopeIsNegative = false;
             if (slope < 0f)
@@ -165,7 +177,7 @@ namespace VeinManagerClasses
             return slopeIsNegative;
         }
 
-        bool slopeIsPositive(float slope)
+        public bool slopeIsPositive(float slope)
         {
             bool slopeIsPositive = false;
             if (slope > 0f)

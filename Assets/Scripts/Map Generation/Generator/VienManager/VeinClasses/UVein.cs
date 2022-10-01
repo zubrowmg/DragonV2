@@ -16,6 +16,10 @@ namespace VeinManagerClasses
         int totalUParts = 4;
         int totalSections = 8;
 
+        List<int> partWidths = new List<int>();
+        List<int> lowerBoundries = new List<int>();
+        List<int> upperBoundries = new List<int>();
+
         public UVein(ref GeneratorContainer contInst,
                      Direction generalDirection,
                      Coords<int> startCoords,
@@ -35,19 +39,292 @@ namespace VeinManagerClasses
                      distance)
         {
             this.setVeinType(VeinType.U);
+
+            configureUVein();
         }
+
+        void configureUVein()
+        {
+
+            int credits = totalSections - 5;
+            int partWidth = 0;
+            int part = 0;
+
+            UVeinType uType = (UVeinType)Random.Range(0, 2 + 1);
+            if (uType == UVeinType.Shift)
+            {
+                // Can also shift 0 times aka None
+                // Can only shift up to 3
+                shiftStart += Random.Range(0, 3 + 1);
+            }
+            else if (uType == UVeinType.Widen)
+            {
+                while (credits > 0)
+                {
+                    // Choose a random width
+                    partWidth = Random.Range(1, credits + 1);
+                    credits -= partWidth;
+
+                    // Give it to a random part
+                    part = Random.Range(0, partWidths.Count);
+                    for (int i = 0; i < partWidths.Count; i++)
+                    {
+                        if (part == i)
+                        {
+                            partWidths[part] += partWidth;
+                        }
+                    }
+                }
+            }
+            else if (uType == UVeinType.Shift_Widen)
+            {
+                // Can only shift up to 2, need credits for widening
+                int shiftStartChange = 1;// Random.Range(1, 2+1);
+                shiftStart += shiftStartChange;
+                credits -= shiftStartChange;
+
+                while (credits > 0)
+                {
+                    // Choose a random width
+                    partWidth = Random.Range(1, credits + 1);
+                    credits -= partWidth;
+
+                    // Give it to a random part
+                    part = Random.Range(0, partWidths.Count);
+                    for (int i = 0; i < partWidths.Count; i++)
+                    {
+                        if (part == i)
+                        {
+                            partWidths[part] += partWidth;
+                        }
+                    }
+                }
+            }
+
+            configurePartBoundries();
+        }
+
+        void configurePartBoundries()
+        {
+            int combinedWidths = 0;
+            for (int i = 0; i < partWidths.Count; i++)
+            {
+                lowerBoundries[i] = (shiftStart + combinedWidths + i - 2) * (getDistanceGoal() / totalSections);
+
+                combinedWidths += partWidths[i];
+
+                upperBoundries[i] = (shiftStart + combinedWidths + i) * (getDistanceGoal() / totalSections);
+                //Debug.Log("Low: " + lowerBoundries[i] + "    High: " + upperBoundries[i]);
+            }
+        }
+
+        void handleUVeinSlope()
+        {
+            float intendedSlope = intendedVeinSlope.getSlope();
+            float perpendicularSlope = ((float)1 / intendedSlope);
+            float medianSlope = (intendedSlope + perpendicularSlope) / 2;
+            VeinDirection newDir = getCurrentVeinDirection();
+
+            //Debug.Log("Distance: " + distance);
+
+            float newSlope = 0f;
+            if (getCurrentDistance() < 1 * (getDistanceGoal() / totalSections))
+            {
+                // DON'T EVER START TURNING IN HERE
+            }
+            else if (lowerBoundries[0] <= getCurrentDistance() && getCurrentDistance() < upperBoundries[0])
+            {
+                handleUtype(UVeinStage.Part1, intendedSlope, ref newDir, ref dir, ref slope, newSlope, intendedVeinDirection);
+            }
+            else if (lowerBoundries[1] <= getCurrentDistance() && getCurrentDistance() < upperBoundries[1])
+            {
+                handleUtype(UVeinStage.Part2, intendedSlope, ref newDir, ref dir, ref slope, newSlope, intendedVeinDirection);
+            }
+            else if (lowerBoundries[2] <= getCurrentDistance() && getCurrentDistance() < upperBoundries[2])
+            {
+                handleUtype( UVeinStage.Part3, intendedSlope, ref newDir, ref dir, ref slope, newSlope, intendedVeinDirection);
+            }
+            else if (lowerBoundries[3] <= getCurrentDistance() && getCurrentDistance() < upperBoundries[3])
+            {
+                handleUtype(UVeinStage.Part4, intendedSlope, ref newDir, ref dir, ref slope, newSlope, intendedVeinDirection);
+            }
+        }
+
+        void handleUtype(UVeinStage stage, float intendedSlope, ref VeinDirection newDir,
+                                ref float slope, float newSlope, VeinDirection intendedDir)
+        {
+
+            //Debug.Log("                " + stage);
+            if (stage == UVeinStage.Part1)
+            {
+                if (isUpDown)
+                {
+                    newSlope = calculateAngleChange(intendedDir, intendedSlope, currentVeinDirection, slope, 45f, ref newDir);
+                    if (isMovingAngleLessThanTargetAngle(slope, currentVeinDirection, newSlope, newDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Inc, ref currentVeinDirection);
+                    }
+                }
+                else
+                {
+                    newSlope = calculateAngleChange(intendedDir, intendedSlope, currentVeinDirection, slope, -45f, ref newDir);
+                    if (isMovingAngleGreaterThanTargetAngle(slope, currentVeinDirection, newSlope, newDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Dec, ref currentVeinDirection);
+                    }
+                }
+            }
+            else if (stage == UVeinStage.Part2)
+            {
+                if (isUpDown)
+                {
+                    if (isMovingAngleGreaterThanTargetAngle(slope, currentVeinDirection, intendedSlope, intendedDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Dec, ref currentVeinDirection);
+                    }
+                }
+                else
+                {
+                    if (isMovingAngleLessThanTargetAngle(slope, currentVeinDirection, intendedSlope, intendedDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Inc, ref currentVeinDirection);
+                    }
+                }
+            }
+            else if (stage == UVeinStage.Part3)
+            {
+                if (isUpDown)
+                {
+                    newSlope = calculateAngleChange(intendedDir, intendedSlope, currentVeinDirection, slope, -45f, ref newDir);
+                    if (isMovingAngleGreaterThanTargetAngle(slope, currentVeinDirection, newSlope, newDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Dec, ref currentVeinDirection);
+                    }
+                }
+                else
+                {
+                    newSlope = calculateAngleChange(intendedDir, intendedSlope, currentVeinDirection, slope, 45f, ref newDir);
+                    if (isMovingAngleLessThanTargetAngle(slope, currentVeinDirection, newSlope, newDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Inc, ref currentVeinDirection);
+                    }
+                }
+            }
+            else if (stage == UVeinStage.Part4)
+            {
+                if (isUpDown)
+                {
+                    if (isMovingAngleLessThanTargetAngle(slope, currentVeinDirection, intendedSlope, intendedDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Inc, ref currentVeinDirection);
+                    }
+                }
+                else
+                {
+                    if (isMovingAngleGreaterThanTargetAngle(slope, currentVeinDirection, intendedSlope, intendedDir))
+                    {
+                        veinSlope.changeSlope(SlopeChange.Dec, ref currentVeinDirection);
+                    }
+                }
+            }
+        }
+
+        bool isMovingAngleGreaterThanTargetAngle(float slope, VeinDirection dir, float newSlope, VeinDirection newDir)
+        {
+            float movingAngle = getAngleFromSlope(slope, dir);
+            float targetAngle = getAngleFromSlope(newSlope, newDir);
+
+            bool isGreater = false;
+            //Debug.Log("Moving Dir: " + dir + "    New Dir: " + newDir);
+            //Debug.Log("Moving Ang: " + movingAngle + "    Target Ang: " + targetAngle);
+
+            if (dir == VeinDirection.Right && newDir == VeinDirection.Right)
+            {
+                if (0f < movingAngle && movingAngle < 90f && 270f < targetAngle && targetAngle < 360f)
+                {
+                    isGreater = true;
+                }
+                else if (270f < movingAngle && movingAngle < 360f && 0f < targetAngle && targetAngle < 90f)
+                {
+                    isGreater = false;
+                }
+                else if (targetAngle < movingAngle)
+                {
+                    isGreater = true;
+                }
+            }
+            else if (targetAngle < movingAngle)
+            {
+                isGreater = true;
+            }
+
+            return isGreater;
+        }
+
+
+        bool isMovingAngleLessThanTargetAngle(float slope, VeinDirection dir, float newSlope, VeinDirection newDir)
+        {
+            float movingAngle = getAngleFromSlope(slope, dir);
+            float targetAngle = getAngleFromSlope(newSlope, newDir);
+
+            bool isLess = false;
+
+            if (dir == VeinDirection.Right && newDir == VeinDirection.Right)
+            {
+                // This is to handle the 360 degrees to 0 degrees transition
+                if (0f < targetAngle && targetAngle < 90f && 270f < movingAngle && movingAngle < 360f)
+                {
+                    isLess = true;
+                }
+                else if (270f < targetAngle && targetAngle < 360f && 0f < movingAngle && movingAngle < 90f)
+                {
+                    isLess = false;
+                }
+                else if (movingAngle < targetAngle)
+                {
+                    isLess = true;
+                }
+            }
+            else if (movingAngle < targetAngle)
+            {
+                isLess = true;
+            }
+
+            return isLess;
+        }
+
+        float getAngleFromSlope(float slope, VeinDirection dir)
+        {
+            float newAngle = 0f;
+
+            if (dir == VeinDirection.Right)
+            {
+                newAngle = Mathf.Rad2Deg * Mathf.Atan2(Mathf.Abs(slope), 1);
+                if (veinSlope.slopeIsNegative(slope) == true)
+                {
+                    newAngle = 360f - newAngle;
+                }
+            }
+            else
+            {
+                newAngle = Mathf.Rad2Deg * Mathf.Atan2(Mathf.Abs(slope), 1);
+                if (veinSlope.slopeIsNegative(slope) == true)
+                {
+                    newAngle = 180f - newAngle;
+                }
+                else
+                {
+                    newAngle += 180f;
+                }
+            }
+
+            return newAngle;
+        }
+
 
         public override void triggerVeinGeneration2()
         {
-            //int[] partWidths = new int[totalUParts];
-            //int[] lowerBoundries = new int[totalUParts];
-            //int[] upperBoundries = new int[totalUParts];
-
-            //if (vein == veinType.U)
-            //{
-            //    configureUVein(ref shiftStart, ref partWidths, totalUParts, totalSections, ref newDistance, ref lowerBoundries, ref upperBoundries);
-            //}
-
+            Slope prevSlope = veinSlope.deepCopy();
             DistanceStateTracker distanceTracker = new DistanceStateTracker(getDistanceGoal());
             bool distanceStateChanged = false;
 
@@ -60,15 +337,14 @@ namespace VeinManagerClasses
             {
                 distanceTracker.updateState(ref distanceStateChanged, getCurrentDistance());
 
-                // Change slope first
-                if (distanceStateChanged == true)
-                {
-                    //changeSlopeEveryXDistance(ref currentSlopeIndex, ref currentSlopeStartCoords, this.currentCoords, distanceTracker.getCurrentState());
-                    //!!!!!!!!!!
-                }
-                else if (veinType == VeinType.U)
-                {
+                // Change slope to look like a U
+                prevSlope = veinSlope;
+                handleUtype(isUpDown, uVeinStage, );
 
+                if (veinSlope.getSlope() != prevSlope.getSlope())
+                {
+                    currentSlopeIndex = 0;
+                    currentSlopeStartCoords = currentCoords.deepCopy();
                 }
 
                 // Next handle width changes
