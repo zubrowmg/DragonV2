@@ -907,13 +907,7 @@ public class gridManagerScript : MonoBehaviour
         float tempCurrentAngle = currentAngle;
         float tempNewAngle = newAngle;
 
-        /*Debug.Log("Slope: " + slope);
-        Debug.Log("Int Slope: " + intendedSlope);
-        Debug.Log("Pre Curr Ang: " + currentAngle);
-        Debug.Log("Pre New Ang: " + newAngle);
-        Debug.Log("Int Ang: " + oldAngle);
-        Debug.Log("Ang Diff: " + angleDiff);
-        */
+
 
         if (dir == veinDirection.Left)
         {
@@ -1033,50 +1027,19 @@ public class gridManagerScript : MonoBehaviour
             }
         }
 
-        /*
-        Debug.Log("Int Ang: " + oldAngle);
-        Debug.Log("Curr Ang: " + currentAngle);
-        Debug.Log("New Ang: " + newAngle);
-
-        Debug.Log("Temp Curr Ang: " + tempCurrentAngle);
-        Debug.Log("Temp New Ang: " + tempNewAngle);
-        
-        Debug.Log("New Slope1: " + Mathf.Tan(Mathf.Deg2Rad * newAngle));
-        Debug.Log("New Ang1: " + newAngle);
-        */
-
         float newSlope = Mathf.Tan(Mathf.Deg2Rad * newAngle);
 
-        /*if (intendedSlope > -maxNonVerticalSlope && newSlope < -maxNonVerticalSlope)
-        {
-            newSlope = -maxNonVerticalSlope;
-        } 
-        else */
+
         if (intendedSlope > -maxSlope && newSlope < -maxSlope)
         {
             newSlope = -maxSlope;
         }
-        /*else if (intendedSlope == -maxSlope && newSlope > 0)
-        {
-            newSlope = maxNonVerticalSlope;
-        }
-
-        if (intendedSlope < maxNonVerticalSlope && newSlope > maxNonVerticalSlope)
-        {
-            newSlope = maxNonVerticalSlope;
-        }
-        else*/
+        
         if (intendedSlope < maxSlope && newSlope > maxSlope)
         {
             newSlope = maxSlope;
         }
-        /*else if(intendedSlope == maxSlope && newSlope < 0)
-        {
-            newSlope = -maxNonVerticalSlope;
-        }*/
-
-
-        //Debug.Log("Target Slope: " + newSlope);
+        
 
         return newSlope;
     }
@@ -1462,8 +1425,6 @@ public class gridManagerScript : MonoBehaviour
         //Debug.Log("width: " + width + "widthchange: " + widthChange);
         if (width <= minWidth)
         {
-            //Debug.Log("width: " + width);
-            //Debug.Log("width IN");
             keepWidthPercent = .65f;
             increaseWidthPercent = .35f;
             decreaseWidthPercent = .00f;
@@ -1494,16 +1455,7 @@ public class gridManagerScript : MonoBehaviour
         else if (width > approxWidth)
         {
             // Want decreaseWidthPercent to increase
-            
-            
-            
-            /*if (widthChange >= 8)
-            {
-                keepWidthPercent = .40f;
-                increaseWidthPercent = .025f;
-                decreaseWidthPercent = .60f;
-            }
-            else*/ if (widthChange >= 8)
+            if (widthChange >= 8)
             {
                 keepWidthPercent = .50f;
                 increaseWidthPercent = .15f;

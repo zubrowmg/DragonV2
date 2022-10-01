@@ -16,8 +16,11 @@ namespace VeinManagerClasses
     public class Slope
     {
         // Hard coded limits
-        float maxSlope = 8f; // Old value
-        float maxNonVerticalSlope = 7.9f; // New value
+        float maxSlope = 5f; 
+        float maxNonVerticalSlope = 4.9f; 
+
+        // Degrees that the slope can change at
+        List<float> fivePointSevenDegrees = new List<float> { .1f, .17f, .2f, .49f, .78f, 1.17f, 1.71f, 2.4f };
 
         int xChange;
         int yChange;
@@ -73,15 +76,101 @@ namespace VeinManagerClasses
             return slope;
         }
 
-        // TEMPORARY FUNCTION, NEEDS TO BE UPDATED
-        public void changeSlope(float newValue)
+        public void changeSlope(SlopeChange slopeChange, ref VeinDirection currentVeinDirection)
         {
-            this.slopeFloat = newValue;
+            //float prevSope = slopeFloat;
+            
+            // Change slopeChange into a value for increasing or decreasing slope
+            float incOrDec = 1f;
+            if (slopeChange == SlopeChange.Dec)
+                incOrDec = -1f;
+
+            if (Mathf.Abs(slopeFloat) < .5f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[0] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 1f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[1] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 1.5f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[2] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 2f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[3] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 2.5f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[4] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 3f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[5] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 3.5f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[6] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < 4f)
+                slopeFloat = slopeFloat + (fivePointSevenDegrees[7] * (incOrDec));
+            else if (Mathf.Abs(slopeFloat) < maxSlope)
+            {
+                if (slopeIsPositive(slopeFloat) == true)
+                {
+                    if (incOrDec > 0)
+                        slopeFloat = maxSlope;
+                    else
+                        slopeFloat = slopeFloat + (fivePointSevenDegrees[7] * incOrDec);
+                }
+                else
+                {
+                    if (incOrDec < 0)
+                        slopeFloat = -maxSlope;
+                    else
+                        slopeFloat = slopeFloat + (fivePointSevenDegrees[7] * incOrDec);
+                }
+            }
+            else
+            {
+                if (slopeIsNegative(slopeFloat) == true)
+                    slopeFloat = slopeFloat + (fivePointSevenDegrees[6] * incOrDec);
+                else if (slopeFloat < 0)
+                    slopeFloat = slopeFloat + (fivePointSevenDegrees[6] * incOrDec);
+                else
+                    slopeFloat = slopeFloat + (fivePointSevenDegrees[6] * incOrDec);
+
+            }
+
+            // Check if the new slope needs to be corrected, aka can't be greater than the max slope
+            if (slopeIsPositive(slopeFloat) == true)
+            {
+                if (slopeFloat > maxSlope)
+                {
+                    slopeFloat = -maxSlope + Mathf.Abs(slopeFloat - maxSlope);
+                    if (currentVeinDirection == VeinDirection.Right)
+                        currentVeinDirection = VeinDirection.Left;
+                    else
+                        currentVeinDirection = VeinDirection.Right;
+                }
+            }
+            else if (slopeIsNegative(slopeFloat) == true)
+            {
+                if (slopeFloat < -maxSlope)
+                {
+                    slopeFloat = maxSlope - Mathf.Abs(slopeFloat + maxSlope);
+                    if (currentVeinDirection == VeinDirection.Right)
+                        currentVeinDirection = VeinDirection.Left;
+                    else
+                        currentVeinDirection = VeinDirection.Right;
+                }
+            }
+
+            //Debug.Log("SLOPE IN : " + prevSope + "\n" +
+            //          "SLOPE OUT: " + slopeFloat);
         }
 
-        public void changeSlope(SlopeChange slopeChange)
+        bool slopeIsNegative(float slope)
         {
-            
+            bool slopeIsNegative = false;
+            if (slope < 0f)
+                slopeIsNegative = true;
+            return slopeIsNegative;
+        }
+
+        bool slopeIsPositive(float slope)
+        {
+            bool slopeIsPositive = false;
+            if (slope > 0f)
+                slopeIsPositive = true;
+            return slopeIsPositive;
         }
 
         // ===================================================================================================

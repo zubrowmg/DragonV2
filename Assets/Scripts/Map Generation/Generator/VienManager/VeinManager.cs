@@ -103,55 +103,57 @@ public class VeinManager : ContainerAccessor
     void getSimpleTestVeins(ref Queue<Vein> veinQueue)
     {
         // Dims 588, 288
+        int approxWidthDistance = 6;
+        int approxVeinDistance = 30;
 
         // Up/ Down
         Coords<int> end = new Coords<int>(leftVeinStart.getX(), leftVeinStart.getY() + 50);
-        //veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //veinQueue.Enqueue(new SimpleVein(ref getContainerInst(), Direction.West, leftVeinStart, end, true, true, true));
         end = new Coords<int>(rightVeinStart.getX(), rightVeinStart.getY() - 50);
-        //veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, rightVeinStart, end, true, true, true));
+        //veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.West, rightVeinStart, end, true, true, true));
 
         // Left Down
         //if (true)
         //{
         //    end = new Coords<int>(180, 0);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.West, leftVeinStart, end, true, true, true));
         //    end = new Coords<int>(0, 0);
-        //    //veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //    //veinQueue.Enqueue(new SimpleVein(ref getContainerInst(), Direction.West, leftVeinStart, end, true, true, true));
         //    end = new Coords<int>(0, 70);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(), Direction.West, leftVeinStart, end, true, true, true));
         //}
 
         //// Left Up
         //if (false)
         //{
         //    end = new Coords<int>(0, 220);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.West, leftVeinStart, end, true, true, true));
         //    end = new Coords<int>(0, 300);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.West, leftVeinStart, end, true, true, true));
         //    end = new Coords<int>(180, 300);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.West, leftVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.West, leftVeinStart, end, true, true, true));
         //}
 
         //// Right Down
         //if (false)
         //{
         //    end = new Coords<int>(480, 0);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.East, rightVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.East, rightVeinStart, end, true, true, true));
         //    end = new Coords<int>(588, 0);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.East, rightVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.East, rightVeinStart, end, true, true, true));
         //    end = new Coords<int>(588, 70);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.East, rightVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.East, rightVeinStart, end, true, true, true));
         //}
 
         //// Right Up
         //if (false)
         //{
         //    end = new Coords<int>(588, 220);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.East, rightVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.East, rightVeinStart, end, true, true, true));
         //    end = new Coords<int>(588, 300);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.East, rightVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(),  Direction.East, rightVeinStart, end, true, true, true));
         //    end = new Coords<int>(420, 300);
-        //    veinQueue.Enqueue(new Vein(ref getContainerInst(), VeinType.Simple, Direction.East, rightVeinStart, end, true, true, true));
+        //    veinQueue.Enqueue(new SimpleVein(ref getContainerInst(), Direction.East, rightVeinStart, end, true, true, true));
         //}
     }
 
@@ -177,6 +179,8 @@ public class VeinManager : ContainerAccessor
 
     Vein configSendOffVeinProps(Direction dir)
     {
+        int approxWidthDistance = 6;
+        int approxVeinDistance = 130;
         Vein initVein = null;
 
         Coords<int> endDesination;
@@ -199,7 +203,8 @@ public class VeinManager : ContainerAccessor
                             new RandomProbability.RandomSelection(yAxisTwoThird + 1, yAxis - 1, .0f));
                 endDesination = new Coords<int>(xChange, yChange);
 
-                initVein = new Vein(ref getContainerInst(), type, Direction.West, leftVeinStart, endDesination, varyVeinWidth, varyVeinLength, varyVeinSlope);
+                initVein = new SimpleVein(ref getContainerInst(), Direction.West, leftVeinStart, endDesination, varyVeinWidth, varyVeinLength, 
+                                                        varyVeinSlope, approxWidthDistance, approxVeinDistance);
                 break;
             case Direction.South:
                 xChange = RandomProbability.getIntBasedOnPercentage(
@@ -209,7 +214,8 @@ public class VeinManager : ContainerAccessor
                 yChange = 0;
                 endDesination = new Coords<int>(xChange, yChange);
 
-                initVein = new Vein(ref getContainerInst(), type, Direction.South, middleVeinStart, endDesination, varyVeinWidth, varyVeinLength, varyVeinSlope);
+                initVein = new SimpleVein(ref getContainerInst(), Direction.South, middleVeinStart, endDesination, varyVeinWidth, varyVeinLength, 
+                                                        varyVeinSlope, approxWidthDistance, approxVeinDistance);
                 break;
             case Direction.East:
                 xChange = tileAccessor.getTileMapDims().getMaxX() - 1;
@@ -219,7 +225,8 @@ public class VeinManager : ContainerAccessor
                             new RandomProbability.RandomSelection(yAxisTwoThird + 1, yAxis - 1, .0f));
                 endDesination = new Coords<int>(xChange, yChange);
 
-                initVein = new Vein(ref getContainerInst(), type, Direction.East, rightVeinStart, endDesination, varyVeinWidth, varyVeinLength, varyVeinSlope);
+                initVein = new SimpleVein(ref getContainerInst(), Direction.East, rightVeinStart, endDesination, varyVeinWidth, varyVeinLength, 
+                                                        varyVeinSlope, approxWidthDistance, approxVeinDistance);
                 break;
         }
 
