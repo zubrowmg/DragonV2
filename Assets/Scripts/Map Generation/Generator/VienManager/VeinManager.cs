@@ -243,7 +243,7 @@ public class VeinManager : ContainerAccessor
     Vein configSendOffVeinProps(Direction dir)
     {
         int approxWidthDistance = 6;
-        int approxVeinDistance = 130;
+        int approxVeinDistance = 30;
         Vein initVein = null;
 
         Coords<int> endDesination;
