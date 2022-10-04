@@ -33,7 +33,7 @@ namespace VeinManagerClasses
             this.setVeinType(VeinType.Simple);
         }
 
-        public override void triggerVeinGeneration2()
+        public override void triggerVeinGeneration()
         {
             DistanceStateTracker distanceTracker = new DistanceStateTracker(getDistanceGoal());
             bool distanceStateChanged = false;

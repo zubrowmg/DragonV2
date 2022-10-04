@@ -128,7 +128,7 @@ namespace VeinManagerClasses
         // ===================================================================================================
         //                               Vein Creation Functions
         // ===================================================================================================
-        public void triggerVeinGeneration()
+        public void triggerVeinGeneration_OLD()
         {
             // U VEINS ARE NOT SUPPORTED
             //bool isUpDown = Random.Range(0, 1 + 1) == 1 ? true : false;
@@ -197,25 +197,22 @@ namespace VeinManagerClasses
             }
         }
 
-        public abstract void triggerVeinGeneration2();
+        public abstract void triggerVeinGeneration();
         
 
         protected void changeSlopeEveryXDistance(ref int currentSlopeIndex, ref Coords<int> currentSlopeStartCoords, Coords<int> currentCoords, VeinDistanceTraveled distanceState)
         {
             bool slopeChanged = true;
-            // Check if slope needs to be changed
-            //if (distanceState == VeinDistanceTraveled.Three_Sixths)
-            //{
-                // First randomly decide if it needs to be changed
-                slopeChanged = decideSlopeChanges();
+           
+            // First randomly decide if it needs to be changed
+            slopeChanged = decideSlopeChanges();
 
-                // If slope changes then reset these slope dependant variables
-                if (slopeChanged)
-                {
-                    currentSlopeIndex = 0;
-                    currentSlopeStartCoords = currentCoords.deepCopy();
-                }
-            //}
+            // If slope changes then reset these slope dependant variables
+            if (slopeChanged)
+            {
+                currentSlopeIndex = 0;
+                currentSlopeStartCoords = currentCoords.deepCopy();
+            }
         }
 
         protected void handleWidthChanges()

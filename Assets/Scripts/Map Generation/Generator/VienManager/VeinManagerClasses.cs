@@ -212,6 +212,152 @@ namespace VeinManagerClasses
         {
             return maxNonVerticalSlope;
         }
+
+        public float calculateAngleChange(VeinDirection intendedDir, float intendedSlope, VeinDirection dir, float slope, float angleDiff, ref VeinDirection newDir)
+        {
+            float oldAngle = Mathf.Rad2Deg * Mathf.Atan2(intendedSlope, 1);
+            float currentAngle = Mathf.Rad2Deg * Mathf.Atan2(slope, 1);
+            float newAngle = (angleDiff + (Mathf.Rad2Deg * Mathf.Atan2(intendedSlope, 1)));
+
+            float tempCurrentAngle = currentAngle;
+            float tempNewAngle = newAngle;
+
+
+
+            if (dir == VeinDirection.Left)
+            {
+                if (tempCurrentAngle < 0f)
+                {
+                    tempCurrentAngle = 180f - Mathf.Abs(currentAngle);
+                    currentAngle = 180f - Mathf.Abs(currentAngle);
+                    if (0f < tempCurrentAngle + angleDiff && tempCurrentAngle + angleDiff < 90f)
+                    {
+                        dir = VeinDirection.Right;
+                        //Debug.Log("      Right");
+                    }
+                }
+                else
+                {
+                    tempCurrentAngle = Mathf.Abs(currentAngle) + 180f;
+                    currentAngle = 180f + Mathf.Abs(currentAngle);
+                    if (270f < tempCurrentAngle + angleDiff && tempCurrentAngle + angleDiff < 360f)
+                    {
+                        dir = VeinDirection.Right;
+                        //Debug.Log("      Right");
+                    }
+                }
+            }
+            else if (dir == VeinDirection.Right)
+            {
+                if (currentAngle < 0f)
+                {
+                    tempCurrentAngle = 360 - Mathf.Abs(currentAngle);
+                    currentAngle = 360 - Mathf.Abs(currentAngle);
+                    if (180f < tempCurrentAngle + angleDiff && tempCurrentAngle + angleDiff < 270f)
+                    {
+                        dir = VeinDirection.Left;
+                        //Debug.Log("      LEFT");
+                    }
+                }
+                else
+                {
+                    tempCurrentAngle = currentAngle;
+                    //currentAngle = currentAngle;
+                    if (90f < tempCurrentAngle + angleDiff && tempCurrentAngle + angleDiff < 180f)
+                    {
+                        dir = VeinDirection.Left;
+                        //Debug.Log("      Left");
+                    }
+                }
+            }
+
+            if (intendedDir == VeinDirection.Left)
+            {
+                if (oldAngle < 0f)
+                {
+                    oldAngle = 180f - Mathf.Abs(oldAngle);
+                    newAngle = oldAngle + angleDiff;
+                    if (0f < newAngle && newAngle < 90f)
+                    {
+                        newDir = VeinDirection.Right;
+                        //Debug.Log("      Right");
+                    }
+                    else
+                    {
+                        newDir = VeinDirection.Left;
+                    }
+                }
+                else
+                {
+                    oldAngle = Mathf.Abs(oldAngle) + 180f;
+                    newAngle = oldAngle + angleDiff;
+                    if (270f < newAngle && newAngle < 360f)
+                    {
+                        newDir = VeinDirection.Right;
+                        //Debug.Log("      Right");
+                    }
+                    else
+                    {
+                        newDir = VeinDirection.Left;
+                    }
+                }
+            }
+            else if (intendedDir == VeinDirection.Right)
+            {
+                if (oldAngle < 0f)
+                {
+                    oldAngle = 360f - Mathf.Abs(oldAngle);
+                    newAngle = oldAngle + angleDiff;
+                    if (newAngle > 360f)
+                    {
+                        newAngle = newAngle - 360f;
+                    }
+                    if (180f < newAngle && newAngle < 270f)
+                    {
+                        newDir = VeinDirection.Left;
+                        //Debug.Log("      LEFT");
+                    }
+                    else
+                    {
+                        newDir = VeinDirection.Right;
+                    }
+                }
+                else
+                {
+                    //oldAngle = oldAngle;
+                    newAngle = oldAngle + angleDiff;
+                    if (newAngle < 0f)
+                    {
+                        newAngle = 360f + newAngle;
+                    }
+                    if (90f < newAngle && newAngle < 180f)
+                    {
+                        newDir = VeinDirection.Left;
+                        //Debug.Log("      Left");
+                    }
+                    else
+                    {
+                        newDir = VeinDirection.Right;
+                    }
+                }
+            }
+
+            float newSlope = Mathf.Tan(Mathf.Deg2Rad * newAngle);
+
+
+            if (intendedSlope > -maxSlope && newSlope < -maxSlope)
+            {
+                newSlope = -maxSlope;
+            }
+
+            if (intendedSlope < maxSlope && newSlope > maxSlope)
+            {
+                newSlope = maxSlope;
+            }
+
+
+            return newSlope;
+        }
     }
 
     public class DistanceStateTracker
