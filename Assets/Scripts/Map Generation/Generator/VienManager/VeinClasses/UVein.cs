@@ -117,8 +117,6 @@ namespace VeinManagerClasses
 
         void handleUVeinSlope()
         {
-
-
             if (getCurrentDistance() < 1 * (getDistanceGoal() / totalSections))
             {
                 // DON'T EVER START TURNING IN HERE
@@ -352,7 +350,8 @@ namespace VeinManagerClasses
 
                 // Calculate distance that next coord would put the vein at
                 //      If it goes over the distance goal end while loop here
-                updatePosition(nextCoords, ref this.currentCoords, ref this.prevCoords, ref this.currentDistance);
+                float newCurrentDistance = calculateNewPosition(nextCoords, ref this.currentCoords, ref this.prevCoords, getCurrentDistance());
+                setCurrentDistance(newCurrentDistance);
                 if (getCurrentDistance() > (float)getDistanceGoal())
                     break;
 

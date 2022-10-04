@@ -16,8 +16,8 @@ namespace VeinManagerClasses
     public class Slope
     {
         // Hard coded limits
-        float maxSlope = 5f; 
-        float maxNonVerticalSlope = 4.9f; 
+        float maxSlope = 5f;
+        float maxNonVerticalSlope = 4.9f;
 
         // Degrees that the slope can change at
         List<float> fivePointSevenDegrees = new List<float> { .1f, .17f, .2f, .49f, .78f, 1.17f, 1.71f, 2.4f };
@@ -91,7 +91,7 @@ namespace VeinManagerClasses
         public void changeSlope(SlopeChange slopeChange, ref VeinDirection currentVeinDirection)
         {
             //float prevSope = slopeFloat;
-            
+
             // Change slopeChange into a value for increasing or decreasing slope
             float incOrDec = 1f;
             if (slopeChange == SlopeChange.Dec)
@@ -358,6 +358,46 @@ namespace VeinManagerClasses
 
             return newSlope;
         }
+
+        public bool veinIsGoingUp(VeinDirection currentDirection)
+        {
+            bool isGoingUp = false;
+            if (    (currentDirection == VeinDirection.Left && (getSlope() < (getMaxNonVerticalSlope() * -1))) ||
+                    (currentDirection == VeinDirection.Right && (getSlope() > (getMaxNonVerticalSlope()))))
+                isGoingUp = true;
+
+            return isGoingUp;
+        }
+
+        public bool veinIsGoingDown(VeinDirection currentDirection)
+        {
+            bool isGoingDown = false;
+            if (    (currentDirection == VeinDirection.Left && (getSlope() > getMaxNonVerticalSlope())) ||
+                    (currentDirection == VeinDirection.Right && (getSlope() < (getMaxNonVerticalSlope() * -1))))
+                isGoingDown = true;
+
+            return isGoingDown;
+        }
+
+        public bool veinIsGoingLeft(VeinDirection currentDirection)
+        {
+            bool isGoingLeft = false;
+            //                                              -4.9 <= slope <= 4.9
+            if (currentDirection == VeinDirection.Left && ((getMaxNonVerticalSlope() * -1) <= getSlope() && getSlope() <= getMaxNonVerticalSlope()))
+                isGoingLeft = true;
+
+            return isGoingLeft;
+        }
+
+        public bool veinIsGoingRight(VeinDirection currentDirection)
+        {
+            bool isGoingRight = false;
+            //                                              -4.9 <= slope <= 4.9
+            if (currentDirection == VeinDirection.Right && ((getMaxNonVerticalSlope() * -1) <= getSlope() && getSlope() <= getMaxNonVerticalSlope()))
+                isGoingRight = true;
+
+            return isGoingRight;
+        }
     }
 
     public class DistanceStateTracker
@@ -434,6 +474,61 @@ namespace VeinManagerClasses
         public VeinDistanceTraveled getCurrentState()
         {
             return state;
+        }
+    }
+
+    public class VeinCrossing
+    {
+        //  Meant to limit a vein "crossing" to just 4 veins, really shouldn't need any more than this
+        //      Two kind of usage, mid section crossing or end piece crossing
+
+        Vein northVein = null;
+        Vein eastVein = null;
+        Vein southVein = null;
+        Vein westVein = null;
+        Tile associatedTile = null;
+
+        public VeinCrossing(ref Tile associatedTile, ref Vein currentVein, Slope currentVeinSlope, VeinDirection currentDirection, bool endOfVeinCrossing)
+        {
+            this.associatedTile = associatedTile;
+
+            initCrossing(ref currentVein, currentVeinSlope, currentDirection, endOfVeinCrossing);
+        }
+
+        public void initCrossing(ref Vein currentVein, Slope currentVeinSlope, VeinDirection currentDirection, bool endOfVeinCrossing)
+        {
+            if (currentVeinSlope.veinIsGoingUp(currentDirection) == true)
+            {
+                if (endOfVeinCrossing)
+                    southVein = currentVein;
+                else
+                    southVein = northVein = currentVein;
+            }
+            else if (currentVeinSlope.veinIsGoingDown(currentDirection) == true)
+            {
+                if (endOfVeinCrossing)
+                    northVein = currentVein;
+                else
+                    northVein = southVein = currentVein;
+            }
+            else if (currentVeinSlope.veinIsGoingLeft(currentDirection) == true)
+            {
+                if (endOfVeinCrossing)
+                    eastVein = currentVein;
+                else
+                    eastVein = westVein = currentVein;
+            }
+            else if (currentVeinSlope.veinIsGoingRight(currentDirection) == true)
+            {
+                if (endOfVeinCrossing)
+                    westVein = currentVein;
+                else
+                    westVein = eastVein = currentVein;
+            }
+            else
+            {
+                Debug.LogError("VeinCrossing - initCrossing(): Which way is the vein going?");
+            }
         }
     }
 }
