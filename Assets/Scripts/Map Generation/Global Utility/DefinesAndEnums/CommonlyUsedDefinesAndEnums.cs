@@ -2,8 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CommonlyUsedEnums
+namespace CommonlyUsedDefinesAndEnums
 {
+    static class CommonDefines
+    {
+        public static int DefualtId = -999;
+
+    }
+
     // Directions
     public enum Direction { North, East, South, West };
 

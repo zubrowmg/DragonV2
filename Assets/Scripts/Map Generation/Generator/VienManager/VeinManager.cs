@@ -5,14 +5,14 @@ using UnityEngine;
 using VeinManagerClasses;
 using VeinEnums;
 using CommonlyUsedClasses;
-using CommonlyUsedEnums;
+using CommonlyUsedDefinesAndEnums;
+using ZoneAbilityAndThemeEnums;
 
 // ==========================================================
 //              Vien Manager Accessors
 // ==========================================================
 public partial class VeinAccessor
 {
-
 }
 
 // ==========================================================
@@ -39,11 +39,7 @@ public class VeinManager : ContainerAccessor
     Coords<int> rightVeinStart;
     Coords<int> middleVeinStart;
 
-    // Vary Width Percentages
-    float keepWidthPercent = .50f;
-    float increaseWidthPercent = .25f;
-    float decreaseWidthPercent = .25f;
-
+    // Defines
     int xAxis;
     int xAxisOneThird;
     int xAxisTwoThird;
@@ -57,6 +53,9 @@ public class VeinManager : ContainerAccessor
     int yAxisOneFourth;
     int yAxisTwoFourth;
     int yAxisThreeFourth;
+
+    // Zone Vein Generation
+    ZoneVeinGenerator zoneVeinGenerator;
 
     public VeinManager(ref GeneratorContainer contInst) : base(ref contInst)
     {
@@ -77,6 +76,8 @@ public class VeinManager : ContainerAccessor
         this.yAxisOneFourth = tileAccessor.getTileMapDims().getMaxY() / 4;
         this.yAxisTwoFourth = 2 * tileAccessor.getTileMapDims().getMaxY() / 4;
         this.yAxisThreeFourth = 3 * tileAccessor.getTileMapDims().getMaxY() / 4;
+
+        this.zoneVeinGenerator = new ZoneVeinGenerator(ref contInst);
     }
 
     public void startVeinGeneration()
@@ -230,14 +231,30 @@ public class VeinManager : ContainerAccessor
         getSimpleTestVeins(ref veinQueue, new List<int> { 0, 0, 0, 0, 0});
         getUTestVeins(ref veinQueue, new List<int> { 0, 0, 0, 0, 0 });
 
-        // Function that will call createVein(vein)
         foreach (var vein in veinQueue)
         {
-            //Debug.Log("VEIN SLOPE: " + vein.getVeinSlope());
-            //Debug.Log("VEIN DIR: " + vein.getCurrentVeinDirection());
-            vein.triggerVeinGeneration();
+            vein.triggerVeinGeneration(/*out lastVeinConnectPoint */);
+
+
+            // !!!!!
+            // veinBookMarkQueue.add(lastVeinConnectPoint);
             veinList.Add(vein);
         }
+
+        // ALLOCATE THESE VEINS WITH IDS
+
+        // You will want to create a DiDotGraph so that you can connect zone veins in a controlled manner
+        //      Maybe start connecting veins once all zone veins are created????
+
+
+        /*
+        // Go through each starting zone start connect point:
+        //      1. Figure out the allocated dimensions, should be skewed down and away from the center
+        //      2. Grab the zones theme and ability, since zone generation will rely on these parameters
+        //          Zone_New newZone = createNewZone(GameTiming.Early);
+        //      3. zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
+
+        */
     }
 
     Vein configSendOffVeinProps(Direction dir)

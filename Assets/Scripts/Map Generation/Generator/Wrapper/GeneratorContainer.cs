@@ -12,11 +12,16 @@ public class GeneratorContainer
     public GameObject garbage;
     public StartConfig startConfig;
 
+    public ZoneThemeAndAbilitySetup zoneThemeAndAbilitySetup;
+    public ZoneContainer zoneContainer;
+
     public GeneratorContainer(GameObject tileMapGameObject, GameObject garbage)
     {
         this.tileMap = new TileMap(tileMapGameObject);
         this.garbage = garbage;
         this.startConfig = new StartConfig();
+
+        this.zoneThemeAndAbilitySetup = new ZoneThemeAndAbilitySetup();
     }
 
 }

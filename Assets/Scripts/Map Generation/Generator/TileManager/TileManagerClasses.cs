@@ -4,7 +4,7 @@ using UnityEngine;
 
 using CommonlyUsedClasses;
 using VeinManagerClasses;
-using CommonlyUsedEnums;
+using CommonlyUsedDefinesAndEnums;
 
 namespace TileManagerClasses
 {
