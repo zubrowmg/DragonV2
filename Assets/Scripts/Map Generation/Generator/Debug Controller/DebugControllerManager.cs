@@ -11,6 +11,7 @@ public class DebugControllerManager : MonoBehaviour
 
     // Colors
     Color purple      = new Color(.29f, .025f, .76f, .5f);
+    Color orange      = new Color(1f, .5f, .0f, .85f);
     Color red         = new Color(.9725f, 0f, .0412f, .76f);
     Color green       = new Color(.085f, .85f, .12f, .88f);
     Color darkGreen   = new Color(.07f, .51f, .07f, .50f);
@@ -19,14 +20,17 @@ public class DebugControllerManager : MonoBehaviour
     Color black       = new Color(0f, 0f, 0f, 1f);
     Color tileDefault = new Color(255f, 255f, 255f, .27f);
 
-    // Button Toggles
-    bool toggleVeins = false;
-
 
     public void init(ref GeneratorWrapper generatorInst)
     {
         this.generatorInst = generatorInst;
     }
+
+    // ==============================================================================================
+    //                                      Vein Debug
+    // ==============================================================================================
+    bool toggleVeins = false;
+    bool toggleVeinConnections = false;
 
     public void selectVeins()
     {
@@ -54,6 +58,29 @@ public class DebugControllerManager : MonoBehaviour
         }
     }
 
+    public void selectVeinConnections()
+    {
+        List<Vein> veinList = generatorInst.getVeinManager().getVeinList();
+        toggleVeinConnections = !toggleVeinConnections;
+
+        foreach (var vein in veinList)
+        {
+            var veinRef = vein;
+            List<VeinConnection> veinConnectors = veinRef.getVeinConnections();
+
+            foreach (var conn in veinConnectors)
+            {
+                var tileRef = conn.getAssociatedTile();
+                if (toggleVeinConnections)
+                {
+                    changeTileColor(ref tileRef, orange);
+                }
+                else
+                    changeTileColor(ref tileRef, tileDefault);
+            }
+        }
+    }
+
     public void clearGrid()
     {
         //int xMax = gridManager.GetComponent<gridManagerScript>().grid.GetLength(0);
@@ -71,6 +98,10 @@ public class DebugControllerManager : MonoBehaviour
         //gridDoorSelect = false;
         //gridZoneSelect = 0;
     }
+
+    // ==============================================================================================
+    //                                      Tile Debug
+    // ==============================================================================================
 
     void changeRoomColor(ref GameObject room, Color color)
     {

@@ -50,10 +50,14 @@ namespace VeinManagerClasses
 
         // List of Tiles
         List<Tile> associatedTiles = new List<Tile>();
-        // List of Tile Bookmarks, Bookmarks are meant for future vein expansion
 
+        // List of Vein Connections, Connections are meant for future vein expansion
+        float veinConnectionCounter = 0;
+        float defualtVeinConnectionDistance = 30;
+        float actualVeinConnectionDistance = 30;
+        List<VeinConnection> listOfVeinConnections = new List<VeinConnection>();
 
-
+        // Distance state variables
         VeinDistanceTraveled veinDistanceState = VeinDistanceTraveled.None;
         bool justChangedStates = false;
 
@@ -82,6 +86,7 @@ namespace VeinManagerClasses
                                                                    new List<int> { -1, 0, 1 }, 
                                                                    1, 
                                                                    .5f);
+
         }
 
         public Vein(ref GeneratorContainer contInst, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
@@ -94,6 +99,9 @@ namespace VeinManagerClasses
             this.intendedVeinDirection = this.currentVeinDirection;
 
             this.approxDistance = initVaryLength(varyLength, approxDistance);
+
+            configVeinConnectionDistance();
+
         }
 
         // If you want to set width/distance
@@ -108,6 +116,9 @@ namespace VeinManagerClasses
 
             this.approxWidth = width;
             this.approxDistance = initVaryLength(varyLength, distance);
+
+            configVeinConnectionDistance();
+
         }
 
         int initVaryLength(bool varyLength, int distance)
@@ -125,80 +136,55 @@ namespace VeinManagerClasses
             }
         }
 
+        void configVeinConnectionDistance()
+        {
+
+
+            // If the vein is really small then there is no reason to put a connection in
+            if (getDistanceGoal() < defualtVeinConnectionDistance)
+                actualVeinConnectionDistance = int.MaxValue;
+            // If the vein is slightly bigger than small then put only one connection in the middle
+            else if (getDistanceGoal() < defualtVeinConnectionDistance * 2f)
+                actualVeinConnectionDistance = getDistanceGoal() / 2f;
+            // else leave the actualVeinConnectionDistance as the default amount
+
+            Debug.Log("GOAL: " + getDistanceGoal() + "\n" + "DEFUALT: " + defualtVeinConnectionDistance + "\n" + "ACTUAL: " + actualVeinConnectionDistance);
+
+        }
+
         // ===================================================================================================
         //                               Vein Creation Functions
         // ===================================================================================================
-        public void triggerVeinGeneration_OLD()
+
+        protected void addNewVeinConnection(ref Tile associatedTile)
         {
-            // U VEINS ARE NOT SUPPORTED
-            //bool isUpDown = Random.Range(0, 1 + 1) == 1 ? true : false;
-            //int shiftStart = 2;
-            //const int totalUParts = 4;
-            //const int totalSections = 8;
-            //int[] partWidths = new int[totalUParts];
-            //int[] lowerBoundries = new int[totalUParts];
-            //int[] upperBoundries = new int[totalUParts];
+            VeinConnection newConnector = new VeinConnection(ref associatedTile);
+            newConnector.addVeinLink(this);
+            listOfVeinConnections.Add(newConnector);
+        }
 
-            //if (vein == veinType.U)
-            //{
-            //    configureUVein(ref shiftStart, ref partWidths, totalUParts, totalSections, ref newDistance, ref lowerBoundries, ref upperBoundries);
-            //}
+        void placeVeinConnection(float currentDistance, float nextDistance)
+        {
+            veinConnectionCounter = veinConnectionCounter + calculateDifference(currentDistance, nextDistance);
 
-            Coords<int> prevCoords = new Coords<int>(getStartCoords().getX(), getStartCoords().getY());
-            Coords<int> currentCoords = new Coords<int>(getStartCoords().getX(), getStartCoords().getY());
+            //Debug.Log("COUNT: " + veinConnectionCounter + "\n" + "DISTANCE: " + actualVeinConnectionDistance);
 
-            //int width = approxWidth;
-            int prevWidth = getCurrentWidth();
-            int xBreakOut = getStartCoords().getX(); // Will probably depricate breakout
-            int yBreakOut = getStartCoords().getY();
 
-            for (int i = 0; i < getDistanceGoal(); i++)
+            if (veinConnectionCounter > actualVeinConnectionDistance)
             {
+                Debug.Log("PLACED VEIN CONNECTION");
 
-                //handleDistanceState(currentCoords, prevCoords, ref veinDistanceState, ref justChangedStates);
-                prevCoords.setX(currentCoords.getX());
+                bool accessSuccessful = false;
+                Tile selectedTile = getTile(this.currentCoords, ref accessSuccessful);
 
-                // If we reach the distance goal, then stop here
-                if (getCurrentDistance() > getDistanceGoal())
-                {
-                    break;
-                }
+                if (accessSuccessful)
+                    addNewVeinConnection(ref selectedTile);
 
-                
-                //else if (vein == veinType.U)
-                //{
-                //    handleUVeinSlope(ref distance, ref newDistance, ref slope, ref isUpDown, ref intendedSlope, ref dir, intendedDir,
-                //                        shiftStart, ref partWidths, totalUParts, totalSections, lowerBoundries, upperBoundries);
-                //    simpleVein(ref i, ref x, ref y, ref yPrev, ref yStart, ref newDistance, ref width, ref slope, ref exitLoop, ref dir, ref xBreakOut, ref yBreakOut, intendedDir, generalVeinDir);
-                //}
-
-                // Varies the width every cycle
-                if (varyVeinWidth)
-                {
-                    //handleWidthChanges(ref width, ref prevWidth, ref approxWidth, ref x, ref y, ref dir, ref decreaseWidthPercent, ref keepWidthPercent, ref increaseWidthPercent);
-                }
-
-                // Varies the slope when varySlope every sixth of the distance
-                // Only for simple veins
-                if (varyVeinSlope && getVeinType() != VeinType.U)
-                {
-                    //handleSlopeChanges(ref state, ref justChangedStates, ref slope, ref intendedSlope, ref dir);
-                }
-
-                // Every 25 units of distance, we put down a split vein, then a vein template at the end and mark it as POI
-                //if (splitVeins)
-                //{
-                //handleSplitVein(ref state, ref justChangedStates, x, yPrev, xStart, yStart, slope, generalVeinDir);
-                // }
-
-
-                // Every 1/6 of the total distance, there is some variance introduced to the bias percents
-
+                veinConnectionCounter = 0f;
             }
         }
 
         public abstract void triggerVeinGeneration();
-        
 
         protected void changeSlopeEveryXDistance(ref int currentSlopeIndex, ref Coords<int> currentSlopeStartCoords, Coords<int> currentCoords, VeinDistanceTraveled distanceState)
         {
@@ -352,17 +338,12 @@ namespace VeinManagerClasses
             prevCoords = currentCoords.deepCopy();
             currentCoords = nextCoords.deepCopy();
 
-            float xChange = (float)Mathf.Abs(currentCoords.getX() - prevCoords.getX());
-            float yChange = (float)Mathf.Abs(currentCoords.getY() - prevCoords.getY());
+            float xChange = calculateDifference(currentCoords.getX(), prevCoords.getX()); //(float)Mathf.Abs(currentCoords.getX() - prevCoords.getX());
+            float yChange = calculateDifference(currentCoords.getY(), prevCoords.getY()); //(float)Mathf.Abs(currentCoords.getY() - prevCoords.getY()); //
             float distanceChange = Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
             currentDistance = currentDistance + distanceChange;
 
             return currentDistance;
-        }
-
-        protected void updateCurrentDistance(float newDistance)
-        {
-            this.currentDistance = newDistance;
         }
 
         // Uses same while loop logic used in triggerVeinGeneration()
@@ -526,9 +507,20 @@ namespace VeinManagerClasses
 
         }
 
+        float calculateDifference(float numOne, float numTwo)
+        {
+            return (float)Mathf.Abs(numOne - numTwo);
+        }
+
         // ===================================================================================================
         //                               Setters/Getters
         // ===================================================================================================
+
+        public List<VeinConnection> getVeinConnections()
+        {
+            return this.listOfVeinConnections;
+        }
+
         public VeinDirection getIntendedVeinDirection()
         {
             return this.intendedVeinDirection;
@@ -582,6 +574,8 @@ namespace VeinManagerClasses
 
         public void setCurrentDistance(float newDistance)
         {
+            placeVeinConnection(this.currentDistance, newDistance);
+
             this.currentDistance = newDistance;
         }
 
