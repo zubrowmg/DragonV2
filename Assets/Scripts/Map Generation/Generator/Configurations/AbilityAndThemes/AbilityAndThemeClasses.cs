@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using ZoneAbilityAndThemeEnums;
+using AbilityAndThemeEnums;
 
-namespace ZoneAbilityAndThemeClasses
+namespace AbilityAndThemeClasses
 {
     public class Themes
     {

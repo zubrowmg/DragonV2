@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CommonlyUsedDefinesAndEnums;
-using ZoneAbilityAndThemeEnums;
-using ZoneAbilityAndThemeClasses;
+using AbilityAndThemeEnums;
+using AbilityAndThemeClasses;
 
 public class Zone_New
 {

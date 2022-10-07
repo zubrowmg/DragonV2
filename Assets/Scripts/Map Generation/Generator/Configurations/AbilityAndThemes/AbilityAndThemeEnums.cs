@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZoneAbilityAndThemeEnums
+namespace AbilityAndThemeEnums
 {
     // Themes
     public enum ZoneThemes { None, Rock, Fire, Forest, Wind, Lake /* Earth */};

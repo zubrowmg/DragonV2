@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using ZoneAbilityAndThemeEnums;
-using ZoneAbilityAndThemeClasses;
+using AbilityAndThemeEnums;
+using AbilityAndThemeClasses;
 
-public class ZoneThemeAndAbilitySetup
+public class ThemeAndAbilityConfig
 {
     public Themes earlyGameZoneThemes;
     public Themes midGameZoneThemes;
@@ -19,7 +19,7 @@ public class ZoneThemeAndAbilitySetup
 
     public List<LinkedZonesAndAbilities> linkedZoneThemesAndAbilities;
 
-    public ZoneThemeAndAbilitySetup()
+    public ThemeAndAbilityConfig()
     {
         this.earlyGameZoneThemes = new Themes(GameTiming.Early);
         this.midGameZoneThemes = new Themes(GameTiming.Mid);
@@ -184,7 +184,7 @@ public class ZoneThemeAndAbilitySetup
         midGameAbilities.list.Remove(randomAbility);
     }
 
-    public bool isLinkedTheme(ZoneThemes theme)
+    bool isLinkedTheme(ZoneThemes theme)
     {
         for (int i = 0; i < linkedZoneThemesAndAbilities.Count; i++)
         {
@@ -197,7 +197,7 @@ public class ZoneThemeAndAbilitySetup
         return false;
     }
 
-    public ZoneAbilities getLinkedAbility(ZoneThemes theme)
+    ZoneAbilities getLinkedAbility(ZoneThemes theme)
     {
         ZoneAbilities linkedAbility = ZoneAbilities.None;
 
@@ -212,7 +212,7 @@ public class ZoneThemeAndAbilitySetup
         return linkedAbility;
     }
 
-    public bool isLinkedAbility(ZoneAbilities ability)
+    bool isLinkedAbility(ZoneAbilities ability)
     {
         for (int i = 0; i < linkedZoneThemesAndAbilities.Count; i++)
         {

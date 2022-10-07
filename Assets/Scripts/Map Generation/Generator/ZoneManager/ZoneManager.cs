@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using ZoneAbilityAndThemeClasses;
-using ZoneAbilityAndThemeEnums;
+using AbilityAndThemeClasses;
+using AbilityAndThemeEnums;
 
 // ==========================================================
 //              Zone Manager Accessors
@@ -13,7 +13,7 @@ public partial class ContainerAccessor
     public Zone_New createNewZone(GameTiming gameTiming)
     {
         // Creates a new zone and adds it to the zoneContainer
-        Zone_New newZone = this.contInst.zoneThemeAndAbilitySetup.getNewZone(gameTiming);
+        Zone_New newZone = this.contInst.themeAndAbilityConfig.getNewZone(gameTiming);
         this.contInst.zoneContainer.addZone(ref newZone);
         return newZone;
     }
