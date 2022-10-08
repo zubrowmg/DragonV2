@@ -21,6 +21,7 @@ namespace VeinManagerClasses
         List<int> upperBoundries = new List<int> { 0, 0, 0, 0 };
 
         public UVein(ref GeneratorContainer contInst,
+                     int id,
                      Direction generalDirection,
                      Coords<int> startCoords,
                      Coords<int> endCoords,
@@ -29,6 +30,7 @@ namespace VeinManagerClasses
                      int width,
                      int distance)
               : base(ref contInst,
+                     id,
                      generalDirection,
                      startCoords,
                      endCoords,
@@ -356,10 +358,9 @@ namespace VeinManagerClasses
 
                 if (getCurrentDistance() > (float)getDistanceGoal())
                 {
-                    Debug.Log("PLACED END CAP VEIN CONNECTION");
                     placeVeinConnection(this.currentCoords);
                     break;
-                }
+                };
 
                 // Mark a strip of tiles as veins
                 createVeinStrip(currentCoords);

@@ -12,6 +12,7 @@ namespace VeinManagerClasses
     public class SimpleVein : Vein
     {
         public SimpleVein(ref GeneratorContainer contInst,
+                          int id,
                           Direction generalDirection,
                           Coords<int> startCoords,
                           Coords<int> endCoords,
@@ -21,6 +22,7 @@ namespace VeinManagerClasses
                           int width,
                           int distance)
                    : base(ref contInst,
+                          id,
                           generalDirection,
                           startCoords,
                           endCoords,

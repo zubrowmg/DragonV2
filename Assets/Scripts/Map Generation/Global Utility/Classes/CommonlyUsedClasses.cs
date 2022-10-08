@@ -241,4 +241,29 @@ namespace CommonlyUsedClasses
         }
 
     }
+
+    public class RangeLimit
+    {
+        int min;
+        int max; 
+
+        public RangeLimit(int min, int max)
+        {
+            this.min = min;
+            this.max = max;
+        }
+
+        public bool valueIsInBetweenRange(int val)
+        {
+            bool valIsGood = false;
+            if (min <= val && val <= max)
+                valIsGood = true;
+            return valIsGood;
+        }
+
+        public int getMin()
+        {
+            return this.min;
+        }
+    }
 }

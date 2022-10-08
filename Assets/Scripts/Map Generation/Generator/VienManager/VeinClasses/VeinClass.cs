@@ -16,6 +16,7 @@ namespace VeinManagerClasses
 
         // Type
         protected VeinType veinType = VeinType.None_Set;
+        int veinId = CommonDefines.DefualtId;
 
         // Direction
         protected Direction generalVeinDirection; // Not really used in calculations, only to help for debug
@@ -61,11 +62,15 @@ namespace VeinManagerClasses
         VeinDistanceTraveled veinDistanceState = VeinDistanceTraveled.None;
         bool justChangedStates = false;
 
+        // =========================================================================
+        //                            End Variables
+        // =========================================================================
+        
 
-
-        void initGeneralProperties(Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+        void initGeneralProperties(int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
                                 bool varyWidth, bool varyLength, bool varySlope)
         {
+            this.veinId = id;
             this.generalVeinDirection = generalDirection;
             this.startCoords = startCoords.deepCopy();
             this.endCoords = endCoords;
@@ -89,10 +94,10 @@ namespace VeinManagerClasses
 
         }
 
-        public Vein(ref GeneratorContainer contInst, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+        public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
                         bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst)
         {
-            initGeneralProperties(generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
+            initGeneralProperties(id, generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
 
             this.currentWidth = approxWidth;
             this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);
@@ -105,10 +110,10 @@ namespace VeinManagerClasses
         }
 
         // If you want to set width/distance
-        public Vein(ref GeneratorContainer contInst,Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+        public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
                         bool varyWidth, bool varyLength, bool varySlope, int width, int distance) : base(ref contInst)
         {
-            initGeneralProperties(generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
+            initGeneralProperties(id, generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
 
             this.currentWidth = approxWidth;
             this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);

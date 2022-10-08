@@ -69,7 +69,9 @@ namespace TileManagerClasses
 
     public class Tile
     {
+        bool gameObjectIsInstantiated = false;
         GameObject gameObject;
+
         GameObject tileMapGameObject;
         bool gameObjectTilesAreOn;
         bool enabledGameObjectIfTouched;
@@ -134,6 +136,7 @@ namespace TileManagerClasses
             this.gameObject.transform.position = new Vector3(worldCoords.getX(), worldCoords.getY(), 0);
             this.gameObject.transform.SetParent(tileMapGameObject.transform);
             this.gameObject.name = this.name;
+            this.gameObjectIsInstantiated = true;
         }
 
         public void setTileAsVein(Vein veinInst)
@@ -163,7 +166,13 @@ namespace TileManagerClasses
 
         public ref GameObject getTileGameObject()
         {
-            return ref gameObject;
+            if (gameObjectIsInstantiated == true)
+                return ref gameObject;
+            else
+            {
+                Debug.LogError("Tile Class - getTileGameObject(): Attempted to grab a tile gameobject that is not instantiated");
+                return ref gameObject;
+            }
         }
 
         // Test function, not used in generation
