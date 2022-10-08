@@ -138,8 +138,7 @@ namespace VeinManagerClasses
 
         void configVeinConnectionDistance()
         {
-
-
+            
             // If the vein is really small then there is no reason to put a connection in
             if (getDistanceGoal() < defualtVeinConnectionDistance)
                 actualVeinConnectionDistance = int.MaxValue;
@@ -148,8 +147,7 @@ namespace VeinManagerClasses
                 actualVeinConnectionDistance = getDistanceGoal() / 2f;
             // else leave the actualVeinConnectionDistance as the default amount
 
-            Debug.Log("GOAL: " + getDistanceGoal() + "\n" + "DEFUALT: " + defualtVeinConnectionDistance + "\n" + "ACTUAL: " + actualVeinConnectionDistance);
-
+            //Debug.Log("GOAL: " + getDistanceGoal() + "\n" + "DEFUALT: " + defualtVeinConnectionDistance + "\n" + "ACTUAL: " + actualVeinConnectionDistance);
         }
 
         // ===================================================================================================
@@ -163,25 +161,31 @@ namespace VeinManagerClasses
             listOfVeinConnections.Add(newConnector);
         }
 
-        void placeVeinConnection(float currentDistance, float nextDistance)
+        protected void handleMiddleVeinConnections(float currentDistance, float nextDistance)
         {
             veinConnectionCounter = veinConnectionCounter + calculateDifference(currentDistance, nextDistance);
-
-            //Debug.Log("COUNT: " + veinConnectionCounter + "\n" + "DISTANCE: " + actualVeinConnectionDistance);
-
-
-            if (veinConnectionCounter > actualVeinConnectionDistance)
+            float approxDistanceLeft = calculateDifference(getDistanceGoal(), getCurrentDistance());
+           
+            // Don't place connections leading up to the end of the vein
+            if (approxDistanceLeft < actualVeinConnectionDistance)
             {
-                Debug.Log("PLACED VEIN CONNECTION");
-
-                bool accessSuccessful = false;
-                Tile selectedTile = getTile(this.currentCoords, ref accessSuccessful);
-
-                if (accessSuccessful)
-                    addNewVeinConnection(ref selectedTile);
-
+                // nothing
+            }
+            // Place vein connection every x distance (x = actualVeinConnectionDistance)
+            else if (veinConnectionCounter > actualVeinConnectionDistance)
+            {
+                placeVeinConnection(this.currentCoords);
                 veinConnectionCounter = 0f;
             }
+        }
+
+        protected void placeVeinConnection(Coords<int> coords)
+        {
+            bool accessSuccessful = false;
+            Tile selectedTile = getTile(coords, ref accessSuccessful);
+
+            if (accessSuccessful)
+                addNewVeinConnection(ref selectedTile);
         }
 
         public abstract void triggerVeinGeneration();
@@ -574,8 +578,6 @@ namespace VeinManagerClasses
 
         public void setCurrentDistance(float newDistance)
         {
-            placeVeinConnection(this.currentDistance, newDistance);
-
             this.currentDistance = newDistance;
         }
 

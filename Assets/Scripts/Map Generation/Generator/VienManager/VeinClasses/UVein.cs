@@ -351,9 +351,15 @@ namespace VeinManagerClasses
                 // Calculate distance that next coord would put the vein at
                 //      If it goes over the distance goal end while loop here
                 float newCurrentDistance = calculateNewPosition(nextCoords, ref this.currentCoords, ref this.prevCoords, getCurrentDistance());
+                handleMiddleVeinConnections(this.currentDistance, newCurrentDistance);
                 setCurrentDistance(newCurrentDistance);
+
                 if (getCurrentDistance() > (float)getDistanceGoal())
+                {
+                    Debug.Log("PLACED END CAP VEIN CONNECTION");
+                    placeVeinConnection(this.currentCoords);
                     break;
+                }
 
                 // Mark a strip of tiles as veins
                 createVeinStrip(currentCoords);
