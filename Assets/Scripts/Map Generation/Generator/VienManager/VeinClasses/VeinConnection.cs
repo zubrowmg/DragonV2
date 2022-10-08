@@ -10,7 +10,7 @@ namespace VeinManagerClasses
     {
         // Class is meant to serve as a vein connection or a "node"
 
-        List<Vein> linkedVeins = new List<Vein>();
+        List<VeinBase> linkedVeins = new List<VeinBase>();
         Tile associatedTile;
 
         public VeinConnection(ref Tile associatedTile)
@@ -18,7 +18,7 @@ namespace VeinManagerClasses
             this.associatedTile = associatedTile;
         }
 
-        public void addVeinLink(Vein vein)
+        public void addVeinLink(VeinBase vein)
         {
             this.linkedVeins.Add(vein);
         }

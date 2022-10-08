@@ -82,7 +82,13 @@ namespace VeinManagerClasses
             }
         }
 
-    }
+        public override VeinConnection getFurthestVeinConnectorFromStart()
+        {
+            // Should be the last vein connection added to the list, look at triggerVeinGeneration() in simple and U veins
+            return listOfVeinConnections[listOfVeinConnections.Count - 1];
+        }
+
+}
 
 }
 

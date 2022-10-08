@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace VeinEnums
 {
-    public enum VeinType { Simple, U, Wave, ReallyStrong, None_Set };
+    public enum VeinType { Simple, U, Zone, None_Set };
     public enum VeinDirection { Left, Right, None_Set };
 
     public enum VeinDistanceTraveled { None, One_Sixths, Two_Sixths, Three_Sixths, Four_Sixths, Five_Sixths };

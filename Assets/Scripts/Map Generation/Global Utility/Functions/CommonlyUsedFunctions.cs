@@ -2,17 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CommonlyUsedFunctions : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+
+
+namespace CommonlyUsedFunctions
+{
+
+    public static class CommonFunctions
     {
-        
+
+        public static List<T> Shuffle<T>(ref List<T> list)
+        {
+            List<T> shuffledList = new List<T>();
+
+            while (list.Count > 0)
+            {
+                int randIndex = Random.Range(0, list.Count);
+
+                shuffledList.Add(list[randIndex]);
+                list.RemoveAt(randIndex);
+            }
+
+            return shuffledList;
+        }
     }
 }
+

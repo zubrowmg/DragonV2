@@ -6,6 +6,7 @@ using VeinManagerClasses;
 using VeinEnums;
 using CommonlyUsedClasses;
 using CommonlyUsedDefinesAndEnums;
+using CommonlyUsedFunctions;
 using AbilityAndThemeEnums;
 
 // ==========================================================
@@ -32,7 +33,7 @@ public partial class VeinAccessor
 //          - If the algorithm feels that a connection needs to be made, feel free to use a normal vein
 public class VeinManager : ContainerAccessor
 {
-    List<Vein> veinList = new List<Vein>();
+    List<VeinBase> veinList = new List<VeinBase>();
 
     // Start vein coords
     Coords<int> leftVeinStart;
@@ -101,26 +102,32 @@ public class VeinManager : ContainerAccessor
 
     void createSendOffRoomVeins()
     {
-        // Create Vein with basic settings
         Queue<Vein> veinQueue = new Queue<Vein>();
+        List<VeinConnection> farVeinConnectionList = new List<VeinConnection>();
+
+        // Create Vein with basic settings
         veinQueue.Enqueue(configSendOffVeinProps(Direction.West)); // Left vein
         veinQueue.Enqueue(configSendOffVeinProps(Direction.South)); // Middle vein
         veinQueue.Enqueue(configSendOffVeinProps(Direction.East)); // Right vein
 
+        //  Test veins
         getSimpleTestVeins(ref veinQueue, new List<int> { 0, 0, 0, 0, 0 });
         getUTestVeins(ref veinQueue, new List<int> { 0, 0, 0, 0, 0 });
 
+        // Create the veins that connect to the send off room
         foreach (var vein in veinQueue)
         {
-            vein.triggerVeinGeneration(/*out lastVeinConnectPoint */);
-
-
-            // !!!!!
-            // veinBookMarkQueue.add(lastVeinConnectPoint);
+            vein.triggerVeinGeneration();
+            farVeinConnectionList.Add(vein.getFurthestVeinConnectorFromStart());
             veinList.Add(vein);
         }
 
-        // ALLOCATE THESE VEINS WITH IDS
+        // Randomly go through each VeinConnection and create a connecting zone vein
+        farVeinConnectionList = CommonFunctions.Shuffle(ref farVeinConnectionList);
+        foreach (var connection in farVeinConnectionList)
+        {
+            
+        }
 
         // You will want to create a DiDotGraph so that you can connect zone veins in a controlled manner
         //      Maybe start connecting veins once all zone veins are created????
@@ -324,7 +331,7 @@ public class VeinManager : ContainerAccessor
         return initVein;
     }
 
-    public ref List<Vein> getVeinList()
+    public ref List<VeinBase> getVeinList()
     {
         return ref veinList;
     }

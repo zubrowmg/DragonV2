@@ -9,19 +9,14 @@ using VeinEnums;
 
 namespace VeinManagerClasses
 {
-    public abstract class Vein : TileAccessor
+    public abstract class Vein : VeinBase
     {
         // Test Vars
         public string name = "TEST____0";
 
-        // Type
-        protected VeinType veinType = VeinType.None_Set;
-        int veinId = CommonDefines.DefualtId;
-
         // Direction
         protected Direction generalVeinDirection; // Not really used in calculations, only to help for debug
         protected VeinDirection intendedVeinDirection = VeinDirection.None_Set;
-        protected Coords<int> startCoords;
         protected Coords<int> endCoords;
 
         // Width and Distance
@@ -43,20 +38,13 @@ namespace VeinManagerClasses
 
         // Vein properties used during vein creation time
         protected float currentDistance = 0f;
-        protected Coords<int> prevCoords;
-        protected Coords<int> currentCoords;
 
         protected VeinDirection currentVeinDirection = VeinDirection.None_Set;
-
-
-        // List of Tiles
-        List<Tile> associatedTiles = new List<Tile>();
-
+        
         // List of Vein Connections, Connections are meant for future vein expansion
         float veinConnectionCounter = 0;
         float defualtVeinConnectionDistance = 30;
         float actualVeinConnectionDistance = 30;
-        List<VeinConnection> listOfVeinConnections = new List<VeinConnection>();
 
         // Distance state variables
         VeinDistanceTraveled veinDistanceState = VeinDistanceTraveled.None;
@@ -67,10 +55,10 @@ namespace VeinManagerClasses
         // =========================================================================
         
 
-        void initGeneralProperties(int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+        void initGeneralProperties(Direction generalDirection, Coords<int> endCoords,
                                 bool varyWidth, bool varyLength, bool varySlope)
         {
-            this.veinId = id;
+            
             this.generalVeinDirection = generalDirection;
             this.startCoords = startCoords.deepCopy();
             this.endCoords = endCoords;
@@ -80,9 +68,6 @@ namespace VeinManagerClasses
             this.varyVeinWidth = varyWidth;
             this.varyVeinLength = varyLength;
             this.varyVeinSlope = varySlope;
-
-            this.prevCoords = startCoords.deepCopy();
-            this.currentCoords = startCoords.deepCopy();
 
             this.slopeTargetManager = new TargetProbabilityManager(.1f, 
                                                                    veinSlope.getSlope(), 
@@ -95,9 +80,9 @@ namespace VeinManagerClasses
         }
 
         public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
-                        bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst)
+                        bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst, id, startCoords)
         {
-            initGeneralProperties(id, generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
+            initGeneralProperties(generalDirection, endCoords, varyWidth, varyLength, varySlope);
 
             this.currentWidth = approxWidth;
             this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);
@@ -111,9 +96,9 @@ namespace VeinManagerClasses
 
         // If you want to set width/distance
         public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
-                        bool varyWidth, bool varyLength, bool varySlope, int width, int distance) : base(ref contInst)
+                        bool varyWidth, bool varyLength, bool varySlope, int width, int distance) : base(ref contInst, id, startCoords)
         {
-            initGeneralProperties(id, generalDirection, startCoords, endCoords, varyWidth, varyLength, varySlope);
+            initGeneralProperties(generalDirection, endCoords, varyWidth, varyLength, varySlope);
 
             this.currentWidth = approxWidth;
             this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);
@@ -155,16 +140,16 @@ namespace VeinManagerClasses
             //Debug.Log("GOAL: " + getDistanceGoal() + "\n" + "DEFUALT: " + defualtVeinConnectionDistance + "\n" + "ACTUAL: " + actualVeinConnectionDistance);
         }
 
+
         // ===================================================================================================
         //                               Vein Creation Functions
         // ===================================================================================================
 
-        protected void addNewVeinConnection(ref Tile associatedTile)
-        {
-            VeinConnection newConnector = new VeinConnection(ref associatedTile);
-            newConnector.addVeinLink(this);
-            listOfVeinConnections.Add(newConnector);
-        }
+        public abstract void triggerVeinGeneration();
+
+        public override abstract VeinConnection getFurthestVeinConnectorFromStart();
+       
+
 
         protected void handleMiddleVeinConnections(float currentDistance, float nextDistance)
         {
@@ -193,7 +178,6 @@ namespace VeinManagerClasses
                 addNewVeinConnection(ref selectedTile);
         }
 
-        public abstract void triggerVeinGeneration();
 
         protected void changeSlopeEveryXDistance(ref int currentSlopeIndex, ref Coords<int> currentSlopeStartCoords, Coords<int> currentCoords, VeinDistanceTraveled distanceState)
         {
@@ -347,9 +331,9 @@ namespace VeinManagerClasses
             prevCoords = currentCoords.deepCopy();
             currentCoords = nextCoords.deepCopy();
 
-            float xChange = calculateDifference(currentCoords.getX(), prevCoords.getX()); //(float)Mathf.Abs(currentCoords.getX() - prevCoords.getX());
-            float yChange = calculateDifference(currentCoords.getY(), prevCoords.getY()); //(float)Mathf.Abs(currentCoords.getY() - prevCoords.getY()); //
-            float distanceChange = Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
+            //float xChange = calculateDifference(currentCoords.getX(), prevCoords.getX()); 
+            //float yChange = calculateDifference(currentCoords.getY(), prevCoords.getY());
+            float distanceChange = calculateCoordsDistance(currentCoords, prevCoords); // Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
             currentDistance = currentDistance + distanceChange;
 
             return currentDistance;
@@ -521,14 +505,17 @@ namespace VeinManagerClasses
             return (float)Mathf.Abs(numOne - numTwo);
         }
 
+        float calculateCoordsDistance(Coords<int> oneCoord, Coords<int> twoCoords)
+        {
+            float xChange = calculateDifference(oneCoord.getX(), twoCoords.getX()); 
+            float yChange = calculateDifference(oneCoord.getY(), twoCoords.getY());
+            return Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
+        }
+
         // ===================================================================================================
         //                               Setters/Getters
         // ===================================================================================================
 
-        public List<VeinConnection> getVeinConnections()
-        {
-            return this.listOfVeinConnections;
-        }
 
         public VeinDirection getIntendedVeinDirection()
         {
@@ -596,14 +583,12 @@ namespace VeinManagerClasses
             return veinSlope.getSlope();
         }
 
-        public ref List<Tile> getAssociatedTiles()
-        {
-            return ref associatedTiles;
-        }
-
+        
         public void setVeinType(VeinType type)
         {
             this.veinType = type;
         }
+
+        
     }
 }

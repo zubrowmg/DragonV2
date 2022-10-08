@@ -175,15 +175,14 @@ namespace TileManagerClasses
             }
         }
 
-        // Test function, not used in generation
-        public void changeVeinName()
-        {
-            associatedVein.name = "TEST_______111";
-        }
-
         public bool getIsVeinMain()
         {
             return this.isVeinMain;
+        }
+
+        public Coords<int> getTileMapCoords()
+        {
+            return this.tileMapIndex;
         }
     }
 }

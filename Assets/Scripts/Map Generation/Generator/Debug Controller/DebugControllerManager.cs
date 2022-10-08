@@ -34,7 +34,7 @@ public class DebugControllerManager : MonoBehaviour
 
     public void selectVeins()
     {
-        List<Vein> veinList = generatorInst.getVeinManager().getVeinList();
+        List<VeinBase> veinList = generatorInst.getVeinManager().getVeinList();
         toggleVeins = !toggleVeins;
 
         foreach (var vein in veinList)
@@ -60,7 +60,7 @@ public class DebugControllerManager : MonoBehaviour
 
     public void selectVeinConnections()
     {
-        List<Vein> veinList = generatorInst.getVeinManager().getVeinList();
+        List<VeinBase> veinList = generatorInst.getVeinManager().getVeinList();
         toggleVeinConnections = !toggleVeinConnections;
 
         foreach (var vein in veinList)
