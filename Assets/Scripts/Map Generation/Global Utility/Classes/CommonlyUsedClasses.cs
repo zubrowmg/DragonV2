@@ -46,38 +46,6 @@ namespace CommonlyUsedClasses
         }
     }
 
-    public class Dimensions
-    {
-        Coords<int> minCoords;
-        Coords<int> maxCoords;
-
-        public Dimensions(Coords<int> minCoords, Coords<int> maxCoords)
-        {
-            this.minCoords = minCoords;
-            this.maxCoords = maxCoords;
-        }
-
-        public int getMinX()
-        {
-            return minCoords.getX();
-        }
-
-        public int getMinY()
-        {
-            return minCoords.getY();
-        }
-
-        public int getMaxX()
-        {
-            return maxCoords.getX();
-        }
-
-        public int getMaxY()
-        {
-            return maxCoords.getY();
-        }
-    }
-
     public class TwoDList<T>
     {
         List<List<T>> array;

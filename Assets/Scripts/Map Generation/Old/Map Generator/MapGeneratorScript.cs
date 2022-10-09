@@ -99,6 +99,7 @@ public class MapGeneratorScript : MonoBehaviour
                                 tempRoomProperties.gridCoords.x + tempRoomProperties.doorList[3].doorCoords.x + 1, 
                                 tempRoomProperties.gridCoords.y + tempRoomProperties.doorList[3].doorCoords.y));
 
+        // Create boos rooms and add bookmarks
         handleBossRoomPresets(bossRoomLocations, ref bookMarks);
 
         int count = 0;
@@ -116,8 +117,6 @@ public class MapGeneratorScript : MonoBehaviour
 
             if (newRoom != null)
             {
-                //Debug.Log("+++++ ROOM" + count);
-
                 // Make the room a child of MapGenerator.Map
                 newRoom.transform.SetParent(map.transform);
                 newRoom.name = GlobalDefines.roomNamePrefix + count;
@@ -140,30 +139,6 @@ public class MapGeneratorScript : MonoBehaviour
 
         // Installs door to all of the room's inner grid for saving purposes
         edgesAndDoorManager.installDoorsToInnerGrid(ref roomList);
-
-
-        //for (int i = 0; i < roomList.Count; i++)
-        //{
-        //    roomProperties roomProps = roomList[i].GetComponent<roomProperties>();
-
-        //    if (roomList[i].name == "Room9")
-        //    {
-        //        for (int j = 0; j < roomProps.doorList.Count; j++)
-        //        {
-        //            if (roomProps.doorList[j].doorUsedBool)
-        //            {
-        //                print("DOOR" + j + "    " + roomProps.doorList[j].adjacentRoom.name +
-        //                    "   " + roomProps.doorList[j].doorUsedBool + "    " + roomProps.doorList[j].linkedDoorId);
-
-        //            }
-        //        }
-        //    }
-        //}
-
-
-        // Thought this would help with memory, it didn't
-        //grid.GetComponent<gridManagerScript>().deleteUnusedGrids();
-
 
     }
 

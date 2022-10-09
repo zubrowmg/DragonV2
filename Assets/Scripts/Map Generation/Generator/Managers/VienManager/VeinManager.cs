@@ -159,8 +159,8 @@ public class VeinManager : ContainerAccessor
     void getSimpleTestVeins(ref Queue<Vein> veinQueue, List<int> select)
     {
         // Dims 588, 288
-        int approxWidthDistance, width = 6;
-        int approxVeinDistance, distance = 120;
+        int width = 6;
+        int distance = 120;
 
         // Up/ Down
         Coords<int> end = new Coords<int>(leftVeinStart.getX(), leftVeinStart.getY() + 50);
@@ -218,8 +218,8 @@ public class VeinManager : ContainerAccessor
     void getUTestVeins(ref Queue<Vein> veinQueue, List<int> select)
     {
         // Dims 588, 288
-        int approxWidthDistance, width = 6;
-        int approxVeinDistance, distance = 150;
+        int width = 6;
+        int distance = 150;
 
         // Up/ Down
         Coords<int> end = new Coords<int>(leftVeinStart.getX(), leftVeinStart.getY() + 50);

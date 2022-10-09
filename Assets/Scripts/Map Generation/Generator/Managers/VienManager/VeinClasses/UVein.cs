@@ -13,7 +13,7 @@ namespace VeinManagerClasses
     {
         bool isUpDown = Random.Range(0, 1 + 1) == 1 ? true : false; // Determines which way the u will go, up/down or left/right
         int shiftStart = 2;
-        int totalUParts = 4;
+        //int totalUParts = 4;
         int totalSections = 8;
 
         List<int> partWidths = new List<int> { 0, 0, 0, 0 };
