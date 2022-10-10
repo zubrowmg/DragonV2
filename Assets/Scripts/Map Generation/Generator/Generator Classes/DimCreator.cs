@@ -25,14 +25,13 @@ public class DimCreator
     //                                  Main Functions
     // =======================================================================================
 
-    void getDimensions(int xStart, int yStart, ref DimensionList dimensionList)
+    void getDimensions(Coords<int> startCoords, ref DimensionList dimensionList)
     {
         bool dimensionRejected = false;
 
-        int xMin = xStart;
-        int yMin = yStart;
-        int xMax = xStart;
-        int yMax = yStart;
+        Coords<int> minCoords = startCoords.deepCopy();
+        Coords<int> maxCoords = startCoords.deepCopy();
+        Coords<int> center = startCoords.deepCopy();
 
         if (grid.GetComponent<gridManagerScript>().grid[xStart, yStart].GetComponent<gridUnitScript>().isOccupied == true)
         {
@@ -40,11 +39,10 @@ public class DimCreator
             return;
         }
 
-        Coords center = new Coords(xStart, yStart);
 
-        LinkedList<Coords> coordsToCheck = new LinkedList<Coords>();
-        coordsToCheck.AddFirst(new Coords(xStart, yStart));
-        Coords currentCoords = coordsToCheck.First.Value;
+        LinkedList<Coords<int>> coordsToCheck = new LinkedList<Coords<int>>();
+        coordsToCheck.AddFirst(startCoords.deepCopy());
+        Coords<int> currentCoords = coordsToCheck.First.Value;
 
         while (dimensionList.area < maxArea)
         {
@@ -59,26 +57,20 @@ public class DimCreator
                 coordsToCheck.RemoveFirst();
             }
 
-            xMin = currentCoords.x;
-            yMin = currentCoords.y;
-            xMax = currentCoords.x;
-            yMax = currentCoords.y;
-
-            //    print("CHECKING:     " + xMin + "," + yMin);
-
-            center.x = currentCoords.x;
-            center.y = currentCoords.y;
+            minCoords = currentCoords.deepCopy();
+            maxCoords = currentCoords.deepCopy();
+            center = currentCoords.deepCopy();
 
             expandAroundPoint(ref xMin, ref yMin, ref xMax, ref yMax);
 
             // If any of the sides a shorter than 5 then reject the square
-            if (xMax - xMin < minSideLength - 1 || yMax - yMin < minSideLength - 1)
+            if (maxCoords.getX() - minCoords.getX() < minSideLength - 1 || maxCoords.getY() - minCoords.getY() < minSideLength - 1)
             {
                 // Don't add anything
             }
             else
             {
-                dimensionRejected = dimensionList.addDimension(new SquareArea(xMin, yMin, xMax, yMax, center.x, center.y));
+                dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
 
                 if (dimensionRejected == false)
                 {

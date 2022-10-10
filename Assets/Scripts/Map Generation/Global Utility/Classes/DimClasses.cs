@@ -47,6 +47,16 @@ namespace CommonlyUsedClasses
         {
             return this.maxCoords.getY();
         }
+
+        public int xStart()
+        {
+            return this.startCoords.getX();
+        }
+
+        public int yStart()
+        {
+            return this.startCoords.getY();
+        }
     }
 
 
@@ -140,10 +150,8 @@ namespace CommonlyUsedClasses
             if (isIsolated == true)
             {
                 // Remove the last added square
-                xMin = prevXMin;
-                yMin = prevYMin;
-                xMax = prevXMax;
-                yMax = prevYMax;
+                minCoords = prevMin.deepCopy();
+                maxCoords = prevMax.deepCopy();
 
                 squareArealist.Remove(newArea);
                 updateGrid();
@@ -156,6 +164,8 @@ namespace CommonlyUsedClasses
             return isIsolated;
         }
 
+        // THIS FUNCTION IS NEEDED
+        //      Checks if there is a body of sqaure areas that are connected by a 2 wide Tile. This is not good enough to be considered "touching"
         public void finalCheck()
         {
             int minTouchingWidth = 2;
@@ -169,15 +179,15 @@ namespace CommonlyUsedClasses
                 int xMaxCount = 0;
                 int xMinCount = 0;
 
-                int yMaxCheck = square.yMax() - yMin + 1;
-                int yMinCheck = square.yMin() - yMin - 1;
-                int xMinCheck = square.xMin() - xMin - 1;
-                int xMaxCheck = square.xMax() - xMin + 1;
+                int yMaxCheck = square.yMax() - maxCoords.getY() + 1;
+                int yMinCheck = square.yMin() - minCoords.getY() - 1;
+                int xMinCheck = square.xMin() - maxCoords.getX() - 1;
+                int xMaxCheck = square.xMax() - minCoords.getX() + 1;
 
                 // Check top perimeter
                 if (yMaxCheck < grid[0].Count)
                 {
-                    for (int x = (square.xMin() - xMin); x <= (square.xMax() - xMin); x++)
+                    for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
                         // Top
                         if (grid[x][yMaxCheck] == 1)
@@ -199,7 +209,7 @@ namespace CommonlyUsedClasses
                 // Check bot perimeter
                 if (yMinCheck >= 0)
                 {
-                    for (int x = (square.xMin() - xMin); x <= (square.xMax() - xMin); x++)
+                    for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
                         if (grid[x][yMinCheck] == 1)
                         {
@@ -220,7 +230,7 @@ namespace CommonlyUsedClasses
                 // Check right perimeter
                 if (xMaxCheck < grid.Count)
                 {
-                    for (int y = (square.yMin() - yMin); y <= (square.yMax() - yMin); y++)
+                    for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
                         if (grid[xMaxCheck][y] == 1)
                         {
@@ -241,7 +251,7 @@ namespace CommonlyUsedClasses
                 // Check left perimeter
                 if (xMinCheck >= 0)
                 {
-                    for (int y = (square.yMin() - yMin); y <= (square.yMax() - yMin); y++)
+                    for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
                         if (grid[xMinCheck][y] == 1)
                         {
@@ -281,16 +291,14 @@ namespace CommonlyUsedClasses
             }
         }
 
-        
-
         private bool checkForGaps(SquareArea newArea)
         {
             bool gapsExist = true;
 
-            for (int x = (newArea.xMin() - xMin); x <= (newArea.xMax() - xMin); x++)
+            for (int x = (newArea.xMin() - minCoords.getX()); x <= (newArea.xMax() - minCoords.getX()); x++)
             {
-                int yMinCheck = newArea.yMin() - yMin - 1;
-                int yMaxCheck = newArea.yMax() - yMin + 1;
+                int yMinCheck = newArea.yMin() - minCoords.getY() - 1;
+                int yMaxCheck = newArea.yMax() - minCoords.getY() + 1;
 
                 if (yMinCheck >= 0)
                 {
@@ -313,9 +321,9 @@ namespace CommonlyUsedClasses
             // Check left/right perimeter
             if (gapsExist != false)
             {
-                int xMinCheck = newArea.xMin() - xMin - 1;
-                int xMaxCheck = newArea.xMax() - xMin + 1;
-                for (int y = (newArea.yMin() - yMin); y <= (newArea.yMax() - yMin); y++)
+                int xMinCheck = newArea.xMin() - minCoords.getX() - 1;
+                int xMaxCheck = newArea.xMax() - minCoords.getX() + 1;
+                for (int y = (newArea.yMin() - minCoords.getY()); y <= (newArea.yMax() - minCoords.getY()); y++)
                 {
                     if (xMinCheck >= 0)
                     {
@@ -335,7 +343,7 @@ namespace CommonlyUsedClasses
                     }
                 }
             }
-            8
+            
             return gapsExist;
         }
 
@@ -345,11 +353,11 @@ namespace CommonlyUsedClasses
             List<int> temp = new List<int>();
 
             // Create a blank grid
-            for (int x = 0; x < (xMax - xMin + 1); x++)
+            for (int x = 0; x < (maxCoords.getX() - minCoords.getX() + 1); x++)
             {
                 temp = new List<int>();
 
-                for (int y = 0; y < (yMax - yMin + 1); y++)
+                for (int y = 0; y < (maxCoords.getY() - minCoords.getY() + 1); y++)
                 {
                     temp.Add(0);
                 }
@@ -361,13 +369,13 @@ namespace CommonlyUsedClasses
             for (int i = 0; i < squareArealist.Count; i++)
             {
                 temp = new List<int>();
-                SquareArea currentSquare = list[i];
-                int xAccess = currentSquare.xMin() - xMin;
-                int yAccess = currentSquare.yMin() - yMin;
+                SquareArea currentSquare = squareArealist[i];
+                int xAccess = currentSquare.xMin() - minCoords.getX();
+                int yAccess = currentSquare.yMin() - minCoords.getY();
 
                 for (int x = 0; x < (currentSquare.xMax() - currentSquare.xMin() + 1); x++)
                 {
-                    yAccess = currentSquare.yMin() - yMin;
+                    yAccess = currentSquare.yMin() - minCoords.getY();
                     for (int y = 0; y < (currentSquare.yMax() - currentSquare.yMin() + 1); y++)
                     {
                         //print(xAccess + "," + yAccess);

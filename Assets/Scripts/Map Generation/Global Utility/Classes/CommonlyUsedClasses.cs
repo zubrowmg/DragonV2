@@ -40,6 +40,12 @@ namespace CommonlyUsedClasses
             this.y = y;
         }
 
+        public void set(T x, T y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
         public void print(string msg)
         {
             Debug.Log(msg + x + "," + y);
