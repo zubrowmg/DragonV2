@@ -12,16 +12,20 @@ public abstract class DimCreator : TileAccessor
     // Class is meant to be used for capturing a collection of square areas
 
     // Square Area control variables
-    int minSideLength;
-    int maxArea;
+    protected float maxSqaureAreaArea;
+    protected int minSideLength;
+    protected int maxArea;
 
-    CoordsInt startCoords;
+    // Adjacent coords search variables
+    protected int maxAdjacentSearchDisplacement;
 
+    // Wiggle Conditions
+    protected int wiggleDisplacementRange;
 
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
-
     }
+
     // =======================================================================================
     //                                  Abstract Functions
     // =======================================================================================
@@ -54,13 +58,16 @@ public abstract class DimCreator : TileAccessor
 
     protected abstract void expandAroundPoint(ref CoordsInt minCoords, ref CoordsInt maxCoords);
 
+    protected abstract bool wiggleConditions(CoordsInt wiggledCoords);
 
     // =======================================================================================
     //                                  Main Functions
     // =======================================================================================
 
-    void getDimensions(CoordsInt startCoords, ref DimensionList dimensionList)
+    // Should not be calling this function directly, look at getDimensionsForRoom() as an example
+    protected DimensionList getDimensions(CoordsInt startCoords)
     {
+        DimensionList dimensionList = new DimensionList();
         bool dimensionRejected = false;
 
         CoordsInt minCoords = startCoords.deepCopyInt();
@@ -71,7 +78,7 @@ public abstract class DimCreator : TileAccessor
         //      For vein dim creator this checks is the tile already has a room placed in it
         //      For vein zone dim creator this checks if the tile is already a vein
         if (tileCheck(startCoords) == true)
-            return;
+            return dimensionList;
 
 
         LinkedList<CoordsInt> coordsToCheck = new LinkedList<CoordsInt>();
@@ -116,13 +123,13 @@ public abstract class DimCreator : TileAccessor
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by only 1 unit
         dimensionList.finalCheck();
+
+        return dimensionList;
     }
 
     void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords)
     {
-        int startDisplacement = 11;
-        //int wiggleDisplacement = 2; // Meant to move the displacement a little in the perpendicular directions
-
+        int startDisplacement = this.maxAdjacentSearchDisplacement;
 
         int x = 0;
         int y = 0;
@@ -206,10 +213,9 @@ public abstract class DimCreator : TileAccessor
         // If the grid is a vein and is not occupied and the point is not already added then add the point
         //    pointAlreadyChecked() is needed to avoid an infinite loop when 2 "gaps" between squares is deemed addable
         //        The dimension list will reject the square gaps, but 
-        if (tileIsVein(wiggledCoords) == true &&
-            tileIsOccupiedByRoom(wiggledCoords) == false)
+        if (wiggleConditions(wiggledCoords) == true)
         {
-            if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords) == true)
+            if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords, wiggleDisplacementRange) == true)
             {
                 tooCloseToPreviouslyAttemptedSquareCore = true;
             }
@@ -265,4 +271,5 @@ public abstract class DimCreator : TileAccessor
     // =======================================================================================
     //                                  Setters/Getters
     // =======================================================================================
+
 }

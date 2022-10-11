@@ -407,12 +407,12 @@ namespace CommonlyUsedClasses
 
         }
 
-        public bool pointTooCloseToPreviouslyAttemptedSquareCore(CoordsInt coords)
+        public bool pointTooCloseToPreviouslyAttemptedSquareCore(CoordsInt coords, int displacemntRange)
         {
             int x = coords.getX();
             int y = coords.getY();
             bool pointRejected = false;
-            int displacement = 3;
+            int displacement = displacemntRange = 3;
 
             //Debug.Log("INPUT: " + x + "," + y);
 
