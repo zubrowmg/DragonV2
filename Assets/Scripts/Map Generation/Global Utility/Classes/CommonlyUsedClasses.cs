@@ -6,8 +6,8 @@ namespace CommonlyUsedClasses
 {
     public class Coords<T>
     {
-        T x;
-        T y;
+        protected T x;
+        protected T y;
 
         public Coords(T x, T y)
         {
@@ -15,7 +15,7 @@ namespace CommonlyUsedClasses
             this.y = y;
         }
 
-        public Coords<T> deepCopy()
+        public virtual Coords<T> deepCopy()
         {
             return new Coords<T>(this.x, this.y);
         }
@@ -49,6 +49,58 @@ namespace CommonlyUsedClasses
         public void print(string msg)
         {
             Debug.Log(msg + x + "," + y);
+        }
+        
+    }
+
+    public class CoordsInt : Coords<int>
+    {
+        public CoordsInt(int x, int y) : base (x, y)
+        {}
+
+        public CoordsInt deepCopyInt()
+        {
+            return new CoordsInt(this.x, this.y);
+        }
+
+        public void incX(int num)
+        {
+            this.x = this.x + num;
+        }
+
+        public void incY(int num)
+        {
+            this.y = this.y + num;
+        }
+
+        public void decX(int num)
+        {
+            this.x = this.x - num;
+        }
+
+        public void decY(int num)
+        {
+            this.y = this.y - num;
+        }
+
+        public void incX()
+        {
+            incX(1);
+        }
+
+        public void incY()
+        {
+            incY(1);
+        }
+
+        public void decX()
+        {
+            decX(1);
+        }
+
+        public void decY()
+        {
+            decY(1);
         }
     }
 

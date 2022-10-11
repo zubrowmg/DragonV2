@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
+using CommonlyUsedClasses;
 
 
 namespace CommonlyUsedFunctions
@@ -24,6 +24,18 @@ namespace CommonlyUsedFunctions
             }
 
             return shuffledList;
+        }
+
+        public static float calculateCoordsDistance(Coords<int> oneCoord, Coords<int> twoCoords)
+        {
+            float xChange = calculateDifference(oneCoord.getX(), twoCoords.getX());
+            float yChange = calculateDifference(oneCoord.getY(), twoCoords.getY());
+            return Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
+        }
+
+        public static float calculateDifference(float numOne, float numTwo)
+        {
+            return (float)Mathf.Abs(numOne - numTwo);
         }
     }
 }

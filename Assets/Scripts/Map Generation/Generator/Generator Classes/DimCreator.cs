@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using CommonlyUsedFunctions;
 using CommonlyUsedClasses;
+using TileManagerClasses;
 
-public class DimCreator
+
+public abstract class DimCreator : TileAccessor
 {
     // Class is meant to be used for capturing a collection of square areas
 
@@ -12,37 +15,68 @@ public class DimCreator
     int minSideLength;
     int maxArea;
 
-    Coords<int> startCoords;
+    CoordsInt startCoords;
 
 
-    public DimCreator()
+    public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
 
     }
+    // =======================================================================================
+    //                                  Abstract Functions
+    // =======================================================================================
+
+    protected abstract bool tileCheck(CoordsInt coords);
+
+    protected bool tileIsOccupiedByRoom(CoordsInt coords)
+    {
+        bool tileContainsRoom = false;
+        bool accessSuccessful = false;
+        Tile selectedTile = getTile(coords, ref accessSuccessful);
+
+        if (accessSuccessful)
+            tileContainsRoom = selectedTile.getIsOccupiedByRoom();
+
+        return tileContainsRoom;
+    }
+
+    protected bool tileIsVein(CoordsInt coords)
+    {
+        bool tileIsVein = false;
+        bool accessSuccessful = false;
+        Tile selectedTile = getTile(coords, ref accessSuccessful);
+
+        if (accessSuccessful)
+            tileIsVein = selectedTile.getIsVein();
+
+        return tileIsVein;
+    }
+
+    protected abstract void expandAroundPoint(ref CoordsInt minCoords, ref CoordsInt maxCoords);
 
 
     // =======================================================================================
     //                                  Main Functions
     // =======================================================================================
 
-    void getDimensions(Coords<int> startCoords, ref DimensionList dimensionList)
+    void getDimensions(CoordsInt startCoords, ref DimensionList dimensionList)
     {
         bool dimensionRejected = false;
 
-        Coords<int> minCoords = startCoords.deepCopy();
-        Coords<int> maxCoords = startCoords.deepCopy();
-        Coords<int> center = startCoords.deepCopy();
+        CoordsInt minCoords = startCoords.deepCopyInt();
+        CoordsInt maxCoords = startCoords.deepCopyInt();
+        CoordsInt center = startCoords.deepCopyInt();
 
-        if (grid.GetComponent<gridManagerScript>().grid[xStart, yStart].GetComponent<gridUnitScript>().isOccupied == true)
-        {
-            // To speed up generation, if the bookmark isOccupied then return immediatly
+        // To speed up generation,
+        //      For vein dim creator this checks is the tile already has a room placed in it
+        //      For vein zone dim creator this checks if the tile is already a vein
+        if (tileCheck(startCoords) == true)
             return;
-        }
 
 
-        LinkedList<Coords<int>> coordsToCheck = new LinkedList<Coords<int>>();
-        coordsToCheck.AddFirst(startCoords.deepCopy());
-        Coords<int> currentCoords = coordsToCheck.First.Value;
+        LinkedList<CoordsInt> coordsToCheck = new LinkedList<CoordsInt>();
+        coordsToCheck.AddFirst(startCoords.deepCopyInt());
+        CoordsInt currentCoords = coordsToCheck.First.Value;
 
         while (dimensionList.area < maxArea)
         {
@@ -57,11 +91,11 @@ public class DimCreator
                 coordsToCheck.RemoveFirst();
             }
 
-            minCoords = currentCoords.deepCopy();
-            maxCoords = currentCoords.deepCopy();
-            center = currentCoords.deepCopy();
+            minCoords = currentCoords.deepCopyInt();
+            maxCoords = currentCoords.deepCopyInt();
+            center = currentCoords.deepCopyInt();
 
-            expandAroundPoint(ref xMin, ref yMin, ref xMax, ref yMax);
+            expandAroundPoint(ref minCoords, ref maxCoords);
 
             // If any of the sides a shorter than 5 then reject the square
             if (maxCoords.getX() - minCoords.getX() < minSideLength - 1 || maxCoords.getY() - minCoords.getY() < minSideLength - 1)
@@ -75,13 +109,157 @@ public class DimCreator
                 if (dimensionRejected == false)
                 {
                     // Search for more dimensions and add them to coordsToCheck
-                    findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, xStart, yStart);
+                    findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, startCoords);
                 }
             }
         }
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by only 1 unit
         dimensionList.finalCheck();
+    }
+
+    void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords)
+    {
+        int startDisplacement = 11;
+        //int wiggleDisplacement = 2; // Meant to move the displacement a little in the perpendicular directions
+
+
+        int x = 0;
+        int y = 0;
+
+        bool foundNewPoint = false;
+
+        // Four for each direction
+        for (int i = 0; i < 4; i++)
+        {
+            foundNewPoint = false;
+            int displacement = startDisplacement;
+
+            if (i == 0)
+            {
+                x = center.getX() + displacement;
+                y = center.getY();
+            }
+            else if (i == 1)
+            {
+                x = center.getX() - displacement;
+                y = center.getY();
+            }
+            else if (i == 2)
+            {
+                x = center.getX();
+                y = center.getY() + displacement;
+            }
+            else if (i == 3)
+            {
+                x = center.getX();
+                y = center.getY() - displacement;
+            }
+
+            //print("DISPLACEMENT START: " + x + "," + y);
+
+            while (!foundNewPoint)
+            {
+                //print("DISPLACEMENT: " + x + "," + y);
+                bool tooCloseToPreviouslyAttemptedSquareCore = false;
+                CoordsInt wiggledCoords = new CoordsInt(x, y);
+                foundNewPoint = checkDisplacentAndWiggle(ref tooCloseToPreviouslyAttemptedSquareCore, dimensionList, ref coordsToCheck, wiggledCoords, startCoords);
+                if (tooCloseToPreviouslyAttemptedSquareCore)
+                    break;
+
+                // If not change the displacement so that it's closer to the original point
+                if (foundNewPoint == false)
+                {
+                    displacement--;
+
+                    if (i == 0)
+                    {
+                        x = center.getX() + displacement;
+                    }
+                    else if (i == 1)
+                    {
+                        x = center.getX() - displacement;
+                    }
+                    else if (i == 2)
+                    {
+                        y = center.getY() + displacement;
+                    }
+                    else if (i == 3)
+                    {
+                        y = center.getY() - displacement;
+                    }
+
+                    if (displacement <= 6)
+                    {
+                        // Don't get too close or else it's just the same square
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt wiggledCoords, CoordsInt startCoords)
+    {
+        bool foundNewPoint = false;
+
+        // If the grid is a vein and is not occupied and the point is not already added then add the point
+        //    pointAlreadyChecked() is needed to avoid an infinite loop when 2 "gaps" between squares is deemed addable
+        //        The dimension list will reject the square gaps, but 
+        if (tileIsVein(wiggledCoords) == true &&
+            tileIsOccupiedByRoom(wiggledCoords) == false)
+        {
+            if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords) == true)
+            {
+                tooCloseToPreviouslyAttemptedSquareCore = true;
+            }
+            else
+            {
+                addCoordsToList(ref coordsToCheck, wiggledCoords, startCoords);
+                foundNewPoint = true;
+            }
+        }
+
+        return foundNewPoint;
+    }
+
+    void addCoordsToList(ref LinkedList<CoordsInt> coordsToCheck, CoordsInt wiggledCoords, CoordsInt startCoords)
+    {
+        // Need to add the coords into the list ordered by how far they are from the starting coords
+
+        float newDistance = Mathf.Sqrt(
+                                Mathf.Pow(startCoords.getX() - wiggledCoords.getX(), 2) + 
+                                Mathf.Pow(startCoords.getY() - wiggledCoords.getY(), 2));
+
+        if (coordsToCheck.Count == 0)
+            coordsToCheck.AddLast(wiggledCoords.deepCopyInt());
+        else
+        {
+            for (LinkedListNode<CoordsInt> node = coordsToCheck.First; node != null; node = node.Next)
+            {
+                float currentDistance = CommonFunctions.calculateCoordsDistance(wiggledCoords, startCoords);// Mathf.Sqrt(Mathf.Pow(xStart - node.Value.x, 2) + Mathf.Pow(yStart - node.Value.y, 2));
+
+                // If we get to the end of the list
+                if (node.Equals(coordsToCheck.Last))
+                {
+                    if (newDistance < currentDistance)
+                        coordsToCheck.AddBefore(node, wiggledCoords.deepCopyInt());
+                    else
+                        coordsToCheck.AddAfter(node, wiggledCoords.deepCopyInt());
+
+                    break;
+                }
+                // Add it to the list ordered by distance
+                else if (newDistance < currentDistance)
+                {
+                    coordsToCheck.AddBefore(node, wiggledCoords.deepCopyInt());
+
+                    break;
+                }
+            }
+        }
+
+        //coordsToCheck.AddLast(new Coords(x, y));
     }
 
     // =======================================================================================

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CommonlyUsedDefinesAndEnums;
+using CommonlyUsedFunctions;
 using CommonlyUsedClasses;
 using TileManagerClasses;
 using VeinEnums;
@@ -153,8 +154,8 @@ namespace VeinManagerClasses
 
         protected void handleMiddleVeinConnections(float currentDistance, float nextDistance)
         {
-            veinConnectionCounter = veinConnectionCounter + calculateDifference(currentDistance, nextDistance);
-            float approxDistanceLeft = calculateDifference(getDistanceGoal(), getCurrentDistance());
+            veinConnectionCounter = veinConnectionCounter + CommonFunctions.calculateDifference(currentDistance, nextDistance);
+            float approxDistanceLeft = CommonFunctions.calculateDifference(getDistanceGoal(), getCurrentDistance());
            
             // Don't place connections leading up to the end of the vein
             if (approxDistanceLeft < actualVeinConnectionDistance)
@@ -331,9 +332,7 @@ namespace VeinManagerClasses
             prevCoords = currentCoords.deepCopy();
             currentCoords = nextCoords.deepCopy();
 
-            //float xChange = calculateDifference(currentCoords.getX(), prevCoords.getX()); 
-            //float yChange = calculateDifference(currentCoords.getY(), prevCoords.getY());
-            float distanceChange = calculateCoordsDistance(currentCoords, prevCoords); // Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
+            float distanceChange = CommonFunctions.calculateCoordsDistance(currentCoords, prevCoords); // Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
             currentDistance = currentDistance + distanceChange;
 
             return currentDistance;
@@ -500,17 +499,6 @@ namespace VeinManagerClasses
 
         }
 
-        float calculateDifference(float numOne, float numTwo)
-        {
-            return (float)Mathf.Abs(numOne - numTwo);
-        }
-
-        float calculateCoordsDistance(Coords<int> oneCoord, Coords<int> twoCoords)
-        {
-            float xChange = calculateDifference(oneCoord.getX(), twoCoords.getX()); 
-            float yChange = calculateDifference(oneCoord.getY(), twoCoords.getY());
-            return Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
-        }
 
         // ===================================================================================================
         //                               Setters/Getters

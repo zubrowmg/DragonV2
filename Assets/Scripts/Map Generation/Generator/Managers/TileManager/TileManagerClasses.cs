@@ -85,13 +85,16 @@ namespace TileManagerClasses
         float tileHeight;
         float tileWidth;
 
-        // Debug and Generation
+        // Debug and Vein Generation
         bool isTouched = false;
         TileRoomType intendedRoomType = TileRoomType.None_Set; // Zone specific room, normal vein room, a vein biome room (GreatTunnel)
 
         bool isVein = false;
         bool isVeinMain = false;
         Vein associatedVein = null;
+
+        // Room Generation
+        bool isOccupiedByRoom = false;
 
         public Tile()
         {
@@ -139,6 +142,10 @@ namespace TileManagerClasses
             this.gameObjectIsInstantiated = true;
         }
 
+        // ============================================================================
+        //                               Setter/Getters
+        // ============================================================================
+
         public void setTileAsVein(Vein veinInst)
         {
             if (this.isVein == false)
@@ -180,9 +187,19 @@ namespace TileManagerClasses
             return this.isVeinMain;
         }
 
+        public bool getIsVein()
+        {
+            return this.isVein;
+        }
+
         public Coords<int> getTileMapCoords()
         {
             return this.tileMapIndex;
+        }
+
+        public bool getIsOccupiedByRoom()
+        {
+            return this.isOccupiedByRoom;
         }
     }
 }

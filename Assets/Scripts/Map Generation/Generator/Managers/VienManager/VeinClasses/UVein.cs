@@ -254,7 +254,6 @@ namespace VeinManagerClasses
             return isGreater;
         }
 
-
         bool isMovingAngleLessThanTargetAngle(float slope, VeinDirection dir, float newSlope, VeinDirection newDir)
         {
             float movingAngle = getAngleFromSlope(slope, dir);
@@ -313,7 +312,6 @@ namespace VeinManagerClasses
 
             return newAngle;
         }
-
 
         public override void triggerVeinGeneration()
         {

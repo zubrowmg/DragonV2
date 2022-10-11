@@ -407,8 +407,10 @@ namespace CommonlyUsedClasses
 
         }
 
-        public bool pointTooCloseToPreviouslyAttemptedSquareCore(int x, int y)
+        public bool pointTooCloseToPreviouslyAttemptedSquareCore(CoordsInt coords)
         {
+            int x = coords.getX();
+            int y = coords.getY();
             bool pointRejected = false;
             int displacement = 3;
 
@@ -433,8 +435,10 @@ namespace CommonlyUsedClasses
             return pointRejected;
         }
 
-        public bool pointAlreadyAdded(int x, int y)
+        public bool pointAlreadyAdded(CoordsInt coords)
         {
+            int x = coords.getX();
+            int y = coords.getY();
             bool pointUsed = false;
 
             for (int i = 0; i < squareArealist.Count; i++)
