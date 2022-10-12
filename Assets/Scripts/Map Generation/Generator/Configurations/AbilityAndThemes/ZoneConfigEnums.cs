@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace AbilityAndThemeEnums
+namespace ZoneConfigEnums
 {
     // Themes
     public enum ZoneThemes { None, Rock, Fire, Forest, Wind, Lake /* Earth */};
@@ -14,4 +14,6 @@ namespace AbilityAndThemeEnums
     // General Game stage progression
     public enum GameTiming { Early, Mid, Late, Post, Null };
 
+    // Zone Vein Generatrion
+    public enum ZoneVeinGenType { Default, LongVertical, LongHorizontal };
 }

@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    const bool generateTileGameObject = false;
-    const bool enabledGameObjectIfTouched = true;
+    bool debugMode = true;
+    bool generateTileGameObject = false;
+    bool enabledGameObjectIfTouched = true;
     GeneratorWrapper generatorManager;
 
     // Game Objects
@@ -21,7 +22,7 @@ public class Main : MonoBehaviour
         Debug.Log("Seed: " + seed);
 
         Singleton.Init();
-        generatorManager = new GeneratorWrapper(generateTileGameObject, enabledGameObjectIfTouched, tileMapGameObject, garbage);
+        generatorManager = new GeneratorWrapper(debugMode, generateTileGameObject, enabledGameObjectIfTouched, tileMapGameObject, garbage);
 
         generatorManager.startGeneration();
 

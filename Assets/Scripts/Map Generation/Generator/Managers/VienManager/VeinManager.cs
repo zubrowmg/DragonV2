@@ -7,7 +7,7 @@ using VeinEnums;
 using CommonlyUsedClasses;
 using CommonlyUsedDefinesAndEnums;
 using CommonlyUsedFunctions;
-using AbilityAndThemeEnums;
+using ZoneConfigEnums;
 
 // ==========================================================
 //              Vien Manager Accessors
@@ -33,6 +33,7 @@ public partial class VeinAccessor
 //          - If the algorithm feels that a connection needs to be made, feel free to use a normal vein
 public class VeinManager : ContainerAccessor
 {
+    bool debugMode = false;
     List<VeinBase> veinList = new List<VeinBase>();
 
     // Start vein coords
@@ -61,8 +62,10 @@ public class VeinManager : ContainerAccessor
     // Id counter
     int veinIdCounter = CommonDefines.VeinIdRange.getMin();
 
-    public VeinManager(ref GeneratorContainer contInst) : base(ref contInst)
+    public VeinManager(ref GeneratorContainer contInst, bool debugMode) : base(ref contInst)
     {
+        this.debugMode = debugMode;
+
         this.leftVeinStart = new Coords<int>(tileAccessor.getTileMapCenter().getX() - 25 + 2, tileAccessor.getTileMapCenter().getY() - 13);
         this.middleVeinStart = new Coords<int>(tileAccessor.getTileMapCenter().getX(), tileAccessor.getTileMapCenter().getY() - 19);
         this.rightVeinStart = new Coords<int>(tileAccessor.getTileMapCenter().getX() + 24 - 2, tileAccessor.getTileMapCenter().getY() - 13);
@@ -128,6 +131,9 @@ public class VeinManager : ContainerAccessor
         {
             
         }
+
+        // if (debugMode)
+        //      selectAllDimensionTiles so debug controller can show the selected area
 
         // You will want to create a DiDotGraph so that you can connect zone veins in a controlled manner
         //      Maybe start connecting veins once all zone veins are created????

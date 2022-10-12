@@ -56,6 +56,8 @@ public abstract class DimCreator : TileAccessor
         return tileIsVein;
     }
 
+    protected abstract void setDimensionVariables(int minSideLength, int maxArea);
+
     protected abstract void expandAroundPoint(ref CoordsInt minCoords, ref CoordsInt maxCoords);
 
     protected abstract bool wiggleConditions(CoordsInt wiggledCoords);

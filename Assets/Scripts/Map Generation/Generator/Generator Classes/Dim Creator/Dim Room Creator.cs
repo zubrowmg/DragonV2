@@ -9,6 +9,14 @@ public class DimRoomCreator : DimCreator
 {
     float notVeinPercentage = .50f;
 
+    // Room Creator Variables
+    int roomMinSideLength = 5;
+    int roomMaxArea = 160;
+
+    // Room Fill Creator Variables
+    int roomFillMinSideLength = 3;
+    int roomFillMaxArea = 250;
+
     public DimRoomCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.wiggleDisplacementRange = 3;
@@ -241,7 +249,7 @@ public class DimRoomCreator : DimCreator
         return isVeinAndNotARoom;
     }
 
-    void setDimensionVariables(int minSideLength, int maxArea)
+    protected override void setDimensionVariables(int minSideLength, int maxArea)
     {
         this.minSideLength = minSideLength;
         this.maxArea = maxArea;
@@ -253,15 +261,13 @@ public class DimRoomCreator : DimCreator
 
     public DimensionList getDimensionsForRoom(CoordsInt startCoords)
     {
-        //                 Side, max area
-        setDimensionVariables(5, 160);
+        setDimensionVariables(roomMinSideLength, roomMaxArea);
         return getDimensions(startCoords);
     }
 
     public DimensionList getDimensionsToFillRoomCracks(CoordsInt startCoords)
     {
-        //                 Side, max area
-        setDimensionVariables(3, 250);
+        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea);
         return getDimensions(startCoords);
     }
 

@@ -2,24 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using AbilityAndThemeEnums;
+using ZoneConfigEnums;
 using AbilityAndThemeClasses;
 
-public class ThemeAndAbilityConfig
+public class ZoneConfig
 {
-    public Themes earlyGameZoneThemes;
-    public Themes midGameZoneThemes;
-    public Themes lateGameZoneThemes;
+    // Themes
+    Themes earlyGameZoneThemes;
+    Themes midGameZoneThemes;
+    Themes lateGameZoneThemes;
 
-    public Abilities earlyGameAbilities;
-    public Abilities midGameAbilities;
-    public Abilities lateGameAbilities;
+    // Abilities
+    Abilities earlyGameAbilities;
+    Abilities midGameAbilities;
+    Abilities lateGameAbilities;
 
-    public int currentZoneId;
+    // Dictionary for zone vein creation type
+
+    // Id count
+    int currentZoneId;
 
     public List<LinkedZonesAndAbilities> linkedZoneThemesAndAbilities;
 
-    public ThemeAndAbilityConfig()
+    public ZoneConfig()
     {
         this.earlyGameZoneThemes = new Themes(GameTiming.Early);
         this.midGameZoneThemes = new Themes(GameTiming.Mid);
@@ -74,7 +79,8 @@ public class ThemeAndAbilityConfig
                 //    break;
         }
 
-        Zone_New newZone = new Zone_New(currentZoneId, randomAbility, randomTheme);
+        ZoneVeinGenType zoneVeinGenType = getZoneVeinGenType(timing, randomTheme);
+        Zone_New newZone = new Zone_New(timing, currentZoneId, randomAbility, randomTheme, zoneVeinGenType);
 
         currentZoneId++;
 
@@ -112,6 +118,19 @@ public class ThemeAndAbilityConfig
 
     //    return ability;
     //}
+
+    ZoneVeinGenType getZoneVeinGenType(GameTiming timing, ZoneThemes theme)
+    {
+        ZoneVeinGenType genType = ZoneVeinGenType.Default;
+
+        if (timing == GameTiming.Early)
+        {
+            // All early themes are defualt for now
+            genType = ZoneVeinGenType.Default;
+        }
+
+        return genType;
+    }
 
     public void getStartingZone(ref ZoneThemes randomTheme, ref ZoneAbilities randomAbility)
     {

@@ -12,7 +12,7 @@ public class GeneratorContainer
     public GameObject garbage;
     public StartConfig startConfig;
 
-    public ThemeAndAbilityConfig themeAndAbilityConfig;
+    public ZoneConfig zoneConfigurator;
     public ZoneContainer zoneContainer;
 
     public GeneratorContainer(GameObject tileMapGameObject, GameObject garbage)
@@ -21,7 +21,7 @@ public class GeneratorContainer
         this.garbage = garbage;
         this.startConfig = new StartConfig();
 
-        this.themeAndAbilityConfig = new ThemeAndAbilityConfig();
+        this.zoneConfigurator = new ZoneConfig();
     }
 
 }

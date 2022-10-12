@@ -13,11 +13,11 @@ public partial class GeneratorWrapper
     // Contains any classes that map generator managers will need to share, don't abuse this by placing everything and anything in here
     GeneratorContainer commonContainer;
 
-    public GeneratorWrapper(bool generateGridManagerTile, bool enabledGameObjectIfTouched, GameObject tileMapGameObject, GameObject garbage)
+    public GeneratorWrapper(bool debugMode, bool generateGridManagerTile, bool enabledGameObjectIfTouched, GameObject tileMapGameObject, GameObject garbage)
     {
         commonContainer = new GeneratorContainer(tileMapGameObject, garbage);
         tileManager = new TileManager(generateGridManagerTile, enabledGameObjectIfTouched, ref commonContainer);
-        veinManager = new VeinManager(ref commonContainer);
+        veinManager = new VeinManager(ref commonContainer, debugMode);
     }
     ~GeneratorWrapper() { }
 
