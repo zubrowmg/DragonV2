@@ -192,9 +192,17 @@ public class DimVeinZoneCreator : DimCreator
     //                                  Start Functions
     // =======================================================================================
 
-    public DimensionList getDimensionsForVeinZone(CoordsInt startCoords)
+    public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode)
     {
         setDimensionVariables(roomFillMinSideLength, roomFillMaxArea);
-        return getDimensions(startCoords);
+
+        DimensionList newDimList = getDimensions(startCoords);
+        newDimList.printGrid();
+        startCoords.print("");
+
+        if (debugMode)
+            markSelectedGridForDebug(newDimList);
+
+        return newDimList;
     }
 }

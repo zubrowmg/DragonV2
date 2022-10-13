@@ -30,15 +30,21 @@ public partial class GeneratorWrapper
     }
 
     // Debug Controller Functions
-    public TileManager getTileManager()
+    public ref TileManager getTileManager()
     {
-        return tileManager;
+        return ref this.tileManager;
     }
 
     public VeinManager getVeinManager()
     {
-        return veinManager;
+        return this.veinManager;
     }
+
+    public ZoneContainer getZoneContainer()
+    {
+        return this.commonContainer.zoneContainer;
+    }
+
 }
 
 

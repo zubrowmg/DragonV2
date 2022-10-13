@@ -77,7 +77,7 @@ namespace TileManagerClasses
         bool enabledGameObjectIfTouched;
 
         // Coords
-        Coords<int> tileMapIndex;
+        CoordsInt tileMapIndex;
         Coords<float> worldCoords;
 
         // Properties
@@ -112,7 +112,7 @@ namespace TileManagerClasses
         }
 
         public Tile(bool gameObjectTilesAreOn, bool enabledGameObjectIfTouched, GameObject tile, float height, float width, 
-                    Coords<float> worldCoords, Coords<int> tileMapCoords, ref GameObject tileMapGameObject)
+                    Coords<float> worldCoords, CoordsInt tileMapCoords, ref GameObject tileMapGameObject)
         {
             this.gameObjectTilesAreOn = gameObjectTilesAreOn;
             this.tileMapGameObject = tileMapGameObject;
@@ -192,7 +192,7 @@ namespace TileManagerClasses
             return this.isVein;
         }
 
-        public Coords<int> getTileMapCoords()
+        public CoordsInt getTileMapCoords()
         {
             return this.tileMapIndex;
         }

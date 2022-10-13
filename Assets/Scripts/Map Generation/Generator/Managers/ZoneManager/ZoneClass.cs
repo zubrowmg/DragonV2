@@ -6,6 +6,8 @@ using CommonlyUsedDefinesAndEnums;
 using ZoneConfigEnums;
 using AbilityAndThemeClasses;
 
+using CommonlyUsedClasses;
+
 public class Zone_New
 {
     // Zone properties
@@ -16,6 +18,7 @@ public class Zone_New
     // Zone Vein Generation Properties
     GameTiming gameTiming = GameTiming.Early;
     ZoneVeinGenType zoneVeinGenType = ZoneVeinGenType.Default;
+    DimensionList associatedVeinZoneDim = new DimensionList();
 
 
     // Zones are created during vein zone generation
@@ -28,5 +31,22 @@ public class Zone_New
         this.zoneVeinGenType = zoneVeinGenType;
     }
 
+    public Zone_New deepCopy()
+    {
+        return new Zone_New(this.gameTiming, this.id, this.zoneAbility, this.zoneTheme, this.zoneVeinGenType);
+    }
 
+
+    // ==============================================================
+    //                       Setters/Getters
+    // ==============================================================
+    public void setVeinZoneDimList(ref DimensionList dimList)
+    {
+        this.associatedVeinZoneDim = dimList;
+    }
+
+    public ref DimensionList getVeinZoneDimList()
+    {
+        return ref this.associatedVeinZoneDim;
+    }
 }

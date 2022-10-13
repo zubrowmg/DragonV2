@@ -4,17 +4,23 @@ using UnityEngine;
 
 using VeinManagerClasses;
 using TileManagerClasses;
+using CommonlyUsedClasses;
 
 public class DebugControllerManager : MonoBehaviour
 {
     GeneratorWrapper generatorInst;
 
+    TileManager tileManagerRef;
+
     // Colors
     Color purple      = new Color(.29f, .025f, .76f, .5f);
     Color orange      = new Color(1f, .5f, .0f, .85f);
     Color red         = new Color(.9725f, 0f, .0412f, .76f);
+
     Color green       = new Color(.085f, .85f, .12f, .88f);
+    Color lightGreen  = new Color(.3176f, .8113f, .376f, .78f);
     Color darkGreen   = new Color(.07f, .51f, .07f, .50f);
+
     Color blue        = new Color(0f, .56f, .87f, 1f);
     Color white       = new Color(1f, 1f, 1f, 1f);
     Color black       = new Color(0f, 0f, 0f, 1f);
@@ -24,6 +30,27 @@ public class DebugControllerManager : MonoBehaviour
     public void init(ref GeneratorWrapper generatorInst)
     {
         this.generatorInst = generatorInst;
+
+        zoneListCount = generatorInst.getZoneContainer().getZoneListCount();
+        tileManagerRef = generatorInst.getTileManager();
+
+        selectedZone = generatorInst.getZoneContainer().getZone(0);
+        prevZone = generatorInst.getZoneContainer().getZone(zoneListCount - 1);
+    }
+
+
+    int zoneIndex = 0;
+    int zoneListCount;
+    Zone_New selectedZone;
+    Zone_New prevZone;
+    void getNextZone()
+    {
+        prevZone = selectedZone.deepCopy();
+        selectedZone = generatorInst.getZoneContainer().getZone(zoneIndex);
+
+        zoneIndex++;
+        if (zoneIndex >= zoneListCount)
+            zoneIndex = 0;
     }
 
     // ==============================================================================================
@@ -79,6 +106,41 @@ public class DebugControllerManager : MonoBehaviour
                     changeTileColor(ref tileRef, tileDefault);
             }
         }
+    }
+
+    public void changeDimGridColor(ref Zone_New zone, Color color)
+    {
+        DimensionList zoneDimList = zone.getVeinZoneDimList();
+        List<List<int>> grid;
+        Coords<int> startCoords;
+        zoneDimList.getGrid(out grid, out startCoords);
+
+        for (int x = 0; x < grid.Count; x++)
+        {
+            for (int y = 0; y < grid[0].Count; y++)
+            {
+                if (grid[x][y] == 1)
+                {
+                    bool accessSuccesful = false;
+                    Coords<int> tileCoords = new Coords<int>(x + startCoords.getX(), y + startCoords.getY());
+                    Tile currentTile = tileManagerRef.tileAccessor.getTile(tileCoords, ref accessSuccesful);
+
+                    if (accessSuccesful == true)
+                        changeTileColor(ref currentTile, tileDefault);
+                }
+            }
+        }
+    }
+
+    public void selectVeinZoneDim()
+    {
+        // Clear previous zone vein dim
+        changeDimGridColor(ref prevZone, tileDefault);
+
+        // Highlight next grid
+        changeDimGridColor(ref selectedZone, lightGreen);
+
+        getNextZone();
     }
 
     public void clearGrid()

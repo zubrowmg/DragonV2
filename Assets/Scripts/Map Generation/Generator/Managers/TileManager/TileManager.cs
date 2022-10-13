@@ -86,7 +86,7 @@ public partial class TileManager : ContainerAccessor
                 Coords<float> newWorldCoords = 
                     new Coords<float> (((tileMapStartCoords.getX() + x) * tileWidth) + (tileWidth / 2),
                                        ((tileMapStartCoords.getY() + y) * tileHeight) + (tileHeight / 2));
-                Coords<int> newTileMapCoords = new Coords<int>(x, y);
+                CoordsInt newTileMapCoords = new CoordsInt(x, y);
 
                 Tile newTile = new Tile();
                 GameObject tileManagerGameObject = tileAccessor.getTileManagerGameObject();

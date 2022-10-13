@@ -22,6 +22,7 @@ public class GeneratorContainer
         this.startConfig = new StartConfig();
 
         this.zoneConfigurator = new ZoneConfig();
+        this.zoneContainer = new ZoneContainer();
     }
 
 }

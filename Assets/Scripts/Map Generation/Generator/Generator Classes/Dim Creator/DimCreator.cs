@@ -106,7 +106,7 @@ public abstract class DimCreator : TileAccessor
 
             expandAroundPoint(ref minCoords, ref maxCoords);
 
-            // If any of the sides a shorter than 5 then reject the square
+            // If any of the sides a shorter than min length then reject the square
             if (maxCoords.getX() - minCoords.getX() < minSideLength - 1 || maxCoords.getY() - minCoords.getY() < minSideLength - 1)
             {
                 // Don't add anything
@@ -123,7 +123,7 @@ public abstract class DimCreator : TileAccessor
             }
         }
 
-        // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by only 1 unit
+        // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
         dimensionList.finalCheck();
 
         return dimensionList;
@@ -164,8 +164,6 @@ public abstract class DimCreator : TileAccessor
                 x = center.getX();
                 y = center.getY() - displacement;
             }
-
-            //print("DISPLACEMENT START: " + x + "," + y);
 
             while (!foundNewPoint)
             {
@@ -268,6 +266,29 @@ public abstract class DimCreator : TileAccessor
         }
 
         //coordsToCheck.AddLast(new Coords(x, y));
+    }
+
+    protected void markSelectedGridForDebug(DimensionList dimList)
+    {
+        List<List<int>> grid;
+        Coords<int> startCoords;
+        dimList.getGrid(out grid, out startCoords);
+
+        for (int x = 0; x < grid.Count; x++)
+        {
+            for (int y = 0; y < grid[0].Count; y++)
+            {
+                bool accessSuccesful = false;
+                Coords<int> tileCoords = new Coords<int>(x + startCoords.getX(), y + startCoords.getY());
+                Tile currentTile = getTile(tileCoords, ref accessSuccesful);
+
+                if (accessSuccesful == true)
+                {
+                    GameObject tileManagerGameObject = getTileManagerGameObject();
+                    currentTile.instantiateTileGameObject(tileManagerGameObject);
+                }
+            }
+        }
     }
 
     // =======================================================================================

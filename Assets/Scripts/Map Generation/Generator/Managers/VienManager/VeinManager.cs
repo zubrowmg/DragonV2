@@ -36,6 +36,12 @@ public class VeinManager : ContainerAccessor
     bool debugMode = false;
     List<VeinBase> veinList = new List<VeinBase>();
 
+    // Zone Vein Creator
+    DimVeinZoneCreator dimVeinZoneCreator;
+
+    // Zone Vein Generation
+    ZoneVeinGenerator zoneVeinGenerator;
+
     // Start vein coords
     Coords<int> leftVeinStart;
     Coords<int> rightVeinStart;
@@ -56,8 +62,7 @@ public class VeinManager : ContainerAccessor
     int yAxisTwoFourth;
     int yAxisThreeFourth;
 
-    // Zone Vein Generation
-    ZoneVeinGenerator zoneVeinGenerator;
+
 
     // Id counter
     int veinIdCounter = CommonDefines.VeinIdRange.getMin();
@@ -85,6 +90,7 @@ public class VeinManager : ContainerAccessor
         this.yAxisThreeFourth = 3 * tileAccessor.getTileMapDims().getMaxY() / 4;
 
         this.zoneVeinGenerator = new ZoneVeinGenerator(ref contInst);
+        this.dimVeinZoneCreator = new DimVeinZoneCreator(ref contInst);
     }
 
     // ============================================================================
@@ -129,24 +135,22 @@ public class VeinManager : ContainerAccessor
         farVeinConnectionList = CommonFunctions.Shuffle(ref farVeinConnectionList);
         foreach (var connection in farVeinConnectionList)
         {
-            
+            // Create a new zone. Theme and ability included, since zone generation will rely on these parameters
+            Zone_New newZone = createNewZoneAndAddToContainer(GameTiming.Early);
+
+            // Figure out the allocated dimensions, should be skewed down and away from the center
+            CoordsInt connCoords = connection.getAssociatedTile().getTileMapCoords();
+            dimVeinZoneCreator.getDimensionsForVeinZone(connCoords, debugMode);
+
+            // zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
+
         }
 
-        // if (debugMode)
-        //      selectAllDimensionTiles so debug controller can show the selected area
+
 
         // You will want to create a DiDotGraph so that you can connect zone veins in a controlled manner
         //      Maybe start connecting veins once all zone veins are created????
 
-
-        /*
-        // Go through each starting zone start connect point:
-        //      1. Figure out the allocated dimensions, should be skewed down and away from the center
-        //      2. Grab the zones theme and ability, since zone generation will rely on these parameters
-        //          Zone_New newZone = createNewZone(GameTiming.Early);
-        //      3. zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
-
-        */
     }
 
     void createUniqueAreaVeins()

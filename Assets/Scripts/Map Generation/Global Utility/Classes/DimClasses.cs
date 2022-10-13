@@ -453,5 +453,10 @@ namespace CommonlyUsedClasses
             return pointUsed;
         }
 
+        public void getGrid(out List<List<int>> grid, out Coords<int> startCoords)
+        {
+            grid = this.grid;
+            startCoords = this.minCoords;
+        }
     }
 }
