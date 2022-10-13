@@ -112,7 +112,7 @@ public class VeinManager : ContainerAccessor
     void createSendOffRoomVeins()
     {
         Queue<Vein> veinQueue = new Queue<Vein>();
-        List<VeinConnection> farVeinConnectionList = new List<VeinConnection>();
+        List<Double<Vein, VeinConnection>> farVeinConnectionList = new List<Double<Vein, VeinConnection>>();
 
         // Create Vein with basic settings
         veinQueue.Enqueue(configSendOffVeinProps(Direction.West)); // Left vein
@@ -127,7 +127,9 @@ public class VeinManager : ContainerAccessor
         foreach (var vein in veinQueue)
         {
             vein.triggerVeinGeneration();
-            farVeinConnectionList.Add(vein.getFurthestVeinConnectorFromStart());
+
+            Double<Vein, VeinConnection> veinConnEntry = new Double<Vein, VeinConnection>(vein, vein.getFurthestVeinConnectorFromStart());
+            farVeinConnectionList.Add(veinConnEntry);
             veinList.Add(vein);
         }
 
@@ -139,8 +141,21 @@ public class VeinManager : ContainerAccessor
             Zone_New newZone = createNewZoneAndAddToContainer(GameTiming.Early);
 
             // Figure out the allocated dimensions, should be skewed down and away from the center
-            CoordsInt connCoords = connection.getAssociatedTile().getTileMapCoords();
-            dimVeinZoneCreator.getDimensionsForVeinZone(connCoords, debugMode);
+            CoordsInt connCoords = connection.getTwo().getAssociatedTile().getTileMapCoords();
+
+
+
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+            CoordsInt adjustedStartCoords = calculateZoneVeinStartCoords(connection.getOne().getGeneralVeinDirection(), connCoords);
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+            dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode);
 
             // zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
 
@@ -153,6 +168,28 @@ public class VeinManager : ContainerAccessor
 
     }
 
+    CoordsInt calculateZoneVeinStartCoords(Direction veinDirection, CoordsInt originalStartCoords)
+    {
+        int x = originalStartCoords.getX();
+        int y = originalStartCoords.getY();
+
+        if (veinDirection == Direction.West)
+            x = x - 2;
+        else if (veinDirection == Direction.East)
+            x = x + 2;
+
+        // Change above to search for non vein tile that would work
+
+        // tileMap.checkHowDeep()
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!
+        y = y - 2;
+
+        CoordsInt adjustedStartCoords = new CoordsInt(x, y);
+        return adjustedStartCoords;
+    }
+
     void createUniqueAreaVeins()
     {
         // Percent chance to create niche areas:
@@ -161,6 +198,7 @@ public class VeinManager : ContainerAccessor
         //      Meant to be a small mini area, with more focus on connecting the map and fleshing out the world
         //      Can add mini bosses
     }
+
 
     // ============================================================================
     //                           Helper Functions

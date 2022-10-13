@@ -9,8 +9,10 @@ public class DimVeinZoneCreator : DimCreator
 {
 
     // Defualt Vein Zone Creator Variables
-    int roomFillMinSideLength = 15;
-    int roomFillMaxArea = 350;
+    int squareAreaFillMinSideLength = 15;
+    float squareAreaMaxArea = 120;
+
+    int veinZoneMaxArea = 350;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     { }
@@ -39,6 +41,8 @@ public class DimVeinZoneCreator : DimCreator
         int yMinLockedTimer = 0; int yMaxLockedTimer = 0;
         int xMinUnlockCount = 0; int xMaxUnlockCount = 0;
         int yMinUnlockCount = 0; int yMaxUnlockCount = 0;
+
+        Debug.Log("MAX AREA: " + maxSqaureAreaArea);
 
         while (area < maxSqaureAreaArea)
         {
@@ -182,9 +186,10 @@ public class DimVeinZoneCreator : DimCreator
         return isNotVein;
     }
 
-    protected override void setDimensionVariables(int minSideLength, int maxArea)
+    protected override void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea)
     {
         this.minSideLength = minSideLength;
+        this.maxSqaureAreaArea = individualMaxSquareArea;
         this.maxArea = maxArea;
     }
 
@@ -194,7 +199,7 @@ public class DimVeinZoneCreator : DimCreator
 
     public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode)
     {
-        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea);
+        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea);
 
         DimensionList newDimList = getDimensions(startCoords);
         newDimList.printGrid();

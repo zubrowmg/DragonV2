@@ -16,7 +16,7 @@ namespace VeinManagerClasses
         public string name = "TEST____0";
 
         // Direction
-        protected Direction generalVeinDirection; // Not really used in calculations, only to help for debug
+        protected Direction generalVeinDirection;
         protected VeinDirection intendedVeinDirection = VeinDirection.None_Set;
         protected Coords<int> endCoords;
 
@@ -577,6 +577,9 @@ namespace VeinManagerClasses
             this.veinType = type;
         }
 
-        
+        public Direction getGeneralVeinDirection()
+        {
+            return this.generalVeinDirection;
+        }
     }
 }

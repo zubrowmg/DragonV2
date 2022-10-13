@@ -292,4 +292,48 @@ namespace CommonlyUsedClasses
             return this.min;
         }
     }
+
+    public class Double<T1, T2>
+    {
+        protected T1 one;
+        protected T2 two;
+
+        public Double(T1 one, T2 two)
+        {
+            this.one = one;
+            this.two = two;
+        }
+
+        public Double<T1, T2> deepCopy()
+        {
+            return new Double<T1, T2>(this.one, this.two);
+        }
+
+        public T1 getOne()
+        {
+            return this.one;
+        }
+
+        public T2 getTwo()
+        {
+            return this.two;
+        }
+
+    }
+
+    public class Triple<T1, T2, T3> : Double<T1, T2>
+    {
+        protected T3 three;
+
+        public Triple(T1 one, T2 two, T3 three) : base (one, two)
+        {
+            this.one = one;
+            this.two = two;
+        }
+
+        public T3 getThree()
+        {
+            return this.three;
+        }
+    }
 }
