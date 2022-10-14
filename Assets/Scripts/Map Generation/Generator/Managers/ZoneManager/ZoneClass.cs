@@ -49,4 +49,9 @@ public class Zone_New
     {
         return ref this.associatedVeinZoneDim;
     }
+
+    public int getId()
+    {
+        return this.id;
+    }
 }

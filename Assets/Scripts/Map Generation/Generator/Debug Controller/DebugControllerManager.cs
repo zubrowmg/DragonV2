@@ -18,7 +18,7 @@ public class DebugControllerManager : MonoBehaviour
     Color red         = new Color(.9725f, 0f, .0412f, .76f);
 
     Color green       = new Color(.085f, .85f, .12f, .88f);
-    Color lightGreen  = new Color(.3176f, .8113f, .376f, .78f);
+    Color lightGreen  = new Color(.575f, .8773f, .6497f, .78f);
     Color darkGreen   = new Color(.07f, .51f, .07f, .50f);
 
     Color blue        = new Color(0f, .56f, .87f, 1f);
@@ -115,6 +115,9 @@ public class DebugControllerManager : MonoBehaviour
         Coords<int> startCoords;
         zoneDimList.getGrid(out grid, out startCoords);
 
+        Debug.Log(zone.getId());
+        zoneDimList.printMinMax();
+
         for (int x = 0; x < grid.Count; x++)
         {
             for (int y = 0; y < grid[0].Count; y++)
@@ -126,7 +129,7 @@ public class DebugControllerManager : MonoBehaviour
                     Tile currentTile = tileManagerRef.tileAccessor.getTile(tileCoords, ref accessSuccesful);
 
                     if (accessSuccesful == true)
-                        changeTileColor(ref currentTile, tileDefault);
+                        changeTileColor(ref currentTile, color);
                 }
             }
         }

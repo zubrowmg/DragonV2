@@ -9,10 +9,10 @@ public class DimVeinZoneCreator : DimCreator
 {
 
     // Defualt Vein Zone Creator Variables
-    int squareAreaFillMinSideLength = 15;
-    float squareAreaMaxArea = 120;
+    int squareAreaFillMinSideLength = 10;
+    float squareAreaMaxArea = 150;
 
-    int veinZoneMaxArea = 350;
+    int veinZoneMaxArea = 500;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     { }
@@ -36,13 +36,13 @@ public class DimVeinZoneCreator : DimCreator
         // Every so often try to unlock the locked boundries
         //   Helps in very odd cases, where the start point is close to non veins
         int unlockTime = 3;
-        int unlockMax = 2;
+        int unlockMax = 0;
         int xMinLockedTimer = 0; int xMaxLockedTimer = 0;
         int yMinLockedTimer = 0; int yMaxLockedTimer = 0;
         int xMinUnlockCount = 0; int xMaxUnlockCount = 0;
         int yMinUnlockCount = 0; int yMaxUnlockCount = 0;
 
-        Debug.Log("MAX AREA: " + maxSqaureAreaArea);
+        //Debug.Log("MAX AREA: " + maxSqaureAreaArea);
 
         while (area < maxSqaureAreaArea)
         {
@@ -117,6 +117,7 @@ public class DimVeinZoneCreator : DimCreator
                     {
                         yMaxLocked = true;
                         maxCoords.decY();
+
                         //break;
                     }
                 }
@@ -159,6 +160,7 @@ public class DimVeinZoneCreator : DimCreator
                     {
                         xMinLocked = true;
                         minCoords.incX();
+
                     }
                 }
 
@@ -171,12 +173,14 @@ public class DimVeinZoneCreator : DimCreator
                     {
                         xMaxLocked = true;
                         maxCoords.decX();
+
                     }
                 }
             }
 
             area = ((Mathf.Abs(maxCoords.getX() - minCoords.getX()) + 1) * (Mathf.Abs(maxCoords.getY() - minCoords.getY()) + 1));
         }
+
     }
 
     protected override bool wiggleConditions(CoordsInt wiggledCoords)
@@ -202,8 +206,6 @@ public class DimVeinZoneCreator : DimCreator
         setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea);
 
         DimensionList newDimList = getDimensions(startCoords);
-        newDimList.printGrid();
-        startCoords.print("");
 
         if (debugMode)
             markSelectedGridForDebug(newDimList);

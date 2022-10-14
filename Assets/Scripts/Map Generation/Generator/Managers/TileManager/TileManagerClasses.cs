@@ -111,7 +111,7 @@ namespace TileManagerClasses
             this.name = "NULL";
         }
 
-        public Tile(bool gameObjectTilesAreOn, bool enabledGameObjectIfTouched, GameObject tile, float height, float width, 
+        public Tile(bool gameObjectTilesAreOn, bool enabledGameObjectIfTouched, float height, float width, 
                     Coords<float> worldCoords, CoordsInt tileMapCoords, ref GameObject tileMapGameObject)
         {
             this.gameObjectTilesAreOn = gameObjectTilesAreOn;
@@ -129,13 +129,15 @@ namespace TileManagerClasses
             // If gameobject tils are on, then we need to set additional gameobject setting
             if (gameObjectTilesAreOn == true)
             {
-                instantiateTileGameObject(tile);
+                instantiateTileGameObject();
             }
         }
 
-        public void instantiateTileGameObject(GameObject tile)
+        public void instantiateTileGameObject()
         {
-            this.gameObject = tile;
+            GameObject newTileGameObj = Singleton.instantiateTile();
+
+            this.gameObject = newTileGameObj;
             this.gameObject.transform.position = new Vector3(worldCoords.getX(), worldCoords.getY(), 0);
             this.gameObject.transform.SetParent(tileMapGameObject.transform);
             this.gameObject.name = this.name;
@@ -157,7 +159,7 @@ namespace TileManagerClasses
 
                 if (gameObjectTilesAreOn == false)
                 {
-                    instantiateTileGameObject(Singleton.instantiateTile());
+                    instantiateTileGameObject();
                 }
             }
         }

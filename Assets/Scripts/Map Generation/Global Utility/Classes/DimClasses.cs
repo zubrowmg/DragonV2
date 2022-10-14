@@ -291,6 +291,12 @@ namespace CommonlyUsedClasses
             }
         }
 
+        public void printMinMax()
+        {
+            minCoords.print("DIM MIN: ");
+            maxCoords.print("DIM MAX: ");
+        }
+
         private bool checkForGaps(SquareArea newArea)
         {
             bool gapsExist = true;

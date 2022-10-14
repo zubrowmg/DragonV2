@@ -88,19 +88,10 @@ public partial class TileManager : ContainerAccessor
                                        ((tileMapStartCoords.getY() + y) * tileHeight) + (tileHeight / 2));
                 CoordsInt newTileMapCoords = new CoordsInt(x, y);
 
-                Tile newTile = new Tile();
-                GameObject tileManagerGameObject = tileAccessor.getTileManagerGameObject();
                 // Create tile
-                if (generateTileGameObjects == true)
-                {
-                    newTile = new Tile(generateTileGameObjects, enabledGameObjectIfTouched, Singleton.instantiateTile(), tileHeight, tileWidth,
+                GameObject tileManagerGameObject = tileAccessor.getTileManagerGameObject();
+                Tile newTile = new Tile(generateTileGameObjects, enabledGameObjectIfTouched, tileHeight, tileWidth,
                                         newWorldCoords, newTileMapCoords, ref tileManagerGameObject);
-                }
-                else
-                {
-                    newTile = new Tile(generateTileGameObjects, enabledGameObjectIfTouched, null, tileHeight, tileWidth,
-                                        newWorldCoords, newTileMapCoords, ref tileManagerGameObject);
-                }
 
                 tileAccessor.addTileToTileMap(newTileMapCoords, newTile);
             }

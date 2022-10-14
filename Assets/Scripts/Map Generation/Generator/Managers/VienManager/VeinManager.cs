@@ -155,8 +155,8 @@ public class VeinManager : ContainerAccessor
 
 
 
-            dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode);
-
+            DimensionList newZoneDimList = dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode);
+            newZone.setVeinZoneDimList(ref newZoneDimList);
             // zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
 
         }

@@ -87,11 +87,9 @@ public abstract class DimCreator : TileAccessor
         coordsToCheck.AddFirst(startCoords.deepCopyInt());
         CoordsInt currentCoords = coordsToCheck.First.Value;
 
-        startCoords.print("START COORDS: ");
 
         while (dimensionList.area < maxArea)
         {
-            Debug.Log("TEST___0");
 
             if (coordsToCheck.Count == 0)
             {
@@ -107,15 +105,11 @@ public abstract class DimCreator : TileAccessor
             maxCoords = currentCoords.deepCopyInt();
             center = currentCoords.deepCopyInt();
 
-            Debug.Log("TEST___1");
             expandAroundPoint(ref minCoords, ref maxCoords);
-            minCoords.print("MIN: ");
-            minCoords.print("MAX: ");
 
             // If any of the sides a shorter than min length then reject the square
             if (maxCoords.getX() - minCoords.getX() < minSideLength - 1 || maxCoords.getY() - minCoords.getY() < minSideLength - 1)
             {
-                Debug.Log("TEST___2");
                 // Don't add anything
             }
             else
@@ -124,8 +118,6 @@ public abstract class DimCreator : TileAccessor
 
                 if (dimensionRejected == false)
                 {
-                    Debug.Log("TEST___3");
-
                     // Search for more dimensions and add them to coordsToCheck
                     findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, startCoords);
                 }
@@ -293,8 +285,7 @@ public abstract class DimCreator : TileAccessor
 
                 if (accessSuccesful == true)
                 {
-                    GameObject tileManagerGameObject = getTileManagerGameObject();
-                    currentTile.instantiateTileGameObject(tileManagerGameObject);
+                    currentTile.instantiateTileGameObject();
                 }
             }
         }
