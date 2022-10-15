@@ -9,13 +9,16 @@ public class DimVeinZoneCreator : DimCreator
 {
 
     // Defualt Vein Zone Creator Variables
-    int squareAreaFillMinSideLength = 10;
-    float squareAreaMaxArea = 150;
+    int squareAreaFillMinSideLength = 6;
+    float squareAreaMaxArea = 75;
 
-    int veinZoneMaxArea = 500;
+    int veinZoneMaxArea = 200;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
-    { }
+    {
+        this.wiggleDisplacementRange = 1;
+        this.maxAdjacentSearchDisplacement = squareAreaFillMinSideLength + 6;
+    }
 
     protected override bool tileCheck(CoordsInt coords)
     {

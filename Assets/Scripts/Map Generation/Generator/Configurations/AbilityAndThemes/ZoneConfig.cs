@@ -4,6 +4,8 @@ using UnityEngine;
 
 using ZoneConfigEnums;
 using AbilityAndThemeClasses;
+using CommonlyUsedDefinesAndEnums;
+
 
 public class ZoneConfig
 {
@@ -34,7 +36,7 @@ public class ZoneConfig
         this.midGameAbilities = new Abilities(GameTiming.Mid);
         this.lateGameAbilities = new Abilities(GameTiming.Late);
 
-        this.currentZoneId = 0;
+        this.currentZoneId = CommonDefines.getZoneIdMinRange();
 
         this.linkedZoneThemesAndAbilities = new List<LinkedZonesAndAbilities>
         {

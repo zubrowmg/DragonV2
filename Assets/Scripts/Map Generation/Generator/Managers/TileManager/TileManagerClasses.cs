@@ -17,12 +17,26 @@ namespace TileManagerClasses
         Tile selectedTile = null;
 
         // Properties
-        public Coords<int> minDim = new Coords<int>(0, 0);
-        public Coords<int> maxDim = new Coords<int>(147 * 2 * 2, 72 * 2 * 2);
+        Coords<int> minDim = new Coords<int>(0, 0);
+        Coords<int> maxDim = new Coords<int>(147 * 2 * 2, 72 * 2 * 2);
 
-        public Dimensions tileMapDimensions;
+        Dimensions tileMapDimensions;
 
-        public Coords<int> tileMapCenter;
+        Coords<int> tileMapCenter;
+
+        // Depth Markers
+        int yAbove;
+        int yLevel;
+        int yShallow;
+        int yDeep;
+        int yVeryDeep;
+
+        // Horizontal Displacement Markers
+        int xFarLeft;
+        int xLeft;
+        int xRight;
+        int xFarRight;
+
 
         public TileMap(GameObject tileMapGameObject)
         {
@@ -31,6 +45,19 @@ namespace TileManagerClasses
             this.tileMapDimensions = new Dimensions(minDim, maxDim);
             this.tileMapCenter = new Coords<int>(tileMapDimensions.getMaxX()/2, 
                                                 (tileMapDimensions.getMaxY()/2) + 50);
+
+            // Depth Markers
+            int yCenterToBottom = tileMapCenter.getY() - minDim.getY();
+            this.yAbove      = tileMapCenter.getY() + 20;
+            this.yShallow    = tileMapCenter.getY() - (tileMapCenter.getY() / 4);
+            this.yDeep       = tileMapCenter.getY() - ((tileMapCenter.getY() * 2) / 4);
+            this.yVeryDeep = tileMapCenter.getY() - ((tileMapCenter.getY() * 3) / 4);
+
+            // Horizontal Displacement Markers
+            this.xFarLeft = tileMapCenter.getX() - (tileMapCenter.getX() / 2);
+            this.xLeft = tileMapCenter.getX() - 30;
+            this.xRight = tileMapCenter.getX() - 30;
+            this.xFarRight = tileMapCenter.getX() + (tileMapCenter.getX() / 2);
         }
 
         public void addTile(Coords<int> index, Tile item)
@@ -38,15 +65,69 @@ namespace TileManagerClasses
             tileMap.addElement(index, item);
         }
 
-        public ref GameObject getTileMapGameObject()
-        {
-            return ref tileMapGameObject;
-        }
-
         public void countTileDims()
         {
             Debug.Log("TileMap X Count: " + tileMap.getXCount() + 
                     "\n        Y Count: " + tileMap.getYCount());
+        }
+
+
+
+        // ======================================================================
+        //                          Getters/Setters
+        // ======================================================================
+
+        public Depth getTileDepth(CoordsInt coords)
+        {
+            Depth depth = Depth.Level;
+
+            // Above
+            if (yAbove <= coords.getY())
+                depth = Depth.Above;
+            // Level
+            else if (yShallow <= coords.getY() && coords.getY() < yAbove)
+                depth = Depth.Level;
+            // Deep
+            else if (yDeep <= coords.getY() && coords.getY() < yShallow)
+                depth = Depth.Deep;
+            // Really Deep
+            else if (coords.getY() < yDeep)
+                depth = Depth.Very_Deep;
+
+            return depth;
+        }
+
+        public HorizontalDisplacement getTileHorizontalDisplacement(CoordsInt coords)
+        {
+            HorizontalDisplacement xDisplacement = HorizontalDisplacement.Center;
+
+            // Far Right
+            if (xFarRight <= coords.getX())
+                xDisplacement = HorizontalDisplacement.Far_Right;
+            // Right
+            else if (xRight <= coords.getX() && coords.getX() < xFarRight)
+                xDisplacement = HorizontalDisplacement.Right;
+            // Center
+            else if (xLeft <= coords.getX() && coords.getX() < xRight)
+                xDisplacement = HorizontalDisplacement.Center;
+            // Left
+            else if (xFarLeft <= coords.getX() && coords.getX() < xLeft)
+                xDisplacement = HorizontalDisplacement.Left;
+            // Far Left
+            else if (coords.getX() < xFarLeft)
+                xDisplacement = HorizontalDisplacement.Far_Left;
+
+            return xDisplacement;
+        }
+
+        public Dimensions getTileMapDims()
+        {
+            return this.tileMapDimensions;
+        }
+
+        public Coords<int> getTileMapCenter()
+        {
+            return this.tileMapCenter;
         }
 
         public ref Tile getTile(Coords<int> coords, ref bool accessSuccessful)
@@ -65,6 +146,12 @@ namespace TileManagerClasses
 
             return ref selectedTile;
         }
+
+        public ref GameObject getTileMapGameObject()
+        {
+            return ref tileMapGameObject;
+        }
+
     }
 
     public class Tile

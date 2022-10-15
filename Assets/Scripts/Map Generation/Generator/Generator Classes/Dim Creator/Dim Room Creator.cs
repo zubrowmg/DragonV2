@@ -22,7 +22,6 @@ public class DimRoomCreator : DimCreator
     public DimRoomCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.wiggleDisplacementRange = 3;
-        this.maxSqaureAreaArea = 120f;
         this.maxAdjacentSearchDisplacement = 11;
     }
 

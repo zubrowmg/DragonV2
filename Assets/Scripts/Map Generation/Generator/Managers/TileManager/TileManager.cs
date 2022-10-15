@@ -4,7 +4,7 @@ using UnityEngine;
 
 using CommonlyUsedClasses;
 using TileManagerClasses;
-
+using CommonlyUsedDefinesAndEnums;
 
 // ==========================================================
 //              Tile Manager Accessors
@@ -35,17 +35,27 @@ public class TileAccessor
 
     public Dimensions getTileMapDims()
     {
-        return contInst.tileMap.tileMapDimensions;
+        return contInst.tileMap.getTileMapDims();
     }
 
     public Coords<int> getTileMapCenter()
     {
-        return contInst.tileMap.tileMapCenter;
+        return contInst.tileMap.getTileMapCenter();
     }
 
     public ref Tile getTile(Coords<int> coords, ref bool accessSuccessful)
     {
         return ref contInst.tileMap.getTile(coords, ref accessSuccessful);
+    }
+
+    public Depth getTileDepth(CoordsInt coords)
+    {
+        return contInst.tileMap.getTileDepth(coords);
+    }
+
+    public HorizontalDisplacement getTileHorizontalDisplacement(CoordsInt coords)
+    {
+        return contInst.tileMap.getTileHorizontalDisplacement(coords);
     }
 }
 

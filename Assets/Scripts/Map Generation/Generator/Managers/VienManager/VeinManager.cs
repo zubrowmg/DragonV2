@@ -65,7 +65,7 @@ public class VeinManager : ContainerAccessor
 
 
     // Id counter
-    int veinIdCounter = CommonDefines.VeinIdRange.getMin();
+    int veinIdCounter = CommonDefines.getVeinIdMinRange();
 
     public VeinManager(ref GeneratorContainer contInst, bool debugMode) : base(ref contInst)
     {
@@ -154,7 +154,7 @@ public class VeinManager : ContainerAccessor
             // !!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-
+            ZoneDirectionBias zoneGenerationDirection = calculateZoneGenerationDir(adjustedStartCoords);
             DimensionList newZoneDimList = dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode);
             newZone.setVeinZoneDimList(ref newZoneDimList);
             // zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
@@ -188,6 +188,38 @@ public class VeinManager : ContainerAccessor
 
         CoordsInt adjustedStartCoords = new CoordsInt(x, y);
         return adjustedStartCoords;
+    }
+
+    // The general direction needs to be defined, else each zone will be a boring square
+    ZoneDirectionBias calculateZoneGenerationDir(CoordsInt coords)
+    {
+        Depth coordDepth = tileAccessor.getTileDepth(coords);
+        HorizontalDisplacement coordHorDisplacement = tileAccessor.getTileHorizontalDisplacement(coords);
+
+        Direction yDir = Direction.None;
+        Direction xDir = Direction.None;
+
+        if (coordDepth == Depth.Level)
+        {
+            yDir = Direction.South;
+
+            if (coordHorDisplacement == HorizontalDisplacement.Center)
+                xDir = Direction.None;
+            else if (coordHorDisplacement == HorizontalDisplacement.Left)
+                xDir = Direction.West;
+            else if (coordHorDisplacement == HorizontalDisplacement.Right)
+                xDir = Direction.East;
+            else if (coordHorDisplacement == HorizontalDisplacement.Far_Left)
+                xDir = Direction.None;
+            else if (coordHorDisplacement == HorizontalDisplacement.Far_Right)
+                xDir = Direction.None;
+        }
+        else
+        {
+            Debug.LogError("Vein Manager - calculateZoneGenerationDir() - ZONE GENERATION DIR HAS NOT BEEN DEFINED FOR: " + coordDepth);
+        }
+
+        return new ZoneDirectionBias(xDir, yDir);
     }
 
     void createUniqueAreaVeins()
