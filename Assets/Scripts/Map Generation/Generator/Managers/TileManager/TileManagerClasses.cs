@@ -18,7 +18,7 @@ namespace TileManagerClasses
 
         // Properties
         Coords<int> minDim = new Coords<int>(0, 0);
-        Coords<int> maxDim = new Coords<int>(147 * 2 * 2, 72 * 2 * 2);
+        Coords<int> maxDim = new Coords<int>(147 * 2 * 2 * 2, 72 * 2 * 2 * 2);
 
         Dimensions tileMapDimensions;
 
@@ -49,14 +49,14 @@ namespace TileManagerClasses
             // Depth Markers
             int yCenterToBottom = tileMapCenter.getY() - minDim.getY();
             this.yAbove      = tileMapCenter.getY() + 20;
-            this.yShallow    = tileMapCenter.getY() - (tileMapCenter.getY() / 4);
-            this.yDeep       = tileMapCenter.getY() - ((tileMapCenter.getY() * 2) / 4);
-            this.yVeryDeep = tileMapCenter.getY() - ((tileMapCenter.getY() * 3) / 4);
+            this.yShallow    = tileMapCenter.getY() - (yCenterToBottom / 4);
+            this.yDeep       = tileMapCenter.getY() - ((yCenterToBottom * 2) / 4);
+            this.yVeryDeep   = tileMapCenter.getY() - ((yCenterToBottom * 3) / 4);
 
             // Horizontal Displacement Markers
             this.xFarLeft = tileMapCenter.getX() - (tileMapCenter.getX() / 2);
             this.xLeft = tileMapCenter.getX() - 30;
-            this.xRight = tileMapCenter.getX() - 30;
+            this.xRight = tileMapCenter.getX() + 30;
             this.xFarRight = tileMapCenter.getX() + (tileMapCenter.getX() / 2);
         }
 
