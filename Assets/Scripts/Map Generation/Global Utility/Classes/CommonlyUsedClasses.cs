@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using CommonlyUsedDefinesAndEnums;
+
 namespace CommonlyUsedClasses
 {
     public class Coords<T>
@@ -334,6 +336,39 @@ namespace CommonlyUsedClasses
         public T3 getThree()
         {
             return this.three;
+        }
+    }
+
+    public class DirectionBias
+    {
+        Direction horizontalDir;
+        Direction verticalDir;
+
+        public DirectionBias(Direction horizontalDir, Direction verticalDir)
+        {
+            if (horizontalDir == Direction.South || horizontalDir == Direction.North)
+                Debug.LogError("DirectionBias - Attempted to set horizontal bias to either North or South");
+            if (verticalDir == Direction.East || verticalDir == Direction.West)
+                Debug.LogError("DirectionBias - Attempted to set vertical bias to either East or West");
+
+            this.horizontalDir = horizontalDir;
+            this.verticalDir = verticalDir;
+        }
+
+        public Direction getHorizontalDir()
+        {
+            return this.horizontalDir;
+        }
+
+        public Direction getVerticalDir()
+        {
+            return this.verticalDir;
+        }
+
+        public void print()
+        {
+            Debug.Log("Horizontal: " + this.horizontalDir +
+                   "\nVertical: " + this.verticalDir);
         }
     }
 }

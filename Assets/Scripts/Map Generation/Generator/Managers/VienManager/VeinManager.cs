@@ -146,9 +146,9 @@ public class VeinManager : ContainerAccessor
 
             // Adjust the start coords slightly so that that a non vein Tile is selected
             CoordsInt adjustedStartCoords = calculateZoneVeinStartCoords(connection.getOne().getGeneralVeinDirection(), connCoords);
-            ZoneDirectionBias zoneGenerationDirection = calculateZoneGenerationDir(adjustedStartCoords);
+            DirectionBias zoneGenerationDirection = calculateZoneGenerationDir(adjustedStartCoords);
 
-            DimensionList newZoneDimList = dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode);
+            DimensionList newZoneDimList = dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode, zoneGenerationDirection);
 
             newZone.setVeinZoneDimList(ref newZoneDimList);
             // zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
@@ -179,7 +179,7 @@ public class VeinManager : ContainerAccessor
     }
 
     // The general direction needs to be defined, else each zone will be a boring square
-    ZoneDirectionBias calculateZoneGenerationDir(CoordsInt coords)
+    DirectionBias calculateZoneGenerationDir(CoordsInt coords)
     {
         Depth coordDepth = tileAccessor.getTileDepth(coords);
         HorizontalDisplacement coordHorDisplacement = tileAccessor.getTileHorizontalDisplacement(coords);
@@ -207,7 +207,7 @@ public class VeinManager : ContainerAccessor
             Debug.LogError("Vein Manager - calculateZoneGenerationDir() - ZONE GENERATION DIR HAS NOT BEEN DEFINED FOR: " + coordDepth);
         }
 
-        return new ZoneDirectionBias(xDir, yDir);
+        return new DirectionBias(xDir, yDir);
     }
 
     void createUniqueAreaVeins()

@@ -4,6 +4,7 @@ using UnityEngine;
 
 using TileManagerClasses;
 using CommonlyUsedClasses;
+using CommonlyUsedDefinesAndEnums;
 
 public class DimRoomCreator : DimCreator
 {
@@ -250,12 +251,7 @@ public class DimRoomCreator : DimCreator
         return isVeinAndNotARoom;
     }
 
-    protected override void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea)
-    {
-        this.minSideLength = minSideLength;
-        this.maxSqaureAreaArea = individualMaxSquareArea;
-        this.maxArea = maxArea;
-    }
+    
 
     // =======================================================================================
     //                                  Start Functions
@@ -263,13 +259,17 @@ public class DimRoomCreator : DimCreator
 
     public DimensionList getDimensionsForRoom(CoordsInt startCoords)
     {
-        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea);
+        DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
+
+        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias);
         return getDimensions(startCoords);
     }
 
     public DimensionList getDimensionsToFillRoomCracks(CoordsInt startCoords)
     {
-        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea);
+        DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
+
+        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias);
         return getDimensions(startCoords);
     }
 

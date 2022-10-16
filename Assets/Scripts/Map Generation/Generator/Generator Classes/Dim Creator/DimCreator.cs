@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using System; // For using Enum (capital E)
 using CommonlyUsedFunctions;
 using CommonlyUsedClasses;
 using TileManagerClasses;
-
+using CommonlyUsedDefinesAndEnums;
 
 public abstract class DimCreator : TileAccessor
 {
@@ -22,6 +23,10 @@ public abstract class DimCreator : TileAccessor
 
     // Wiggle Conditions
     protected int wiggleDisplacementRange;
+
+
+    // Dim Direction Bias
+    protected DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
@@ -57,11 +62,13 @@ public abstract class DimCreator : TileAccessor
         return tileIsVein;
     }
 
-    protected abstract void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea);
+
+   
 
     protected abstract void expandAroundPoint(ref CoordsInt minCoords, ref CoordsInt maxCoords);
 
     protected abstract bool wiggleConditions(CoordsInt wiggledCoords);
+
 
     // =======================================================================================
     //                                  Main Functions
@@ -143,31 +150,40 @@ public abstract class DimCreator : TileAccessor
         bool foundNewPoint = false;
 
         // Four for each direction
-        for (int i = 0; i < 4; i++)
+
+        foreach (Direction dir in Enum.GetValues(typeof(Direction)))
         {
             foundNewPoint = false;
             int displacement = startDisplacement;
 
-            if (i == 0)
-            {
-                x = center.getX() + displacement;
-                y = center.getY();
-            }
-            else if (i == 1)
-            {
-                x = center.getX() - displacement;
-                y = center.getY();
-            }
-            else if (i == 2)
+
+            if (dir == Direction.North)
             {
                 x = center.getX();
                 y = center.getY() + displacement;
             }
-            else if (i == 3)
+            else if (dir == Direction.East)
+            {
+                x = center.getX() + displacement;
+                y = center.getY();
+            }
+            else if (dir == Direction.South)
             {
                 x = center.getX();
                 y = center.getY() - displacement;
             }
+            else if (dir == Direction.West)
+            {
+                x = center.getX() - displacement;
+                y = center.getY();
+            }
+            else
+                continue;
+
+            // Control the direction based on the Direction Bias passed in
+            if (directionCheck(startCoords, dir) == false)
+                continue;
+
 
             while (!foundNewPoint)
             {
@@ -183,19 +199,19 @@ public abstract class DimCreator : TileAccessor
                 {
                     displacement--;
 
-                    if (i == 0)
+                    if (dir == Direction.East)
                     {
                         x = center.getX() + displacement;
                     }
-                    else if (i == 1)
+                    else if (dir == Direction.West)
                     {
                         x = center.getX() - displacement;
                     }
-                    else if (i == 2)
+                    else if (dir == Direction.North)
                     {
                         y = center.getY() + displacement;
                     }
-                    else if (i == 3)
+                    else if (dir == Direction.South)
                     {
                         y = center.getY() - displacement;
                     }
@@ -209,6 +225,33 @@ public abstract class DimCreator : TileAccessor
             }
         }
     }
+
+    bool directionCheck(CoordsInt startCoords, Direction attemptedDir)
+    {
+        bool allowDirectionExpansion = false;
+
+        if ((directionBias.getHorizontalDir() == Direction.None && attemptedDir == Direction.East) ||
+            (directionBias.getHorizontalDir() == Direction.None && attemptedDir == Direction.West))
+        {
+            allowDirectionExpansion = true;
+        }
+
+        else if ((directionBias.getVerticalDir() == Direction.None && attemptedDir == Direction.North) ||
+                 (directionBias.getVerticalDir() == Direction.None && attemptedDir == Direction.South))
+        {
+            allowDirectionExpansion = true;
+
+        }
+
+        else if (attemptedDir == directionBias.getHorizontalDir() || 
+            attemptedDir == directionBias.getVerticalDir())
+        {
+            allowDirectionExpansion = true;
+        }
+
+        return allowDirectionExpansion;
+    }
+
 
     bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt wiggledCoords, CoordsInt startCoords)
     {
@@ -298,4 +341,11 @@ public abstract class DimCreator : TileAccessor
     //                                  Setters/Getters
     // =======================================================================================
 
+    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias)
+    {
+        this.minSideLength = minSideLength;
+        this.maxSqaureAreaArea = individualMaxSquareArea;
+        this.maxArea = maxArea;
+        this.directionBias = directionBias;
+    }
 }

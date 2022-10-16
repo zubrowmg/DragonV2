@@ -12,7 +12,7 @@ public class DimVeinZoneCreator : DimCreator
     int squareAreaFillMinSideLength = 6;
     float squareAreaMaxArea = 75;
 
-    int veinZoneMaxArea = 1200;
+    int veinZoneMaxArea = 2000;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
@@ -193,20 +193,15 @@ public class DimVeinZoneCreator : DimCreator
         return isNotVein;
     }
 
-    protected override void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea)
-    {
-        this.minSideLength = minSideLength;
-        this.maxSqaureAreaArea = individualMaxSquareArea;
-        this.maxArea = maxArea;
-    }
-
     // =======================================================================================
     //                                  Start Functions
     // =======================================================================================
 
-    public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode)
+    public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode, DirectionBias directionBias)
     {
-        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea);
+        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias);
+
+        directionBias.print();
 
         DimensionList newDimList = getDimensions(startCoords);
 
