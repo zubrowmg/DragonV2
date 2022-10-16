@@ -171,22 +171,31 @@ namespace CommonlyUsedClasses
             int minTouchingWidth = 2;
             bool dimensionListRejected = false;
 
+            if (squareArealist.Count == 1)
+                return;
+
             // Checks all square areas to see if any are touching by a single unit, if they are then delete everything
             foreach (SquareArea square in squareArealist)
             {
+
+
                 int yMaxCount = 0;
                 int yMinCount = 0;
                 int xMaxCount = 0;
                 int xMinCount = 0;
 
-                int yMaxCheck = square.yMax() - maxCoords.getY() + 1;
+                int yMaxCheck = square.yMax() - minCoords.getY() + 1;
                 int yMinCheck = square.yMin() - minCoords.getY() - 1;
-                int xMinCheck = square.xMin() - maxCoords.getX() - 1;
+                int xMinCheck = square.xMin() - minCoords.getX() - 1;
                 int xMaxCheck = square.xMax() - minCoords.getX() + 1;
+
+             
+                
 
                 // Check top perimeter
                 if (yMaxCheck < grid[0].Count)
                 {
+                    Debug.Log((square.xMin() - minCoords.getX() + ", " + (square.xMax() - minCoords.getX()) ));
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
                         // Top
@@ -200,7 +209,7 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMaxCount && yMaxCount < minTouchingWidth)
                     {
-                        Debug.Log("Rejected top perimeter");
+                        Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
                         dimensionListRejected = true;
                         break;
                     }

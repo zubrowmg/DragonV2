@@ -16,8 +16,8 @@ public class DimVeinZoneCreator : DimCreator
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
-        this.wiggleDisplacementRange = 1;
-        this.maxAdjacentSearchDisplacement = squareAreaFillMinSideLength + 6;
+        this.wiggleDisplacementRange = 0;
+        this.maxAdjacentSearchDisplacement = squareAreaFillMinSideLength + 3;
     }
 
     protected override bool tileCheck(CoordsInt coords)

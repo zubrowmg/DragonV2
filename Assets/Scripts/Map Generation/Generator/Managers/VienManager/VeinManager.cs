@@ -144,18 +144,12 @@ public class VeinManager : ContainerAccessor
             CoordsInt connCoords = connection.getTwo().getAssociatedTile().getTileMapCoords();
 
 
-
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!
+            // Adjust the start coords slightly so that that a non vein Tile is selected
             CoordsInt adjustedStartCoords = calculateZoneVeinStartCoords(connection.getOne().getGeneralVeinDirection(), connCoords);
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
             ZoneDirectionBias zoneGenerationDirection = calculateZoneGenerationDir(adjustedStartCoords);
+
             DimensionList newZoneDimList = dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode);
+
             newZone.setVeinZoneDimList(ref newZoneDimList);
             // zoneVeinGenerator.generateZoneVein(newZone, startCoords, Dims);
 
@@ -178,12 +172,6 @@ public class VeinManager : ContainerAccessor
         else if (veinDirection == Direction.East)
             x = x + 2;
 
-        // Change above to search for non vein tile that would work
-
-        // tileMap.checkHowDeep()
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!
         y = y - 2;
 
         CoordsInt adjustedStartCoords = new CoordsInt(x, y);

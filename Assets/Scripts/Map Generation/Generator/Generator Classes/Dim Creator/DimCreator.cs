@@ -17,6 +17,7 @@ public abstract class DimCreator : TileAccessor
     protected int maxArea;
 
     // Adjacent coords search variables
+    //      Don't make this too large, will lead to spread apart square areas and barely touching square areas
     protected int maxAdjacentSearchDisplacement;
 
     // Wiggle Conditions
@@ -120,11 +121,13 @@ public abstract class DimCreator : TileAccessor
                 {
                     // Search for more dimensions and add them to coordsToCheck
                     findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, startCoords);
+
                 }
             }
         }
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
+
         dimensionList.finalCheck();
 
         return dimensionList;
