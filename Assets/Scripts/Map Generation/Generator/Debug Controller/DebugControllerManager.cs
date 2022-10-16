@@ -58,6 +58,7 @@ public class DebugControllerManager : MonoBehaviour
     // ==============================================================================================
     bool toggleVeins = false;
     bool toggleVeinConnections = false;
+    bool toggleVeinZone = false;
 
     public void selectVeins()
     {
@@ -137,13 +138,20 @@ public class DebugControllerManager : MonoBehaviour
 
     public void selectVeinZoneDim()
     {
-        // Clear previous zone vein dim
-        changeDimGridColor(ref prevZone, tileDefault);
+        toggleVeinZone = !toggleVeinZone;
 
-        // Highlight next grid
-        changeDimGridColor(ref selectedZone, lightGreen);
+        for (int i = 0; i < zoneListCount; i++)
+        {
+            Zone_New currentZone = generatorInst.getZoneContainer().getZone(i);
 
-        getNextZone();
+            // Highlight next grid
+            if (toggleVeinZone == true)
+                changeDimGridColor(ref currentZone, lightGreen);
+            // Clear previous zone vein dim
+            else
+                changeDimGridColor(ref currentZone, tileDefault);
+
+        }
     }
 
     public void clearGrid()
