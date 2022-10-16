@@ -222,6 +222,10 @@ namespace TileManagerClasses
 
         public void instantiateTileGameObject()
         {
+            // If a gameobject instance exists then don't create another one
+            if (this.gameObject != null)
+                return;
+
             GameObject newTileGameObj = Singleton.instantiateTile();
 
             this.gameObject = newTileGameObj;

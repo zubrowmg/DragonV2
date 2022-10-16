@@ -168,16 +168,19 @@ namespace CommonlyUsedClasses
         //      Checks if there is a body of sqaure areas that are connected by a 2 wide Tile. This is not good enough to be considered "touching"
         public void finalCheck()
         {
-            int minTouchingWidth = 2;
+            int minTouchingWidth = 2; // I do not recommend changing this
             bool dimensionListRejected = false;
 
             if (squareArealist.Count == 1)
                 return;
 
+            //Debug.Log("=========================================================");
+
+
             // Checks all square areas to see if any are touching by a single unit, if they are then delete everything
             foreach (SquareArea square in squareArealist)
             {
-
+                CoordsInt tempCoord = new CoordsInt(0, 0);
 
                 int yMaxCount = 0;
                 int yMinCount = 0;
@@ -189,19 +192,16 @@ namespace CommonlyUsedClasses
                 int xMinCheck = square.xMin() - minCoords.getX() - 1;
                 int xMaxCheck = square.xMax() - minCoords.getX() + 1;
 
-             
-                
-
                 // Check top perimeter
                 if (yMaxCheck < grid[0].Count)
                 {
-                    Debug.Log((square.xMin() - minCoords.getX() + ", " + (square.xMax() - minCoords.getX()) ));
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
                         // Top
                         if (grid[x][yMaxCheck] == 1)
                         {
                             yMaxCount++;
+                            tempCoord = new CoordsInt(x, yMaxCheck);
 
                             if (yMaxCount >= minTouchingWidth)
                                 break;
@@ -209,9 +209,35 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMaxCount && yMaxCount < minTouchingWidth)
                     {
-                        Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
-                        dimensionListRejected = true;
-                        break;
+                        if (0 < yMinCount && yMinCount < minTouchingWidth)
+                        {
+                            // Check top right corner, spaces represent square areas
+                            //      01 11
+                            //
+                            //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                            //      11 11
+
+                            if (grid[tempCoord.getX() + 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() - 1] == 1)
+                            {
+                                // Nothing
+                            }
+                            // Check top left corner, spaces represent square areas
+                            //      11 10
+                            //
+                            //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                            //      11 11
+
+                            else if (grid[tempCoord.getX() - 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() - 1][tempCoord.getY() - 1] == 1)
+                            {
+                                // Nothing
+                            }
+                            else
+                            {
+                                Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
+                                dimensionListRejected = true;
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -223,6 +249,7 @@ namespace CommonlyUsedClasses
                         if (grid[x][yMinCheck] == 1)
                         {
                             yMinCount++;
+                            tempCoord = new CoordsInt(x, yMinCheck);
 
                             if (yMinCount >= minTouchingWidth)
                                 break;
@@ -230,9 +257,30 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMinCount && yMinCount < minTouchingWidth)
                     {
-                        Debug.Log("Rejected bottom perimeter");
-                        dimensionListRejected = true;
-                        break;
+                        // Check bottom right corner, spaces represent square areas
+                        //      11 11
+                        //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                        //      
+                        //      01 11
+                        if (grid[tempCoord.getX() + 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() + 1] == 1)
+                        {
+                            // Nothing
+                        }
+                        // Check bottom left corner, spaces represent square areas
+                        //      11 11
+                        //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                        //      
+                        //      11 10
+                        else if (grid[tempCoord.getX() - 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() - 1][tempCoord.getY() + 1] == 1)
+                        {
+                            // Nothing
+                        }
+                        else
+                        {
+                            Debug.Log("Rejected bottom perimeter");
+                            dimensionListRejected = true;
+                            break;
+                        }
                     }
                 }
 
@@ -244,6 +292,9 @@ namespace CommonlyUsedClasses
                         if (grid[xMaxCheck][y] == 1)
                         {
                             xMaxCount++;
+                            tempCoord = new CoordsInt(xMaxCheck, y);
+
+                            //Debug.Log(xMaxCheck + ", " + y);
 
                             if (xMaxCount >= minTouchingWidth)
                                 break;
@@ -251,9 +302,31 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < xMaxCount && xMaxCount < minTouchingWidth)
                     {
-                        Debug.Log("Rejected right perimeter");
-                        dimensionListRejected = true;
-                        break;
+                        // Check bottom right corner, spaces represent square areas
+                        //      11 00
+                        //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                        //      
+                        //      11 11
+                        if (grid[tempCoord.getX() - 1][tempCoord.getY() - 1] == 1 && grid[tempCoord.getX()][tempCoord.getY() - 1] == 1)
+                        {
+                            // Nothing
+                        }
+                        // Check top right corner, spaces represent square areas
+                        //      11 11     
+                        //
+                        //      11 11       Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                        //      11 00
+
+                        else if (grid[tempCoord.getX() - 1][tempCoord.getY() + 1] == 1 && grid[tempCoord.getX()][tempCoord.getY() + 1] == 1)
+                        {
+                            // Nothing
+                        }
+                        else
+                        {
+                            Debug.Log("Rejected right perimeter");
+                            dimensionListRejected = true;
+                            break;
+                        }
                     }
                 }
 
@@ -265,6 +338,7 @@ namespace CommonlyUsedClasses
                         if (grid[xMinCheck][y] == 1)
                         {
                             xMinCount++;
+                            tempCoord = new CoordsInt(xMinCheck, y);
 
                             if (xMinCount >= minTouchingWidth)
                                 break;
@@ -272,9 +346,30 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < xMinCount && xMinCount < minTouchingWidth)
                     {
-                        Debug.Log("Rejected left perimeter");
-                        dimensionListRejected = true;
-                        break;
+                        // Check bottom left corner, spaces represent square areas
+                        //      00 11
+                        //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                        //      
+                        //      11 11
+                        if (grid[tempCoord.getX()][tempCoord.getY() - 1] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() - 1] == 1)
+                        {
+                            // Nothing
+                        }
+                        // Check top left corner, spaces represent square areas
+                        //      11 11
+                        //
+                        //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+                        //      00 11
+                        else if (grid[tempCoord.getX()][tempCoord.getY() + 1] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() + 1] == 1)
+                        {
+                            // Nothing
+                        }
+                        else
+                        {
+                            Debug.Log("Rejected left perimeter");
+                            dimensionListRejected = true;
+                            break;
+                        }
                     }
                 }
 

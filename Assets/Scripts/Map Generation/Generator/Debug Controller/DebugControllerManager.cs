@@ -115,8 +115,8 @@ public class DebugControllerManager : MonoBehaviour
         Coords<int> startCoords;
         zoneDimList.getGrid(out grid, out startCoords);
 
-        Debug.Log(zone.getId());
-        zoneDimList.printMinMax();
+        //Debug.Log(zone.getId());
+        //zoneDimList.printMinMax();
 
         for (int x = 0; x < grid.Count; x++)
         {
