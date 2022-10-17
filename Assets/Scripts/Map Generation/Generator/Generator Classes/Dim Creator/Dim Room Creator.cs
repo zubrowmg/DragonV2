@@ -20,6 +20,9 @@ public class DimRoomCreator : DimCreator
     int roomFillMinSideLength = 3;
     int roomFillMaxArea = 250;
 
+    bool topOffDimList = false;
+
+
     public DimRoomCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.wiggleDisplacementRange = 3;
@@ -261,7 +264,7 @@ public class DimRoomCreator : DimCreator
     {
         DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
-        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias);
+        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
         return getDimensions(startCoords);
     }
 
@@ -269,7 +272,7 @@ public class DimRoomCreator : DimCreator
     {
         DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
-        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias);
+        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
         return getDimensions(startCoords);
     }
 

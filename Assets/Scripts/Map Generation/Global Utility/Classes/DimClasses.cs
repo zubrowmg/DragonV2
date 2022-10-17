@@ -57,6 +57,11 @@ namespace CommonlyUsedClasses
         {
             return this.startCoords.getY();
         }
+
+        public Coords<int> getStartCoords()
+        {
+            return this.startCoords;
+        }
     }
 
 
@@ -129,10 +134,14 @@ namespace CommonlyUsedClasses
             Coords<int> prevMin = minCoords.deepCopy();
             Coords<int> prevMax = maxCoords.deepCopy();
 
-            if (newArea.xMin() < minCoords.getX()) minCoords.setX(newArea.xMin());
-            if (newArea.yMin() < minCoords.getY()) minCoords.setY(newArea.yMin());
-            if (newArea.xMax() > maxCoords.getX()) maxCoords.setX(newArea.xMax());
-            if (newArea.yMax() > maxCoords.getY()) maxCoords.setY(newArea.yMax());
+            if (newArea.xMin() < minCoords.getX())
+                minCoords.setX(newArea.xMin());
+            if (newArea.yMin() < minCoords.getY())
+                minCoords.setY(newArea.yMin());
+            if (newArea.xMax() > maxCoords.getX())
+                maxCoords.setX(newArea.xMax());
+            if (newArea.yMax() > maxCoords.getY())
+                maxCoords.setY(newArea.yMax());
 
             squareArealist.Add(newArea);
             listHistory.Add(newArea);
@@ -162,6 +171,26 @@ namespace CommonlyUsedClasses
             }
 
             return isIsolated;
+        }
+
+        public bool addDimensionWithOutExpandingDims(SquareArea newArea)
+        {
+            Coords<int> newMin = new Coords<int>(newArea.xMin(), newArea.yMin());
+            Coords<int> newMax = new Coords<int>(newArea.xMax(), newArea.yMax());
+
+            if (newArea.xMin() < minCoords.getX())
+                newMin.setX(minCoords.getX());
+            if (newArea.yMin() < minCoords.getY())
+                newMin.setY(minCoords.getY());
+
+            if (newArea.xMax() > maxCoords.getX())
+                newMax.setX(maxCoords.getX());
+            if (newArea.yMax() > maxCoords.getY())
+                newMax.setY(maxCoords.getY());
+
+            SquareArea trimmedSquareArea = new SquareArea(newMin, newMax, newArea.getStartCoords());
+
+            return addDimension(trimmedSquareArea);
         }
 
         // THIS FUNCTION IS NEEDED
@@ -567,6 +596,19 @@ namespace CommonlyUsedClasses
         {
             grid = this.grid;
             startCoords = this.minCoords;
+        }
+
+        public bool startCoordsAreOutsideOfCurrentDimList(Coords<int> startCoords)
+        {
+            bool startCoordAreOutside = false;
+
+            if (minCoords.getX() > startCoords.getX() || startCoords.getX() > maxCoords.getX())
+                startCoordAreOutside = true;
+
+            if (minCoords.getY() > startCoords.getY() || startCoords.getY() > maxCoords.getY())
+                startCoordAreOutside = true;
+
+            return startCoordAreOutside;
         }
     }
 }

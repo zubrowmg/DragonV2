@@ -12,6 +12,10 @@ public abstract class DimCreator : TileAccessor
 {
     // Class is meant to be used for capturing a collection of square areas
 
+    // Top off dim list is a way to fill in the rest of the dim list, without further expanding the dim list
+    //      Pretty much only used for zone vein generation
+    bool topOffDimList = false;
+
     // Square Area control variables
     protected float maxSqaureAreaArea;
     protected int minSideLength;
@@ -62,9 +66,6 @@ public abstract class DimCreator : TileAccessor
         return tileIsVein;
     }
 
-
-   
-
     protected abstract void expandAroundPoint(ref CoordsInt minCoords, ref CoordsInt maxCoords);
 
     protected abstract bool wiggleConditions(CoordsInt wiggledCoords);
@@ -96,8 +97,12 @@ public abstract class DimCreator : TileAccessor
         CoordsInt currentCoords = coordsToCheck.First.Value;
 
 
-        while (dimensionList.area < maxArea)
+        bool done = false;
+        bool getDimsToTopOffDimList = false;
+
+        while (done == false)
         {
+            
 
             if (coordsToCheck.Count == 0)
             {
@@ -122,25 +127,41 @@ public abstract class DimCreator : TileAccessor
             }
             else
             {
-                dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
+                if (getDimsToTopOffDimList == false)
+                    dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
+                else
+                    //dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
+                    dimensionRejected = dimensionList.addDimensionWithOutExpandingDims(new SquareArea(minCoords, maxCoords, center));
+
 
                 if (dimensionRejected == false)
                 {
                     // Search for more dimensions and add them to coordsToCheck
-                    findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, startCoords);
+                    findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, startCoords, getDimsToTopOffDimList);
 
                 }
+            }
+
+            // Break out conditions
+            if (dimensionList.area >= maxArea)
+            {
+                if (this.topOffDimList == true)
+                {
+                    getDimsToTopOffDimList = true;
+                }
+                else
+                    done = true;
             }
         }
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
-
         dimensionList.finalCheck();
 
         return dimensionList;
     }
 
-    void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords)
+
+    void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords, bool getDimsToTopOffDimList)
     {
         int startDisplacement = this.maxAdjacentSearchDisplacement;
 
@@ -189,10 +210,14 @@ public abstract class DimCreator : TileAccessor
             {
                 //print("DISPLACEMENT: " + x + "," + y);
                 bool tooCloseToPreviouslyAttemptedSquareCore = false;
+
                 CoordsInt wiggledCoords = new CoordsInt(x, y);
-                foundNewPoint = checkDisplacentAndWiggle(ref tooCloseToPreviouslyAttemptedSquareCore, dimensionList, ref coordsToCheck, wiggledCoords, startCoords);
+                foundNewPoint = checkDisplacentAndWiggle(ref tooCloseToPreviouslyAttemptedSquareCore, 
+                                    dimensionList, ref coordsToCheck, wiggledCoords, startCoords, getDimsToTopOffDimList);
                 if (tooCloseToPreviouslyAttemptedSquareCore)
                     break;
+
+                
 
                 // If not change the displacement so that it's closer to the original point
                 if (foundNewPoint == false)
@@ -253,7 +278,8 @@ public abstract class DimCreator : TileAccessor
     }
 
 
-    bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt wiggledCoords, CoordsInt startCoords)
+    bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, ref LinkedList<CoordsInt> coordsToCheck, 
+                        CoordsInt wiggledCoords, CoordsInt startCoords, bool getDimsToTopOffDimList)
     {
         bool foundNewPoint = false;
 
@@ -268,8 +294,17 @@ public abstract class DimCreator : TileAccessor
             }
             else
             {
-                addCoordsToList(ref coordsToCheck, wiggledCoords, startCoords);
-                foundNewPoint = true;
+                if (getDimsToTopOffDimList == true &&
+                     dimensionList.startCoordsAreOutsideOfCurrentDimList(wiggledCoords) == true)
+                {
+                    //startCoordsAreOutsideOfCurrentDimList = true;
+                    // Don't add the coords as a point of interest
+                }
+                else
+                {
+                    addCoordsToList(ref coordsToCheck, wiggledCoords, startCoords);
+                    foundNewPoint = true;
+                }
             }
         }
 
@@ -341,11 +376,13 @@ public abstract class DimCreator : TileAccessor
     //                                  Setters/Getters
     // =======================================================================================
 
-    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias)
+    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias, bool topOffDimList)
     {
         this.minSideLength = minSideLength;
         this.maxSqaureAreaArea = individualMaxSquareArea;
         this.maxArea = maxArea;
         this.directionBias = directionBias;
+
+        this.topOffDimList = topOffDimList;
     }
 }

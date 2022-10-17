@@ -13,6 +13,7 @@ public class DimVeinZoneCreator : DimCreator
     float squareAreaMaxArea = 75;
 
     int veinZoneMaxArea = 2000;
+    bool topOffDimList = true;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
@@ -199,9 +200,9 @@ public class DimVeinZoneCreator : DimCreator
 
     public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode, DirectionBias directionBias)
     {
-        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias);
+        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
 
-        directionBias.print();
+        //directionBias.print();
 
         DimensionList newDimList = getDimensions(startCoords);
 
