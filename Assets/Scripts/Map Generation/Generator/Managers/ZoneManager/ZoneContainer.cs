@@ -4,13 +4,16 @@ using UnityEngine;
 
 using AbilityAndThemeClasses;
 using ZoneConfigEnums;
+using CommonlyUsedClasses;
+using TileManagerClasses;
 
 public partial class ContainerAccessor
 {
-    public Zone_New createNewZoneAndAddToContainer(GameTiming gameTiming)
+    public Zone_New createNewZoneAndAddToContainer(GameTiming gameTiming, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap)
     {
         // Creates a new zone and adds it to the zoneContainer
-        Zone_New newZone = this.contInst.zoneConfigurator.getNewZone(gameTiming);
+        Zone_New newZone = this.contInst.zoneConfigurator.getNewZone(gameTiming, zoneGenerationDirection, ref zoneDimList, ref tileMap);
+
         this.contInst.zoneContainer.addZone(ref newZone);
 
         return newZone;

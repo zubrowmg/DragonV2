@@ -198,13 +198,14 @@ public class DimVeinZoneCreator : DimCreator
     //                                  Start Functions
     // =======================================================================================
 
-    public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode, DirectionBias directionBias)
+    public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, out TwoDList<Tile> tileMapRef)
     {
         setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
 
         //directionBias.print();
 
         DimensionList newDimList = getDimensions(startCoords);
+        tileMapRef = this.tileMapRef;
 
         if (debugMode)
             markSelectedGridForDebug(newDimList);

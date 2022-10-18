@@ -28,6 +28,8 @@ public abstract class DimCreator : TileAccessor
     // Wiggle Conditions
     protected int wiggleDisplacementRange;
 
+    // Tile Map Reference
+    protected TwoDList<Tile> tileMapRef = new TwoDList<Tile>();
 
     // Dim Direction Bias
     protected DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
@@ -78,7 +80,7 @@ public abstract class DimCreator : TileAccessor
     // Should not be calling this function directly, look at getDimensionsForRoom() as an example
     protected DimensionList getDimensions(CoordsInt startCoords)
     {
-        DimensionList dimensionList = new DimensionList();
+        DimensionList dimensionList = new DimensionList(startCoords);
         bool dimensionRejected = false;
 
         CoordsInt minCoords = startCoords.deepCopyInt();
@@ -155,11 +157,35 @@ public abstract class DimCreator : TileAccessor
         }
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
-        dimensionList.finalCheck();
+        bool dimensionListIsAcceptable = dimensionList.finalCheck();
+        if (dimensionListIsAcceptable == true)
+            fillTileMap(dimensionList);
 
         return dimensionList;
     }
 
+    void fillTileMap(DimensionList dimList)
+    {
+        List<List<int>> grid;
+        Coords<int> startCoords;
+        dimList.getGrid(out grid, out startCoords);
+
+        for (int x = 0; x < grid.Count; x++)
+        {
+            for (int y = 0; y < grid[0].Count; y++)
+            {
+                bool accessSuccesful = false;
+                CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
+                Tile currentTile = getTile(tileCoords, ref accessSuccesful);
+
+                if (accessSuccesful == true)
+                {
+                    //currentTile.instantiateTileGameObject();
+                    this.tileMapRef.addRefElement(tileCoords, ref currentTile);
+                }
+            }
+        }
+    }
 
     void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords, bool getDimsToTopOffDimList)
     {
@@ -361,7 +387,7 @@ public abstract class DimCreator : TileAccessor
             for (int y = 0; y < grid[0].Count; y++)
             {
                 bool accessSuccesful = false;
-                Coords<int> tileCoords = new Coords<int>(x + startCoords.getX(), y + startCoords.getY());
+                CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
                 Tile currentTile = getTile(tileCoords, ref accessSuccesful);
 
                 if (accessSuccesful == true)

@@ -23,8 +23,8 @@ namespace VeinManagerClasses
         public UVein(ref GeneratorContainer contInst,
                      int id,
                      Direction generalDirection,
-                     Coords<int> startCoords,
-                     Coords<int> endCoords,
+                     CoordsInt startCoords,
+                     CoordsInt endCoords,
                      bool varyWidth,
                      bool varyLength,
                      int width,
@@ -321,8 +321,8 @@ namespace VeinManagerClasses
 
             bool hitDistanceGoal = false;
             int currentSlopeIndex = 0; // Keeps count of how many (Vein Main) points were ploted with the current slope. Resets to 0 when slope changes
-            Coords<int> currentSlopeStartCoords = currentCoords.deepCopy(); // Resets to current coords when slope changes
-            Coords<int> nextCoords = currentCoords.deepCopy();
+            CoordsInt currentSlopeStartCoords = currentCoords.deepCopyInt(); // Resets to current coords when slope changes
+            CoordsInt nextCoords = currentCoords.deepCopyInt();
 
             int delaySlopeChangeCount = 0; // Slope changes immediatly, to try and smoothen it out delay slope change so that every other slope change takes effect
 
@@ -338,7 +338,7 @@ namespace VeinManagerClasses
                 if (veinSlope.getSlope() != prevSlope.getSlope())
                 {
                     currentSlopeIndex = 0;
-                    currentSlopeStartCoords = currentCoords.deepCopy();
+                    currentSlopeStartCoords = currentCoords.deepCopyInt();
                     delaySlopeChangeCount = 0;
                 }
                 else

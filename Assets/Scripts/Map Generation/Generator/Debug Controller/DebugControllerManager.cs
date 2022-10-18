@@ -126,7 +126,7 @@ public class DebugControllerManager : MonoBehaviour
                 if (grid[x][y] == 1)
                 {
                     bool accessSuccesful = false;
-                    Coords<int> tileCoords = new Coords<int>(x + startCoords.getX(), y + startCoords.getY());
+                    CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
                     Tile currentTile = tileManagerRef.tileAccessor.getTile(tileCoords, ref accessSuccesful);
 
                     if (accessSuccesful == true)

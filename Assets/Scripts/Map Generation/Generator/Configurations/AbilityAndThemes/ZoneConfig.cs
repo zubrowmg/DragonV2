@@ -5,6 +5,8 @@ using UnityEngine;
 using ZoneConfigEnums;
 using AbilityAndThemeClasses;
 using CommonlyUsedDefinesAndEnums;
+using CommonlyUsedClasses;
+using TileManagerClasses;
 
 
 public class ZoneConfig
@@ -57,7 +59,7 @@ public class ZoneConfig
     }
 
 
-    public Zone_New getNewZone(GameTiming timing)
+    public Zone_New getNewZone(GameTiming timing, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap)
     {
         ZoneThemes randomTheme = ZoneThemes.None;
         ZoneAbilities randomAbility = ZoneAbilities.None;
@@ -82,7 +84,7 @@ public class ZoneConfig
         }
 
         ZoneVeinGenType zoneVeinGenType = getZoneVeinGenType(timing, randomTheme);
-        Zone_New newZone = new Zone_New(timing, currentZoneId, randomAbility, randomTheme, zoneVeinGenType);
+        Zone_New newZone = new Zone_New(timing, currentZoneId, randomAbility, randomTheme, zoneVeinGenType, zoneGenerationDirection, ref zoneDimList, ref tileMap);
 
         currentZoneId++;
 

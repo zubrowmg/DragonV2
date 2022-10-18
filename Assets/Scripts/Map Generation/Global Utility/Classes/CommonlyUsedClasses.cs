@@ -108,32 +108,107 @@ namespace CommonlyUsedClasses
 
     public class TwoDList<T>
     {
-        List<List<T>> array;
-        T selectedItem = default(T);
+        List<List<Double<CoordsInt, T>>> array;
+        Double<CoordsInt, T> selectedItem = new Double<CoordsInt, T>(default(CoordsInt), default(T));
+        T selectedTItem = default(T);
 
         public TwoDList()
         {
-            this.array = new List<List<T>>();
+            this.array = new List<List<Double<CoordsInt, T>>>();
         }
 
-        public TwoDList(List<List<T>> newArray)
+        public TwoDList(List<List<Double<CoordsInt, T>>> newArray)
         {
             this.array = newArray;
         }
 
-        public void addElement(Coords<int> index, T item)
+        public void addElement(CoordsInt index, T item)
         {
-            // If the x index is greater than x axis need a new x row
-            if (array.Count - 1 < index.getX())
-                array.Add(new List<T> { item });
-            else
-                array[index.getX()].Add(item);
+            addRefElement(index, ref item);
         }
 
-        public ref T getElement(Coords<int> index)
+        public void addRefElement(CoordsInt index, ref T item)
         {
-            selectedItem = array[index.getX()][index.getY()];
-            return ref selectedItem;
+            Double<CoordsInt, T> newItem = new Double<CoordsInt, T>(index, item);
+
+            // If the x index is greater than x axis need a new x row
+            if (array.Count - 1 < index.getX())
+                array.Add(new List<Double<CoordsInt, T>> { newItem });
+            else
+                array[index.getX()].Add(newItem);
+        }
+
+
+        public ref T getElement(CoordsInt index)
+        {
+            selectElement(index);
+            return ref selectedTItem;
+        }
+
+        public void selectElement(CoordsInt index)
+        {
+            this.selectedItem = array[index.getX()][index.getY()];
+            this.selectedTItem = this.selectedItem.getTwo();
+        }
+
+        public CoordsInt goLeft(int amount, out bool rejected, out T selectedTItem)
+        {
+            rejected = false;
+            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
+
+            if (currentCoords.getX() - amount < 0)
+                rejected = true;
+            else
+                currentCoords.decX(amount);
+
+            selectedTItem = getElement(currentCoords);
+
+            return currentCoords;
+        }
+
+        public CoordsInt goDown(int amount, out bool rejected, out T selectedTItem)
+        {
+            rejected = false;
+            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
+
+            if (currentCoords.getY() - amount < 0)
+                rejected = true;
+            else
+                currentCoords.decY(amount);
+
+            selectedTItem = getElement(currentCoords);
+
+            return currentCoords;
+        }
+
+        public CoordsInt goRight(int amount, out bool rejected, out T selectedTItem)
+        {
+            rejected = false;
+            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
+
+            if (currentCoords.getX() + amount >= getXCount())
+                rejected = true;
+            else
+                currentCoords.incX(amount);
+
+            selectedTItem = getElement(currentCoords);
+
+            return currentCoords;
+        }
+
+        public CoordsInt goUp(int amount, out bool rejected, out T selectedTItem)
+        {
+            rejected = false;
+            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
+
+            if (currentCoords.getY() + amount >= getYCount())
+                rejected = true;
+            else
+                currentCoords.incY(amount);
+
+            selectedTItem = getElement(currentCoords);
+
+            return currentCoords;
         }
 
         public int getXCount()

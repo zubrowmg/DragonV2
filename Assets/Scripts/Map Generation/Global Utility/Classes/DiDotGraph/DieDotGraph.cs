@@ -7,7 +7,7 @@ namespace DiDotGraphClasses
 {
     public class DiDotGraph<T>
     {
-        // This class is probably going to be the predominate way to create a digraph
+        // This class is probably going to be the main way to create a digraph
         //      Just a connection of nodes, instead of edges and nodes since it's too much effort to add edges during the digraph creation
         //      Once done you can export your DiDotGraph into a normal DiGraph with nodes and edges
 
@@ -18,7 +18,6 @@ namespace DiDotGraphClasses
         {
         }
 
-        // Pretty much always will start a DiGraph with an edge
         public void addStartingNode(ref T startingObject)
         {
             currentObject = startingObject;

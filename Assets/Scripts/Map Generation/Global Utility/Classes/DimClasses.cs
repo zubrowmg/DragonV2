@@ -100,8 +100,10 @@ namespace CommonlyUsedClasses
 
     public class DimensionList
     {
-        Coords<int> minCoords;
-        Coords<int> maxCoords;
+        CoordsInt startCoords;
+
+        CoordsInt minCoords;
+        CoordsInt maxCoords;
         int squareCount;
 
         public int area;
@@ -110,8 +112,9 @@ namespace CommonlyUsedClasses
         public List<SquareArea> listHistory;
         public List<List<int>> grid;
 
-        public DimensionList()
+        public DimensionList(CoordsInt startCoords)
         {
+            this.startCoords = startCoords;
             resetDimensionList();
         }
 
@@ -119,8 +122,8 @@ namespace CommonlyUsedClasses
         {
             this.squareCount = 0;
 
-            this.minCoords = new Coords<int>(System.Int32.MaxValue, System.Int32.MaxValue);
-            this.maxCoords = new Coords<int>(0, 0);
+            this.minCoords = new CoordsInt(System.Int32.MaxValue, System.Int32.MaxValue);
+            this.maxCoords = new CoordsInt(0, 0);
 
             this.area = 0;
 
@@ -131,8 +134,8 @@ namespace CommonlyUsedClasses
 
         public bool addDimension(SquareArea newArea)
         {
-            Coords<int> prevMin = minCoords.deepCopy();
-            Coords<int> prevMax = maxCoords.deepCopy();
+            CoordsInt prevMin = minCoords.deepCopyInt();
+            CoordsInt prevMax = maxCoords.deepCopyInt();
 
             if (newArea.xMin() < minCoords.getX())
                 minCoords.setX(newArea.xMin());
@@ -159,8 +162,8 @@ namespace CommonlyUsedClasses
             if (isIsolated == true)
             {
                 // Remove the last added square
-                minCoords = prevMin.deepCopy();
-                maxCoords = prevMax.deepCopy();
+                minCoords = prevMin.deepCopyInt();
+                maxCoords = prevMax.deepCopyInt();
 
                 squareArealist.Remove(newArea);
                 updateGrid();
@@ -195,13 +198,13 @@ namespace CommonlyUsedClasses
 
         // THIS FUNCTION IS NEEDED
         //      Checks if there is a body of sqaure areas that are connected by a 2 wide Tile. This is not good enough to be considered "touching"
-        public void finalCheck()
+        public bool finalCheck()
         {
             int minTouchingWidth = 2; // I do not recommend changing this
-            bool dimensionListRejected = false;
+            bool dimensionListIsAcceptable = true;
 
             if (squareArealist.Count == 1)
-                return;
+                return dimensionListIsAcceptable;
 
             //Debug.Log("=========================================================");
 
@@ -263,7 +266,7 @@ namespace CommonlyUsedClasses
                             else
                             {
                                 Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
-                                dimensionListRejected = true;
+                                dimensionListIsAcceptable = false;
                                 break;
                             }
                         }
@@ -307,7 +310,7 @@ namespace CommonlyUsedClasses
                         else
                         {
                             Debug.Log("Rejected bottom perimeter");
-                            dimensionListRejected = true;
+                            dimensionListIsAcceptable = false;
                             break;
                         }
                     }
@@ -353,7 +356,7 @@ namespace CommonlyUsedClasses
                         else
                         {
                             Debug.Log("Rejected right perimeter");
-                            dimensionListRejected = true;
+                            dimensionListIsAcceptable = false;
                             break;
                         }
                     }
@@ -396,7 +399,7 @@ namespace CommonlyUsedClasses
                         else
                         {
                             Debug.Log("Rejected left perimeter");
-                            dimensionListRejected = true;
+                            dimensionListIsAcceptable = false;
                             break;
                         }
                     }
@@ -404,31 +407,14 @@ namespace CommonlyUsedClasses
 
             }
 
-            if (dimensionListRejected == true)
+            if (dimensionListIsAcceptable == false)
             {
                 resetDimensionList();
             }
+
+            return dimensionListIsAcceptable;
         }
 
-        public void printGrid()
-        {
-            for (int x = 0; x < grid.Count; x++)
-            {
-                for (int y = 0; y < grid[x].Count; y++)
-                {
-                    if (grid[x][y] == 1)
-                    {
-                        Debug.Log((x + minCoords.getX()) + "," + (y + minCoords.getY()));
-                    }
-                }
-            }
-        }
-
-        public void printMinMax()
-        {
-            minCoords.print("DIM MIN: ");
-            maxCoords.print("DIM MAX: ");
-        }
 
         private bool checkForGaps(SquareArea newArea)
         {
@@ -592,12 +578,6 @@ namespace CommonlyUsedClasses
             return pointUsed;
         }
 
-        public void getGrid(out List<List<int>> grid, out Coords<int> startCoords)
-        {
-            grid = this.grid;
-            startCoords = this.minCoords;
-        }
-
         public bool startCoordsAreOutsideOfCurrentDimList(Coords<int> startCoords)
         {
             bool startCoordAreOutside = false;
@@ -609,6 +589,41 @@ namespace CommonlyUsedClasses
                 startCoordAreOutside = true;
 
             return startCoordAreOutside;
+        }
+
+        // =======================================================================
+        //                              Setter/Getters
+        // =======================================================================
+
+        public void getGrid(out List<List<int>> grid, out Coords<int> startCoords)
+        {
+            grid = this.grid;
+            startCoords = this.minCoords;
+        }
+
+        public void printGrid()
+        {
+            for (int x = 0; x < grid.Count; x++)
+            {
+                for (int y = 0; y < grid[x].Count; y++)
+                {
+                    if (grid[x][y] == 1)
+                    {
+                        Debug.Log((x + minCoords.getX()) + "," + (y + minCoords.getY()));
+                    }
+                }
+            }
+        }
+
+        public void printMinMax()
+        {
+            minCoords.print("DIM MIN: ");
+            maxCoords.print("DIM MAX: ");
+        }
+
+        public CoordsInt getStartCoords()
+        {
+            return this.startCoords;
         }
     }
 }

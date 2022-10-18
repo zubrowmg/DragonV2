@@ -18,7 +18,7 @@ public class TileAccessor
         this.contInst = contInst;
     }
 
-    public void addTileToTileMap(Coords<int> index, Tile item)
+    public void addTileToTileMap(CoordsInt index, Tile item)
     {
         contInst.tileMap.addTile(index, item);
     }
@@ -43,7 +43,7 @@ public class TileAccessor
         return contInst.tileMap.getTileMapCenter();
     }
 
-    public ref Tile getTile(Coords<int> coords, ref bool accessSuccessful)
+    public ref Tile getTile(CoordsInt coords, ref bool accessSuccessful)
     {
         return ref contInst.tileMap.getTile(coords, ref accessSuccessful);
     }

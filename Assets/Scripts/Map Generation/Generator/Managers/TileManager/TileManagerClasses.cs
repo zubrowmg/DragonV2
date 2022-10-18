@@ -60,7 +60,7 @@ namespace TileManagerClasses
             this.xFarRight = tileMapCenter.getX() + (tileMapCenter.getX() / 2);
         }
 
-        public void addTile(Coords<int> index, Tile item)
+        public void addTile(CoordsInt index, Tile item)
         {
             tileMap.addElement(index, item);
         }
@@ -130,7 +130,7 @@ namespace TileManagerClasses
             return this.tileMapCenter;
         }
 
-        public ref Tile getTile(Coords<int> coords, ref bool accessSuccessful)
+        public ref Tile getTile(CoordsInt coords, ref bool accessSuccessful)
         {
             if (tileMapDimensions.getMinX() <= coords.getX() && coords.getX() < tileMapDimensions.getMaxX() &&
                 tileMapDimensions.getMinY() <= coords.getY() && coords.getY() < tileMapDimensions.getMaxY())

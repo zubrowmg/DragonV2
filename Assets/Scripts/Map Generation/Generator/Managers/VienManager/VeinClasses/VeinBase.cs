@@ -16,9 +16,9 @@ namespace VeinManagerClasses
         int veinId = CommonDefines.DefualtId;
 
         // Coords
-        protected Coords<int> startCoords;
-        protected Coords<int> prevCoords; // If not used move back into VeinClass
-        protected Coords<int> currentCoords; // If not used move back into VeinClass
+        protected CoordsInt startCoords;
+        protected CoordsInt prevCoords; // If not used move back into VeinClass
+        protected CoordsInt currentCoords; // If not used move back into VeinClass
 
         // List of Tiles
         protected List<Tile> associatedTiles = new List<Tile>();
@@ -27,12 +27,12 @@ namespace VeinManagerClasses
         protected List<VeinConnection> listOfVeinConnections = new List<VeinConnection>();
 
 
-        public VeinBase(ref GeneratorContainer contInst, int id, Coords<int> startCoords) : base(ref contInst)
+        public VeinBase(ref GeneratorContainer contInst, int id, CoordsInt startCoords) : base(ref contInst)
         {
             this.veinId = id;
             this.startCoords = startCoords;
-            this.prevCoords = startCoords.deepCopy();
-            this.currentCoords = startCoords.deepCopy();
+            this.prevCoords = startCoords.deepCopyInt();
+            this.currentCoords = startCoords.deepCopyInt();
         }
 
 

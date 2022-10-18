@@ -14,8 +14,8 @@ namespace VeinManagerClasses
         public SimpleVein(ref GeneratorContainer contInst,
                           int id,
                           Direction generalDirection,
-                          Coords<int> startCoords,
-                          Coords<int> endCoords,
+                          CoordsInt startCoords,
+                          CoordsInt endCoords,
                           bool varyWidth,
                           bool varyLength,
                           bool varySlope,
@@ -42,8 +42,8 @@ namespace VeinManagerClasses
 
             bool hitDistanceGoal = false;
             int currentSlopeIndex = 0; // Keeps count of how many (Vein Main) points were ploted with the current slope. Resets to 0 when slope changes
-            Coords<int> currentSlopeStartCoords = currentCoords.deepCopy(); // Resets to current coords when slope changes
-            Coords<int> nextCoords = currentCoords.deepCopy();
+            CoordsInt currentSlopeStartCoords = currentCoords.deepCopyInt(); // Resets to current coords when slope changes
+            CoordsInt nextCoords = currentCoords.deepCopyInt();
 
             while (hitDistanceGoal == false)
             {

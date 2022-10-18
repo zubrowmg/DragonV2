@@ -7,6 +7,7 @@ using ZoneConfigEnums;
 using AbilityAndThemeClasses;
 
 using CommonlyUsedClasses;
+using TileManagerClasses;
 
 public class Zone_New
 {
@@ -18,22 +19,30 @@ public class Zone_New
     // Zone Vein Generation Properties
     GameTiming gameTiming = GameTiming.Early;
     ZoneVeinGenType zoneVeinGenType = ZoneVeinGenType.Default;
-    DimensionList associatedVeinZoneDim = new DimensionList();
+    DimensionList associatedVeinZoneDim;
+    TwoDList<Tile> associatedTileMap;
+    DirectionBias zoneGenerationDirection;
 
 
     // Zones are created during vein zone generation
-    public Zone_New(GameTiming timing, int id, ZoneAbilities ability, ZoneThemes theme, ZoneVeinGenType zoneVeinGenType)
+    public Zone_New(GameTiming timing, int id, ZoneAbilities ability, ZoneThemes theme, ZoneVeinGenType zoneVeinGenType, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap)
     {
         this.gameTiming = timing;
         this.id = id;
         this.zoneAbility = ability;
         this.zoneTheme = theme;
         this.zoneVeinGenType = zoneVeinGenType;
+
+        this.associatedTileMap = tileMap;
+        this.associatedVeinZoneDim = zoneDimList;
+        this.zoneGenerationDirection = zoneGenerationDirection;
     }
+
 
     public Zone_New deepCopy()
     {
-        return new Zone_New(this.gameTiming, this.id, this.zoneAbility, this.zoneTheme, this.zoneVeinGenType);
+        // associatedVeinZoneDim and associatedTileMap has to be passed by reference, this might cause issues for a deep copy
+        return new Zone_New(this.gameTiming, this.id, this.zoneAbility, this.zoneTheme, this.zoneVeinGenType, this.zoneGenerationDirection, ref this.associatedVeinZoneDim, ref this.associatedTileMap);
     }
 
 
@@ -48,6 +57,11 @@ public class Zone_New
     public ref DimensionList getVeinZoneDimList()
     {
         return ref this.associatedVeinZoneDim;
+    }
+
+    public ref TwoDList<Tile> getTileMapRef()
+    {
+        return ref this.associatedTileMap;
     }
 
     public int getId()

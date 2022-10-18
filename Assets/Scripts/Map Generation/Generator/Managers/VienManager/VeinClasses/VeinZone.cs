@@ -13,7 +13,7 @@ namespace VeinManagerClasses
     public class VeinZone : VeinBase
     {
 
-        public VeinZone(ref GeneratorContainer contInst, int id, Coords<int> startCoords) : base(ref contInst, id, startCoords)
+        public VeinZone(ref GeneratorContainer contInst, int id, CoordsInt startCoords) : base(ref contInst, id, startCoords)
         {
             this.veinType = VeinType.Zone;
         }

@@ -61,7 +61,7 @@ namespace VeinManagerClasses
         {
             
             this.generalVeinDirection = generalDirection;
-            this.startCoords = startCoords.deepCopy();
+            this.startCoords = startCoords.deepCopyInt();
             this.endCoords = endCoords;
             this.veinSlope = new Slope(startCoords, endCoords);
             this.intendedVeinSlope = new Slope(startCoords, endCoords);
@@ -80,7 +80,7 @@ namespace VeinManagerClasses
 
         }
 
-        public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+        public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, CoordsInt startCoords, Coords<int> endCoords,
                         bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst, id, startCoords)
         {
             initGeneralProperties(generalDirection, endCoords, varyWidth, varyLength, varySlope);
@@ -96,7 +96,7 @@ namespace VeinManagerClasses
         }
 
         // If you want to set width/distance
-        public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, Coords<int> startCoords, Coords<int> endCoords,
+        public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, CoordsInt startCoords, Coords<int> endCoords,
                         bool varyWidth, bool varyLength, bool varySlope, int width, int distance) : base(ref contInst, id, startCoords)
         {
             initGeneralProperties(generalDirection, endCoords, varyWidth, varyLength, varySlope);
@@ -170,7 +170,7 @@ namespace VeinManagerClasses
             }
         }
 
-        protected void placeVeinConnection(Coords<int> coords)
+        protected void placeVeinConnection(CoordsInt coords)
         {
             bool accessSuccessful = false;
             Tile selectedTile = getTile(coords, ref accessSuccessful);
@@ -180,7 +180,7 @@ namespace VeinManagerClasses
         }
 
 
-        protected void changeSlopeEveryXDistance(ref int currentSlopeIndex, ref Coords<int> currentSlopeStartCoords, Coords<int> currentCoords, VeinDistanceTraveled distanceState)
+        protected void changeSlopeEveryXDistance(ref int currentSlopeIndex, ref CoordsInt currentSlopeStartCoords, CoordsInt currentCoords, VeinDistanceTraveled distanceState)
         {
             bool slopeChanged = true;
            
@@ -191,7 +191,7 @@ namespace VeinManagerClasses
             if (slopeChanged)
             {
                 currentSlopeIndex = 0;
-                currentSlopeStartCoords = currentCoords.deepCopy();
+                currentSlopeStartCoords = currentCoords.deepCopyInt();
             }
         }
 
@@ -281,7 +281,7 @@ namespace VeinManagerClasses
             return slopeChanged;
         }
 
-        protected Coords<int> calculateIndexToCoords(Coords<int> currentSlopeStartCoords, int currentSlopeIndex, float currentSlope, VeinDirection currentVeinDir)
+        protected CoordsInt calculateIndexToCoords(CoordsInt currentSlopeStartCoords, int currentSlopeIndex, float currentSlope, VeinDirection currentVeinDir)
         {
             //float currentSlope = veinSlope.getSlope();
             //VeinDirection currentVeinDir = getCurrentVeinDirection();
@@ -321,16 +321,16 @@ namespace VeinManagerClasses
 
             nextX += currentSlopeStartCoords.getX();
             nextY += currentSlopeStartCoords.getY();
-            Coords<int> nextCoords = new Coords<int>(nextX, nextY);
+            CoordsInt nextCoords = new CoordsInt(nextX, nextY);
 
             return nextCoords;
         }
 
-        protected float calculateNewPosition(Coords<int> nextCoords, ref Coords<int> currentCoords, 
-                                                    ref Coords<int> prevCoords, float currentDistance)
+        protected float calculateNewPosition(CoordsInt nextCoords, ref CoordsInt currentCoords, 
+                                                    ref CoordsInt prevCoords, float currentDistance)
         {
-            prevCoords = currentCoords.deepCopy();
-            currentCoords = nextCoords.deepCopy();
+            prevCoords = currentCoords.deepCopyInt();
+            currentCoords = nextCoords.deepCopyInt();
 
             float distanceChange = CommonFunctions.calculateCoordsDistance(currentCoords, prevCoords); // Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
             currentDistance = currentDistance + distanceChange;
@@ -339,7 +339,7 @@ namespace VeinManagerClasses
         }
 
         // Uses same while loop logic used in triggerVeinGeneration()
-        protected void createVeinStrip(Coords<int> currentCoords)
+        protected void createVeinStrip(CoordsInt currentCoords)
         {
             // Mark the middle "main" vein
             markTileAsVein(currentCoords, DebugVeinTileType.VeinMain);
@@ -349,19 +349,19 @@ namespace VeinManagerClasses
             halfWidth++;
             float widthSlope = ((float)-1 / veinSlope.getSlope());
 
-            Coords<int> startCoords = currentCoords.deepCopy();
+            CoordsInt startCoords = currentCoords.deepCopyInt();
 
             float currentDistanceLeft = 0f;
             float currentDistanceRight = 0f;
 
-            Coords<int> nextCoordsLeft = currentCoords.deepCopy();
-            Coords<int> nextCoordsRight = currentCoords.deepCopy();
+            CoordsInt nextCoordsLeft = currentCoords.deepCopyInt();
+            CoordsInt nextCoordsRight = currentCoords.deepCopyInt();
 
-            Coords<int> currentCoordsLeft = currentCoords.deepCopy();
-            Coords<int> currentCoordsRight = currentCoords.deepCopy();
+            CoordsInt currentCoordsLeft = currentCoords.deepCopyInt();
+            CoordsInt currentCoordsRight = currentCoords.deepCopyInt();
 
-            Coords<int> prevCoordsLeft = currentCoords.deepCopy();
-            Coords<int> prevCoordsRight = currentCoords.deepCopy();
+            CoordsInt prevCoordsLeft = currentCoords.deepCopyInt();
+            CoordsInt prevCoordsRight = currentCoords.deepCopyInt();
 
             int widthIndex = 0;
 
@@ -411,16 +411,16 @@ namespace VeinManagerClasses
             }
         }
 
-        void markTilesAsVeinAroundPoint(Coords<int> coords, DebugVeinTileType veinType)
+        void markTilesAsVeinAroundPoint(CoordsInt coords, DebugVeinTileType veinType)
         {
             markTileAsVein(coords, veinType);
-            markTileAsVein(new Coords<int>(coords.getX() - 1, coords.getY()), veinType);
-            markTileAsVein(new Coords<int>(coords.getX() + 1, coords.getY()), veinType);
-            markTileAsVein(new Coords<int>(coords.getX(), coords.getY() - 1), veinType);
-            markTileAsVein(new Coords<int>(coords.getX(), coords.getY() + 1), veinType);
+            markTileAsVein(new CoordsInt(coords.getX() - 1, coords.getY()), veinType);
+            markTileAsVein(new CoordsInt(coords.getX() + 1, coords.getY()), veinType);
+            markTileAsVein(new CoordsInt(coords.getX(), coords.getY() - 1), veinType);
+            markTileAsVein(new CoordsInt(coords.getX(), coords.getY() + 1), veinType);
         }
 
-        void markTileAsVein(Coords<int> index, DebugVeinTileType type)
+        void markTileAsVein(CoordsInt index, DebugVeinTileType type)
         {
             //ZoneUnitProperties newZoneAndAbilities = null;
             bool accessSuccessful = false;

@@ -4,6 +4,7 @@ using UnityEngine;
 
 using DiDotGraphClasses;
 using CommonlyUsedClasses;
+using TileManagerClasses;
 
 public class ZoneVeinGenerator : ContainerAccessor
 {
@@ -14,16 +15,45 @@ public class ZoneVeinGenerator : ContainerAccessor
     //      Should place vein Connect points at the start and end, and a few others on the ends
     //      At the end this class should export the end product as a vein class
 
-    Dimensions allocatedDimensions;
+    TwoDList<Tile> allocatedTileMap; // Entire allocated dimensions
+    TwoDList<Tile> tileMapConnections; // Allocated dims, but only the tiles spaced out every x amount
+    Zone_New currentZone;
 
+    // Zone Connection Node Generation
+    int gapBetweenNodes = 5;
 
     public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
     {
     }
 
-    public void setupNewZoneVein(Dimensions allocatedDimensions)
+ 
+    public void generateZoneVein(ref Zone_New zone)
     {
-        this.allocatedDimensions = allocatedDimensions;
+        this.currentZone = zone;
+        this.allocatedTileMap = currentZone.getTileMapRef();
+
+        //setupZoneConnectionNodes();
     }
 
+    // Don't want the Zone to generate one Tile at a time, need to setup nodes that need to be the only destination points
+    public void setupZoneConnectionNodes()
+    {
+        CoordsInt newCoords = new CoordsInt(0, 0);
+
+        for (int x = 0; x < allocatedTileMap.getXCount(); x = x + gapBetweenNodes)
+        {
+            for (int y = 0; y < allocatedTileMap.getYCount(); y = y + gapBetweenNodes)
+            {
+                Tile tileRef = allocatedTileMap.getElement(new CoordsInt(x, y));
+
+                tileMapConnections.addRefElement(newCoords, ref tileRef);
+                newCoords.incY();
+            }
+            newCoords.incX();
+        }
+    }
+
+    // =====================================================================================
+    //                                     Setters/Getters
+    // =====================================================================================
 }
