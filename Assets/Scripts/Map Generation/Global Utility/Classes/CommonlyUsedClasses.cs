@@ -220,6 +220,11 @@ namespace CommonlyUsedClasses
         {
             return array[0].Count;
         }
+
+        public int getYCount(int index)
+        {
+            return array[index].Count;
+        }
     }
 
     public class RandomProbability

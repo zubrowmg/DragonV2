@@ -13,10 +13,15 @@ public class ZoneVeinGenerator : ContainerAccessor
     //          Ex a node should only have 4 connections max. Circular flow and branching out paths exist
     //      This class should make sure that the vein placement is spacially placed correctly. No over crossing veins
     //      Should place vein Connect points at the start and end, and a few others on the ends
-    //      At the end this class should export the end product as a vein class
 
-    TwoDList<Tile> allocatedTileMap; // Entire allocated dimensions
-    TwoDList<Tile> tileMapConnections; // Allocated dims, but only the tiles spaced out every x amount
+    // !!!!!!!!!!!!!!!!!!!!!!!!
+    //      At the end this class should export the end product as a vein class
+    // !!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+    TwoDList<Tile> allocatedTileMap = new TwoDList<Tile>(); // Entire allocated dimensions
+    TwoDList<Tile> tileMapConnections = new TwoDList<Tile>(); // Allocated dims, but only the tiles spaced out every x amount
     Zone_New currentZone;
 
     // Zone Connection Node Generation
@@ -29,10 +34,12 @@ public class ZoneVeinGenerator : ContainerAccessor
  
     public void generateZoneVein(ref Zone_New zone)
     {
+
         this.currentZone = zone;
         this.allocatedTileMap = currentZone.getTileMapRef();
 
-        //setupZoneConnectionNodes();
+        setupZoneConnectionNodes();
+
     }
 
     // Don't want the Zone to generate one Tile at a time, need to setup nodes that need to be the only destination points
@@ -40,9 +47,12 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
         CoordsInt newCoords = new CoordsInt(0, 0);
 
-        for (int x = 0; x < allocatedTileMap.getXCount(); x = x + gapBetweenNodes)
+        //Debug.Log("X: " + allocatedTileMap.getXCount());
+        //Debug.Log("Y: " + allocatedTileMap.getYCount());
+
+        for (int x = gapBetweenNodes - 1; x < allocatedTileMap.getXCount(); x = x + gapBetweenNodes)
         {
-            for (int y = 0; y < allocatedTileMap.getYCount(); y = y + gapBetweenNodes)
+            for (int y = gapBetweenNodes - 1; y < allocatedTileMap.getYCount(x); y = y + gapBetweenNodes)
             {
                 Tile tileRef = allocatedTileMap.getElement(new CoordsInt(x, y));
 
@@ -51,6 +61,8 @@ public class ZoneVeinGenerator : ContainerAccessor
             }
             newCoords.incX();
         }
+
+        this.currentZone.setVeinZoneConnectionList(ref this.tileMapConnections);
     }
 
     // =====================================================================================

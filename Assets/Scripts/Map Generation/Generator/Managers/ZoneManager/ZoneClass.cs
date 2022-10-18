@@ -20,7 +20,8 @@ public class Zone_New
     GameTiming gameTiming = GameTiming.Early;
     ZoneVeinGenType zoneVeinGenType = ZoneVeinGenType.Default;
     DimensionList associatedVeinZoneDim;
-    TwoDList<Tile> associatedTileMap;
+    TwoDList<Tile> associatedTileMap = new TwoDList<Tile>();
+    TwoDList<Tile> tileMapConnections = new TwoDList<Tile>();
     DirectionBias zoneGenerationDirection;
 
 
@@ -62,6 +63,16 @@ public class Zone_New
     public ref TwoDList<Tile> getTileMapRef()
     {
         return ref this.associatedTileMap;
+    }
+
+    public void setVeinZoneConnectionList(ref TwoDList<Tile> tileMapConnections)
+    {
+        this.tileMapConnections = tileMapConnections;
+    }
+
+    public ref TwoDList<Tile> getVeinZoneConnectionList()
+    {
+        return ref this.tileMapConnections;
     }
 
     public int getId()

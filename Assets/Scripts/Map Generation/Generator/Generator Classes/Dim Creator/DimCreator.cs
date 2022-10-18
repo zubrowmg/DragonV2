@@ -169,7 +169,6 @@ public abstract class DimCreator : TileAccessor
         List<List<int>> grid;
         Coords<int> startCoords;
         dimList.getGrid(out grid, out startCoords);
-
         for (int x = 0; x < grid.Count; x++)
         {
             for (int y = 0; y < grid[0].Count; y++)
@@ -178,13 +177,16 @@ public abstract class DimCreator : TileAccessor
                 CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
                 Tile currentTile = getTile(tileCoords, ref accessSuccesful);
 
+                CoordsInt tileRefCoords = new CoordsInt(x, y);
+
                 if (accessSuccesful == true)
                 {
                     //currentTile.instantiateTileGameObject();
-                    this.tileMapRef.addRefElement(tileCoords, ref currentTile);
+                    this.tileMapRef.addRefElement(tileRefCoords, ref currentTile);
                 }
             }
         }
+
     }
 
     void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords, bool getDimsToTopOffDimList)

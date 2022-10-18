@@ -136,6 +136,25 @@ public class DebugControllerManager : MonoBehaviour
         }
     }
 
+    public void changeDimConnectionColor(ref Zone_New zone, Color color)
+    {
+        TwoDList<Tile> zoneConnTileMapRef = zone.getVeinZoneConnectionList();
+
+        //Debug.Log(zone.getId());
+        //zoneDimList.printMinMax();
+
+        for (int x = 0; x < zoneConnTileMapRef.getXCount(); x++)
+        {
+            for (int y = 0; y < zoneConnTileMapRef.getYCount(x); y++)
+            {
+                CoordsInt connCoords = new CoordsInt(x, y);
+                Tile currentTile = zoneConnTileMapRef.getElement(connCoords);
+
+                changeTileColor(ref currentTile, color);
+            }
+        }
+    }
+
     public void selectVeinZoneDim()
     {
         toggleVeinZone = !toggleVeinZone;
@@ -146,10 +165,16 @@ public class DebugControllerManager : MonoBehaviour
 
             // Highlight next grid
             if (toggleVeinZone == true)
+            {
                 changeDimGridColor(ref currentZone, lightGreen);
+                changeDimConnectionColor(ref currentZone, darkGreen);
+            }
             // Clear previous zone vein dim
             else
+            {
                 changeDimGridColor(ref currentZone, tileDefault);
+
+            }
 
         }
     }
