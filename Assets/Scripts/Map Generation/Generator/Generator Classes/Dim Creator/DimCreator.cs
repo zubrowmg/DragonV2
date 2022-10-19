@@ -80,6 +80,7 @@ public abstract class DimCreator : TileAccessor
     // Should not be calling this function directly, look at getDimensionsForRoom() as an example
     protected DimensionList getDimensions(CoordsInt startCoords)
     {
+        this.tileMapRef = new TwoDList<Tile>();
         DimensionList dimensionList = new DimensionList(startCoords);
         bool dimensionRejected = false;
 

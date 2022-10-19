@@ -5,6 +5,7 @@ using UnityEngine;
 using DiDotGraphClasses;
 using CommonlyUsedClasses;
 using TileManagerClasses;
+using CommonlyUsedFunctions;
 
 public class ZoneVeinGenerator : ContainerAccessor
 {
@@ -18,11 +19,11 @@ public class ZoneVeinGenerator : ContainerAccessor
     //      At the end this class should export the end product as a vein class
     // !!!!!!!!!!!!!!!!!!!!!!!!
 
-
-
-    TwoDList<Tile> allocatedTileMap = new TwoDList<Tile>(); // Entire allocated dimensions
-    TwoDList<Tile> tileMapConnections = new TwoDList<Tile>(); // Allocated dims, but only the tiles spaced out every x amount
     Zone_New currentZone;
+
+    // Tile Map Connections
+    TwoDList<Tile> tileMapConnections = new TwoDList<Tile>(); // Allocated dims, but only the tiles spaced out every x amount
+    CoordsInt currentCoords = new CoordsInt(0, 0);
 
     // Zone Connection Node Generation
     int gapBetweenNodes = 5;
@@ -36,7 +37,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
 
         this.currentZone = zone;
-        this.allocatedTileMap = currentZone.getTileMapRef();
+        this.currentCoords = new CoordsInt(0, 0);
 
         setupZoneConnectionNodes();
 
@@ -45,25 +46,110 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Don't want the Zone to generate one Tile at a time, need to setup nodes that need to be the only destination points
     public void setupZoneConnectionNodes()
     {
+        TwoDList<Tile> allocatedTileMap = this.currentZone.getTileMapRef(); // Entire allocated dimensions
+        DimensionList allocatedDimList = this.currentZone.getVeinZoneDimList(); // Entire allocated dimensions list (0s and 1s)
+
         CoordsInt newCoords = new CoordsInt(0, 0);
 
         //Debug.Log("X: " + allocatedTileMap.getXCount());
-        //Debug.Log("Y: " + allocatedTileMap.getYCount());
 
         for (int x = gapBetweenNodes - 1; x < allocatedTileMap.getXCount(); x = x + gapBetweenNodes)
         {
             for (int y = gapBetweenNodes - 1; y < allocatedTileMap.getYCount(x); y = y + gapBetweenNodes)
             {
-                Tile tileRef = allocatedTileMap.getElement(new CoordsInt(x, y));
+                CoordsInt currentCoords = new CoordsInt(x, y);
+                if (x > allocatedTileMap.getXCount() - gapBetweenNodes + 1 || y > allocatedTileMap.getYCount(x) - gapBetweenNodes + 1)
+                {
+                    // Do nothing, don't want to mark the edges as travel points
+                }
+                else if (allocatedDimList.getGridVal(currentCoords) == 0)
+                {
+                    // Do nothing, don't want to mark the non vein points as travel points
+                }
+                else
+                {
+                    Tile tileRef = allocatedTileMap.getElement(currentCoords);
 
-                tileMapConnections.addRefElement(newCoords, ref tileRef);
-                newCoords.incY();
+                    tileMapConnections.addRefElement(newCoords, ref tileRef);
+                    newCoords.incY();
+                }
             }
             newCoords.incX();
         }
 
         this.currentZone.setVeinZoneConnectionList(ref this.tileMapConnections);
     }
+
+  
+
+    public void goLeft(out bool rejected)
+    {
+        rejected = false;
+
+        // Left most border check
+        if (this.currentCoords.getX() - 1 < 0)
+            rejected = true;
+        // Different y height check
+        //  o    <- o can't go left       
+        //  x
+        // xx
+        // xx
+        else if (this.currentCoords.getY() >= this.tileMapConnections.getYCount(this.currentCoords.getX() - 1))
+            rejected = true;
+        else
+        {
+            CoordsInt tempCoords = this.currentCoords.deepCopyInt();
+            tempCoords.decX();
+
+            CoordsInt attemptedTileMapCoords = this.tileMapConnections.getElement(tempCoords).getTileMapCoords();
+            CoordsInt currentTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTileMapCoords();
+
+            // If the attempted to travel to coord is exactly to the left in world coords, then reject
+            if (CommonFunctions.calculateCoordsDistance(attemptedTileMapCoords, currentTileMapCoords) != (float)gapBetweenNodes)
+            {
+                rejected = true;
+            }
+            else
+            {
+                this.currentCoords.decX();
+            }
+        }
+    }
+
+    public void goRight(out bool rejected)
+    {
+        rejected = false;
+
+        // Right most border check
+        if (this.currentCoords.getX() + 1 >= this.tileMapConnections.getXCount())
+            rejected = true;
+        // Different y height check
+        // o    <- o can't go right       
+        // x
+        // xx
+        // xx
+        else if (this.currentCoords.getY() >= this.tileMapConnections.getYCount(this.currentCoords.getX() + 1))
+            rejected = true;
+        else
+        {
+            CoordsInt tempCoords = this.currentCoords.deepCopyInt();
+            tempCoords.incX();
+
+            CoordsInt attemptedTileMapCoords = this.tileMapConnections.getElement(tempCoords).getTileMapCoords();
+            CoordsInt currentTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTileMapCoords();
+
+            // If the attempted to travel to coord is exactly to the left in world coords, then reject
+            if (CommonFunctions.calculateCoordsDistance(attemptedTileMapCoords, currentTileMapCoords) != (float)gapBetweenNodes)
+            {
+                rejected = true;
+            }
+            else
+            {
+                this.currentCoords.incX();
+            }
+        }
+    }
+
 
     // =====================================================================================
     //                                     Setters/Getters

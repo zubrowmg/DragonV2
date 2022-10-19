@@ -601,6 +601,11 @@ namespace CommonlyUsedClasses
             startCoords = this.minCoords;
         }
 
+        public int getGridVal(Coords<int> coords)
+        {
+            return this.grid[coords.getX()][coords.getY()];
+        }
+
         public void printGrid()
         {
             for (int x = 0; x < grid.Count; x++)

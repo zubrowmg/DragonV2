@@ -225,6 +225,11 @@ namespace CommonlyUsedClasses
         {
             return array[index].Count;
         }
+
+        public T getZeroZero()
+        {
+            return this.array[0][0].getTwo();
+        }
     }
 
     public class RandomProbability
