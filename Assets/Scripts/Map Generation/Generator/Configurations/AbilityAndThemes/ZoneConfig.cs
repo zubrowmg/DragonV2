@@ -59,7 +59,7 @@ public class ZoneConfig
     }
 
 
-    public Zone_New getNewZone(GameTiming timing, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap)
+    public Zone_New getNewZone(GameTiming timing, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap, CoordsInt startCoords)
     {
         ZoneThemes randomTheme = ZoneThemes.None;
         ZoneAbilities randomAbility = ZoneAbilities.None;

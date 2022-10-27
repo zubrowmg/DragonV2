@@ -12,6 +12,10 @@ namespace VeinManagerClasses
 {
     public class VeinZone : VeinBase
     {
+        // !!!!!!!!!!!!!!!!!!!!!!!!
+        //      ZoneVeinGenerator should spit out a this VeinZone Class
+        // !!!!!!!!!!!!!!!!!!!!!!!!
+
 
         public VeinZone(ref GeneratorContainer contInst, int id, CoordsInt startCoords) : base(ref contInst, id, startCoords)
         {

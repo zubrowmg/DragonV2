@@ -9,10 +9,10 @@ using TileManagerClasses;
 
 public partial class ContainerAccessor
 {
-    public Zone_New createNewZoneAndAddToContainer(GameTiming gameTiming, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap)
+    public Zone_New createNewZoneAndAddToContainer(GameTiming gameTiming, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap, CoordsInt startCoords)
     {
         // Creates a new zone and adds it to the zoneContainer
-        Zone_New newZone = this.contInst.zoneConfigurator.getNewZone(gameTiming, zoneGenerationDirection, ref zoneDimList, ref tileMap);
+        Zone_New newZone = this.contInst.zoneConfigurator.getNewZone(gameTiming, zoneGenerationDirection, ref zoneDimList, ref tileMap, startCoords);
 
         this.contInst.zoneContainer.addZone(ref newZone);
 

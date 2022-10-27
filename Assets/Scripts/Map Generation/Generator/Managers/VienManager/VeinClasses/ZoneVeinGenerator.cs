@@ -39,8 +39,13 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.currentZone = zone;
         this.currentCoords = new CoordsInt(0, 0);
 
-        setupZoneConnectionNodes();
 
+
+        // Creates a grid of vein connection nodes
+        setupZoneConnectionNodes();
+        
+
+        createZoneVein();
     }
 
     // Don't want the Zone to generate one Tile at a time, need to setup nodes that need to be the only destination points
@@ -50,8 +55,9 @@ public class ZoneVeinGenerator : ContainerAccessor
         DimensionList allocatedDimList = this.currentZone.getVeinZoneDimList(); // Entire allocated dimensions list (0s and 1s)
 
         CoordsInt newCoords = new CoordsInt(0, 0);
+        CoordsInt startCoords = new CoordsInt(0, 0);
 
-        //Debug.Log("X: " + allocatedTileMap.getXCount());
+        MinValue<float, CoordsInt> minDistance = new MinValue<float, CoordsInt>(1);
 
         for (int x = gapBetweenNodes - 1; x < allocatedTileMap.getXCount(); x = x + gapBetweenNodes)
         {
@@ -71,16 +77,42 @@ public class ZoneVeinGenerator : ContainerAccessor
                     Tile tileRef = allocatedTileMap.getElement(currentCoords);
 
                     tileMapConnections.addRefElement(newCoords, ref tileRef);
+
+                    // Get the point that is the closest to the zone start coords
+                    CoordsInt adjustedCoords = allocatedDimList.getMinCoords().deepCopyInt();
+                    adjustedCoords.incX(x);
+                    adjustedCoords.incY(y);
+
+                    float distance = CommonFunctions.calculateCoordsDistance(allocatedDimList.getStartCoords(), adjustedCoords);
+                    minDistance.addValueToQueue(distance, newCoords.deepCopyInt());
+
                     newCoords.incY();
                 }
             }
             newCoords.incX();
+            newCoords.setY(0);
         }
 
         this.currentZone.setVeinZoneConnectionList(ref this.tileMapConnections);
+
+        // Set the current coords so that we start generating at the proper start
+        startCoords = minDistance.getMinVal().Value;
+        this.currentCoords = startCoords.deepCopyInt();
     }
 
-  
+
+    public void createZoneVein()
+    {
+        bool done = false;
+
+        while (done == false)
+        {
+
+
+            done = true;
+        }
+    }
+
 
     public void goLeft(out bool rejected)
     {

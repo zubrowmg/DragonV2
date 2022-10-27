@@ -151,66 +151,6 @@ namespace CommonlyUsedClasses
             this.selectedTItem = this.selectedItem.getTwo();
         }
 
-        public CoordsInt goLeft(int amount, out bool rejected, out T selectedTItem)
-        {
-            rejected = false;
-            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
-
-            if (currentCoords.getX() - amount < 0)
-                rejected = true;
-            else
-                currentCoords.decX(amount);
-
-            selectedTItem = getElement(currentCoords);
-
-            return currentCoords;
-        }
-
-        public CoordsInt goDown(int amount, out bool rejected, out T selectedTItem)
-        {
-            rejected = false;
-            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
-
-            if (currentCoords.getY() - amount < 0)
-                rejected = true;
-            else
-                currentCoords.decY(amount);
-
-            selectedTItem = getElement(currentCoords);
-
-            return currentCoords;
-        }
-
-        public CoordsInt goRight(int amount, out bool rejected, out T selectedTItem)
-        {
-            rejected = false;
-            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
-
-            if (currentCoords.getX() + amount >= getXCount())
-                rejected = true;
-            else
-                currentCoords.incX(amount);
-
-            selectedTItem = getElement(currentCoords);
-
-            return currentCoords;
-        }
-
-        public CoordsInt goUp(int amount, out bool rejected, out T selectedTItem)
-        {
-            rejected = false;
-            CoordsInt currentCoords = selectedItem.getOne().deepCopyInt();
-
-            if (currentCoords.getY() + amount >= getYCount())
-                rejected = true;
-            else
-                currentCoords.incY(amount);
-
-            selectedTItem = getElement(currentCoords);
-
-            return currentCoords;
-        }
-
         public int getXCount()
         {
             return array.Count;
@@ -456,4 +396,134 @@ namespace CommonlyUsedClasses
                    "\nVertical: " + this.verticalDir);
         }
     }
+
+
+    public abstract class OrderValuesBase<T1, T2>
+    {
+        // First value is the priority
+        //      If using Min first value is the smallest
+        //      If using Max first value is the largest
+        protected LinkedList<KeyValuePair<T1, T2>> queue;
+        protected int queueSize;
+
+        public OrderValuesBase(int size)
+        {
+            queue = new LinkedList<KeyValuePair<T1, T2>>();
+            queueSize = size;
+        }
+
+        public int getCount()
+        {
+            return queue.Count;
+        }
+
+        public KeyValuePair<T1, T2> randomlyChooseKeyValuePair()
+        {
+            KeyValuePair<T1, T2> randomPair = new KeyValuePair<T1, T2>();
+
+            int randNumber = Random.Range(0, queue.Count);
+            int count = 0;
+            for (LinkedListNode<KeyValuePair<T1, T2>> pair = queue.First; pair != null; pair = pair.Next)
+            {
+                if (count == randNumber)
+                {
+                    randomPair = pair.Value;
+                    break;
+                }
+
+                count++;
+            }
+
+            return randomPair;
+        }
+
+        public void addValueToQueue(T1 keyInt, T2 value)
+        {
+            KeyValuePair<T1, T2> newValue = new KeyValuePair<T1, T2>(keyInt, value);
+
+            if (queue.Count == 0)
+                queue.AddFirst(newValue);
+            else
+            {
+                for (LinkedListNode<KeyValuePair<T1, T2>> pair = queue.First; pair != null; pair = pair.Next)
+                {
+                    if (compareCheck(keyInt, pair))
+                    {
+                        queue.AddBefore(pair, newValue);
+
+                        if (queue.Count > queueSize)
+                            queue.RemoveLast();
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        protected abstract bool compareCheck(T1 keyInt, LinkedListNode<KeyValuePair<T1, T2>> pair);
+    }
+
+    public class MaxValue<T1, T2> : OrderValuesBase<T1, T2>
+    {
+        public MaxValue(int size) : base(size) {}
+
+        protected override bool compareCheck(T1 keyInt, LinkedListNode<KeyValuePair<T1, T2>> pair)
+        {
+            bool check = false;
+            int c = Comparer<T1>.Default.Compare(keyInt, pair.Value.Key);
+
+            // keyInt > pair.Value.Key
+            if (c > 0)
+            {
+                check = true;
+            }
+
+            return check;
+        }
+
+        public LinkedList<KeyValuePair<T1, T2>> getMaxValues()
+        {
+            return queue;
+        }
+
+        public KeyValuePair<T1, T2> getMaxVal()
+        {
+            KeyValuePair<T1, T2> pair = queue.First.Value;
+            return pair;
+        }
+    }
+
+    public class MinValue<T1, T2> : OrderValuesBase<T1, T2>
+    {
+        public MinValue(int size) : base (size) {}
+
+
+        protected override bool compareCheck(T1 keyInt, LinkedListNode<KeyValuePair<T1, T2>> pair)
+        {
+            bool check = false;
+            int c = Comparer<T1>.Default.Compare(keyInt, pair.Value.Key);
+
+            // keyInt < pair.Value.Key
+            if (c < 0)
+            {
+                check = true;
+            }
+
+            return check;
+        }
+
+
+        public LinkedList<KeyValuePair<T1, T2>> getMinValues()
+        {
+            return queue;
+        }
+
+        public KeyValuePair<T1, T2> getMinVal()
+        {
+            KeyValuePair<T1, T2> pair = queue.First.Value; 
+            return pair;
+        }
+        
+    }
+
 }

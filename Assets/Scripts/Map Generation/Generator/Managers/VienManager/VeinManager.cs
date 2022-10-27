@@ -148,7 +148,7 @@ public class VeinManager : ContainerAccessor
             DimensionList newZoneDimList = dimVeinZoneCreator.getDimensionsForVeinZone(adjustedStartCoords, debugMode, zoneGenerationDirection, out TwoDList<Tile> tileMapRef);
 
             // Create a new zone. Theme and ability included, since zone generation will rely on these parameters
-            Zone_New newZone = createNewZoneAndAddToContainer(GameTiming.Early, zoneGenerationDirection, ref newZoneDimList, ref tileMapRef);
+            Zone_New newZone = createNewZoneAndAddToContainer(GameTiming.Early, zoneGenerationDirection, ref newZoneDimList, ref tileMapRef, adjustedStartCoords);
 
             // Generate the zone after calculating the new Zone Dim List
             zoneVeinGenerator.generateZoneVein(ref newZone);

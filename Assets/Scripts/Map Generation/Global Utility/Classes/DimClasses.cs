@@ -630,5 +630,10 @@ namespace CommonlyUsedClasses
         {
             return this.startCoords;
         }
+
+        public CoordsInt getMinCoords()
+        {
+            return this.minCoords;
+        }
     }
 }
