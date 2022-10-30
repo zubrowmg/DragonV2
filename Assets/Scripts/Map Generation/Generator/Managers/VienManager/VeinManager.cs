@@ -138,6 +138,8 @@ public class VeinManager : ContainerAccessor
         farVeinConnectionList = CommonFunctions.Shuffle(ref farVeinConnectionList);
         foreach (var connection in farVeinConnectionList)
         {
+            int nextVeinId = getNextVeinId();
+
             // Figure out the allocated dimensions, should be skewed down and away from the center
             CoordsInt connCoords = connection.getTwo().getAssociatedTile().getTileMapCoords();
 
@@ -151,7 +153,8 @@ public class VeinManager : ContainerAccessor
             Zone_New newZone = createNewZoneAndAddToContainer(GameTiming.Early, zoneGenerationDirection, ref newZoneDimList, ref tileMapRef, adjustedStartCoords);
 
             // Generate the zone after calculating the new Zone Dim List
-            zoneVeinGenerator.generateZoneVein(ref newZone);
+            VeinZone newVeinZone = zoneVeinGenerator.generateZoneVein(ref newZone, nextVeinId);
+            veinList.Add(newVeinZone);
         }
 
 

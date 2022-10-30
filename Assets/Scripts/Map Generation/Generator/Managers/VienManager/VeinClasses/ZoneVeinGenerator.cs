@@ -6,6 +6,8 @@ using DiDotGraphClasses;
 using CommonlyUsedClasses;
 using TileManagerClasses;
 using CommonlyUsedFunctions;
+using CommonlyUsedDefinesAndEnums;
+using VeinManagerClasses;
 
 public class ZoneVeinGenerator : ContainerAccessor
 {
@@ -22,30 +24,79 @@ public class ZoneVeinGenerator : ContainerAccessor
     Zone_New currentZone;
 
     // Tile Map Connections
-    TwoDList<Tile> tileMapConnections = new TwoDList<Tile>(); // Allocated dims, but only the tiles spaced out every x amount
+    //       Double< CanTravelTo, Tile >
+    TwoDList<Double<bool, Tile>> tileMapConnections = new TwoDList<Double<bool, Tile>>(); // Allocated dims, but only the tiles spaced out every x amount
     CoordsInt currentCoords = new CoordsInt(0, 0);
+    CoordsInt prevCoords = new CoordsInt(0, 0);
 
     // Zone Connection Node Generation
-    int gapBetweenNodes = 5;
+    int gapBetweenNodes = 9;
+
+    // Direction and momentum
+    //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
+    Direction currentDirection;
+    int momentumMax = 4;
+    int currentMomentum = 0;
+
+    // Initial zone length
+    int maxTrunkLength = 10;
+
+    // Vein
+    VeinZone currentVeinZone;
+
 
     public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
     {
     }
+    // =====================================================================================
+    //                                     Main Function
+    // =====================================================================================
 
- 
-    public void generateZoneVein(ref Zone_New zone)
+    public VeinZone generateZoneVein(ref Zone_New zone, int veinId)
     {
-
+        this.currentVeinZone = new VeinZone(ref getContainerInst(), veinId, zone.getStartCoords());
         this.currentZone = zone;
         this.currentCoords = new CoordsInt(0, 0);
 
 
-
         // Creates a grid of vein connection nodes
+        //      Also sets current coords to the start coords
         setupZoneConnectionNodes();
-        
+        determineStartDirection();
 
         createZoneVein();
+
+        //exportVeinZoneValues();
+
+        return currentVeinZone;
+    }
+
+    // =====================================================================================
+    //                                   Setup Functions
+    // =====================================================================================
+
+    public void determineStartDirection()
+    {
+        // Randomly choose vertical or horizontal direction to start
+        DirectionBias zoneDirBias = this.currentZone.getDirBias();
+        int rand = Random.Range(0, 2);
+
+        if (rand == 0)
+        {
+            this.currentDirection = zoneDirBias.getHorizontalDir();
+            if (this.currentDirection == Direction.None)
+                this.currentDirection = zoneDirBias.getVerticalDir();
+
+        }
+        else
+        {
+            this.currentDirection = zoneDirBias.getVerticalDir();
+            if (this.currentDirection == Direction.None)
+                this.currentDirection = zoneDirBias.getHorizontalDir();
+        }
+
+        if (this.currentDirection == Direction.None)
+            Debug.LogError("ZoneVeinGenerator - determinStartDirection(): Start Direction has no direction to start in");
     }
 
     // Don't want the Zone to generate one Tile at a time, need to setup nodes that need to be the only destination points
@@ -68,22 +119,24 @@ public class ZoneVeinGenerator : ContainerAccessor
                 {
                     // Do nothing, don't want to mark the edges as travel points
                 }
-                else if (allocatedDimList.getGridVal(currentCoords) == 0)
-                {
-                    // Do nothing, don't want to mark the non vein points as travel points
-                }
                 else
                 {
-                    Tile tileRef = allocatedTileMap.getElement(currentCoords);
+                    bool travelAllowed = true;
 
-                    tileMapConnections.addRefElement(newCoords, ref tileRef);
+                    // Mark non vein points as not allowed to be traveled to
+                    if (allocatedDimList.getGridVal(currentCoords) == 0)
+                        travelAllowed = false;
+
+                    Tile tileRef = allocatedTileMap.getElement(currentCoords);
+                    Double<bool, Tile> newElement = new Double<bool, Tile>(travelAllowed, tileRef);
+                    tileMapConnections.addRefElement(newCoords, ref newElement);
 
                     // Get the point that is the closest to the zone start coords
                     CoordsInt adjustedCoords = allocatedDimList.getMinCoords().deepCopyInt();
                     adjustedCoords.incX(x);
                     adjustedCoords.incY(y);
 
-                    float distance = CommonFunctions.calculateCoordsDistance(allocatedDimList.getStartCoords(), adjustedCoords);
+                    float distance = CommonFunctions.calculateCoordsDistance(this.currentZone.getStartCoords(), adjustedCoords);
                     minDistance.addValueToQueue(distance, newCoords.deepCopyInt());
 
                     newCoords.incY();
@@ -101,8 +154,14 @@ public class ZoneVeinGenerator : ContainerAccessor
     }
 
 
+    // =====================================================================================
+    //                              Create Zone Vein Functions
+    // =====================================================================================
+
     public void createZoneVein()
     {
+        createZoneVeinTrunk();
+
         bool done = false;
 
         while (done == false)
@@ -113,75 +172,134 @@ public class ZoneVeinGenerator : ContainerAccessor
         }
     }
 
-
-    public void goLeft(out bool rejected)
+    public void createZoneVeinTrunk()
     {
-        rejected = false;
+        int currentLength = 0;
+        bool trunkFinished = false;
 
-        // Left most border check
-        if (this.currentCoords.getX() - 1 < 0)
-            rejected = true;
-        // Different y height check
-        //  o    <- o can't go left       
-        //  x
-        // xx
-        // xx
-        else if (this.currentCoords.getY() >= this.tileMapConnections.getYCount(this.currentCoords.getX() - 1))
-            rejected = true;
-        else
+        this.currentCoords.print("Start Coords: ");
+
+        while (trunkFinished == false)
         {
-            CoordsInt tempCoords = this.currentCoords.deepCopyInt();
-            tempCoords.decX();
+            // Travel one unit in the current direction
+            this.prevCoords = this.currentCoords;
+            travelOneUnit(this.currentDirection);
+            this.currentCoords.print("Current Coords: ");
 
-            CoordsInt attemptedTileMapCoords = this.tileMapConnections.getElement(tempCoords).getTileMapCoords();
-            CoordsInt currentTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTileMapCoords();
+            // Record the point
 
-            // If the attempted to travel to coord is exactly to the left in world coords, then reject
-            if (CommonFunctions.calculateCoordsDistance(attemptedTileMapCoords, currentTileMapCoords) != (float)gapBetweenNodes)
-            {
-                rejected = true;
-            }
-            else
-            {
-                this.currentCoords.decX();
-            }
+            // Decided on a new direction
+
+            // Create the vein
+            createVein();
+
+
+            // Determine if the trunk is too long
+            currentLength++;
+            if (currentLength >= maxTrunkLength)
+                trunkFinished = true;
+            break;
         }
     }
 
-    public void goRight(out bool rejected)
+    void createVein()
     {
-        rejected = false;
+        SimpleVein newVein = new SimpleVein(ref getContainerInst(), 0, this.currentDirection, this.prevCoords, this.currentCoords, false, false, false, 0, 0);
+        newVein.triggerVeinGeneration();
 
-        // Right most border check
-        if (this.currentCoords.getX() + 1 >= this.tileMapConnections.getXCount())
-            rejected = true;
-        // Different y height check
-        // o    <- o can't go right       
-        // x
-        // xx
-        // xx
-        else if (this.currentCoords.getY() >= this.tileMapConnections.getYCount(this.currentCoords.getX() + 1))
-            rejected = true;
-        else
-        {
-            CoordsInt tempCoords = this.currentCoords.deepCopyInt();
-            tempCoords.incX();
-
-            CoordsInt attemptedTileMapCoords = this.tileMapConnections.getElement(tempCoords).getTileMapCoords();
-            CoordsInt currentTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTileMapCoords();
-
-            // If the attempted to travel to coord is exactly to the left in world coords, then reject
-            if (CommonFunctions.calculateCoordsDistance(attemptedTileMapCoords, currentTileMapCoords) != (float)gapBetweenNodes)
-            {
-                rejected = true;
-            }
-            else
-            {
-                this.currentCoords.incX();
-            }
-        }
+        // Copy tiles from the new vein to the zone vein class
+        List<Tile> newVeinTiles = newVein.getAssociatedTiles();
+        this.currentVeinZone.addAssociatedTiles(ref newVeinTiles);
     }
 
+
+
+
+    // =====================================================================================
+    //                                     Navigation Functions
+    // =====================================================================================
+
+    public void travelOneUnit(Direction dir)
+    {
+        bool directionRejected = goDir(dir);
+
+        if (directionRejected == true)
+            Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction rejected, what to do?");
+    }
+    
+    public bool goDir(Direction dir)
+    {
+        CoordsInt attemptedTileMapCoords = this.currentCoords.deepCopyInt();
+
+        switch (dir)
+        {
+            case Direction.North:
+                attemptedTileMapCoords.incY();
+                break;
+            case Direction.East:
+                attemptedTileMapCoords.incX();
+                break;
+            case Direction.South:
+                attemptedTileMapCoords.decY();
+                break;
+            case Direction.West:
+                attemptedTileMapCoords.decX();
+                break;
+            case Direction.None:
+                Debug.LogError("ZoneVeinGenerator - goDir(): Direction.None passed in");
+                break;
+        }
+
+        // Check if the bounds are correct, also check if it can be traveled to
+        bool rejected = checkTileMapConnPoint(attemptedTileMapCoords);
+
+        if (rejected == false)
+        {
+            Double<bool, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(attemptedTileMapCoords);
+            CoordsInt attemptedWorldTileMapCoords = attemptedTileMapConnElement.getTwo().getTileMapCoords();
+            CoordsInt currentWorldTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTwo().getTileMapCoords();
+
+            // If the attempted to travel to coord is not exactly to the left in world coords, then reject
+            rejected = !checkGapDistance(attemptedWorldTileMapCoords, currentWorldTileMapCoords);
+            if (rejected == false)
+                this.currentCoords = attemptedTileMapCoords.deepCopyInt();
+        }
+
+        return rejected;
+    }
+
+    bool checkTileMapConnPoint(CoordsInt coords)
+    {
+        bool rejected = false;
+
+        if (0 <= coords.getX() && coords.getX() < this.tileMapConnections.getXCount() &&
+            0 <= coords.getY() && coords.getY() < this.tileMapConnections.getYCount())
+        {
+            // Do nothing, it's within bounds
+        }
+        else
+        {
+            rejected = false;
+            return rejected;
+        }
+
+        Double<bool, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(coords);
+
+        if (attemptedTileMapConnElement.getOne() == false)
+            rejected = true;
+
+        return rejected;
+    }
+
+
+    bool checkGapDistance(CoordsInt coordsOne, CoordsInt coordsTwo)
+    {
+        bool gapDistanceIsGood = true;
+        if (CommonFunctions.calculateCoordsDistance(coordsOne, coordsTwo) != (float)gapBetweenNodes)
+            gapDistanceIsGood = false;
+
+        return gapDistanceIsGood;
+    }
 
     // =====================================================================================
     //                                     Setters/Getters

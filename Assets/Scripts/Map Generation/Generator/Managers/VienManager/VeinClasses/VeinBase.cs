@@ -46,6 +46,11 @@ namespace VeinManagerClasses
             listOfVeinConnections.Add(newConnector);
         }
 
+        public void addAssociatedTiles(ref List<Tile> tiles)
+        {
+            this.associatedTiles.AddRange(tiles);
+        }
+
         // ===================================================================================================
         //                               Setters/Getters
         // ===================================================================================================

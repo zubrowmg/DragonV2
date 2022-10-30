@@ -21,7 +21,7 @@ public class Zone_New
     ZoneVeinGenType zoneVeinGenType = ZoneVeinGenType.Default;
     DimensionList associatedVeinZoneDim;
     TwoDList<Tile> associatedTileMap = new TwoDList<Tile>();
-    TwoDList<Tile> tileMapConnections = new TwoDList<Tile>();
+    TwoDList<Double<bool, Tile>> tileMapConnections = new TwoDList<Double<bool, Tile>>();
     DirectionBias zoneGenerationDirection;
 
 
@@ -65,12 +65,12 @@ public class Zone_New
         return ref this.associatedTileMap;
     }
 
-    public void setVeinZoneConnectionList(ref TwoDList<Tile> tileMapConnections)
+    public void setVeinZoneConnectionList(ref TwoDList<Double<bool, Tile>> tileMapConnections)
     {
         this.tileMapConnections = tileMapConnections;
     }
 
-    public ref TwoDList<Tile> getVeinZoneConnectionList()
+    public ref TwoDList<Double<bool, Tile>> getVeinZoneConnectionList()
     {
         return ref this.tileMapConnections;
     }
@@ -78,5 +78,15 @@ public class Zone_New
     public int getId()
     {
         return this.id;
+    }
+
+    public DirectionBias getDirBias()
+    {
+        return this.zoneGenerationDirection;
+    }
+
+    public CoordsInt getStartCoords()
+    {
+        return this.getVeinZoneDimList().getStartCoords();
     }
 }
