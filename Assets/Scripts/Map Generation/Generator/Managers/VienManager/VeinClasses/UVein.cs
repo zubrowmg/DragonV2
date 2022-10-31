@@ -17,8 +17,8 @@ namespace VeinManagerClasses
         int totalSections = 8;
 
         List<int> partWidths = new List<int> { 0, 0, 0, 0 };
-        List<int> lowerBoundries = new List<int> { 0, 0, 0, 0 };
-        List<int> upperBoundries = new List<int> { 0, 0, 0, 0 };
+        List<float> lowerBoundries = new List<float> { 0f, 0f, 0f, 0f };
+        List<float> upperBoundries = new List<float> { 0f, 0f, 0f, 0f };
 
         public UVein(ref GeneratorContainer contInst,
                      int id,
@@ -108,12 +108,12 @@ namespace VeinManagerClasses
 
         void configurePartBoundries()
         {
-            int combinedWidths = 0;
+            float combinedWidths = 0;
             for (int i = 0; i < partWidths.Count; i++)
             {
-                lowerBoundries[i] = (shiftStart + combinedWidths + i - 2) * (getDistanceGoal() / totalSections);
+                lowerBoundries[i] = ((float)shiftStart + combinedWidths + (float)i - 2) * (getDistanceGoal() / (float)totalSections);
                 combinedWidths += partWidths[i];
-                upperBoundries[i] = (shiftStart + combinedWidths + i) * (getDistanceGoal() / totalSections);
+                upperBoundries[i] = ((float)shiftStart + combinedWidths + (float)i) * (getDistanceGoal() / (float)totalSections);
             }
         }
 
@@ -354,7 +354,7 @@ namespace VeinManagerClasses
                 handleMiddleVeinConnections(this.currentDistance, newCurrentDistance);
                 setCurrentDistance(newCurrentDistance);
 
-                if (getCurrentDistance() > (float)getDistanceGoal())
+                if (getCurrentDistance() > getDistanceGoal())
                 {
                     placeVeinConnection(this.currentCoords);
                     break;
@@ -376,5 +376,5 @@ namespace VeinManagerClasses
             // Should be the last vein connection added to the list, look at triggerVeinGeneration() in simple and U veins
             return listOfVeinConnections[listOfVeinConnections.Count - 1];
         }
-        }
+    }
 }

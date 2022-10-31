@@ -54,10 +54,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     public VeinZone generateZoneVein(ref Zone_New zone, int veinId)
     {
-        this.currentVeinZone = new VeinZone(ref getContainerInst(), veinId, zone.getStartCoords());
-        this.currentZone = zone;
-        this.currentCoords = new CoordsInt(0, 0);
-
+        init(veinId, ref zone);
 
         // Creates a grid of vein connection nodes
         //      Also sets current coords to the start coords
@@ -74,6 +71,14 @@ public class ZoneVeinGenerator : ContainerAccessor
     // =====================================================================================
     //                                   Setup Functions
     // =====================================================================================
+
+    void init(int veinId, ref Zone_New zone)
+    {
+        this.currentVeinZone = new VeinZone(ref getContainerInst(), veinId, zone.getStartCoords());
+        this.currentZone = zone;
+        this.currentCoords = new CoordsInt(0, 0);
+        this.tileMapConnections = new TwoDList<Double<bool, Tile>>();
+    }
 
     public void determineStartDirection()
     {
@@ -204,7 +209,9 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     void createVein()
     {
-        SimpleVein newVein = new SimpleVein(ref getContainerInst(), 0, this.currentDirection, this.prevCoords, this.currentCoords, false, false, false, 0, 0);
+        CoordsInt previousWorldCoords = getTileMapCoordsFromTileMapConns(this.prevCoords);
+        CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
+        SimpleVein newVein = new SimpleVein(ref getContainerInst(), 0, this.currentDirection, previousWorldCoords, currentWorldCoords, false, false, false, 5);
         newVein.triggerVeinGeneration();
 
         // Copy tiles from the new vein to the zone vein class
@@ -291,6 +298,10 @@ public class ZoneVeinGenerator : ContainerAccessor
         return rejected;
     }
 
+    CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)
+    {
+        return tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
+    }
 
     bool checkGapDistance(CoordsInt coordsOne, CoordsInt coordsTwo)
     {

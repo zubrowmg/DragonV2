@@ -35,6 +35,28 @@ namespace VeinManagerClasses
             this.setVeinType(VeinType.Simple);
         }
 
+        public SimpleVein(ref GeneratorContainer contInst,
+                          int id,
+                          Direction generalDirection,
+                          CoordsInt startCoords,
+                          CoordsInt endCoords,
+                          bool varyWidth,
+                          bool varyLength,
+                          bool varySlope,
+                          int width)
+                   : base(ref contInst,
+                          id,
+                          generalDirection,
+                          startCoords,
+                          endCoords,
+                          varyWidth,
+                          varyLength,
+                          varySlope,
+                          width)
+        {
+            this.setVeinType(VeinType.Simple);
+        }
+
         public override void triggerVeinGeneration()
         {
             DistanceStateTracker distanceTracker = new DistanceStateTracker(getDistanceGoal());
@@ -65,7 +87,7 @@ namespace VeinManagerClasses
                 handleMiddleVeinConnections(this.currentDistance, newCurrentDistance);
                 setCurrentDistance(newCurrentDistance);
 
-                if (getCurrentDistance() > (float)getDistanceGoal())
+                if (getCurrentDistance() > getDistanceGoal())
                 {
                     placeVeinConnection(this.currentCoords);
                     break;

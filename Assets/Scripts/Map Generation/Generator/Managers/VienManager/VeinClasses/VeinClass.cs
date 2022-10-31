@@ -24,7 +24,7 @@ namespace VeinManagerClasses
         int minWidth = 4;
         int currentWidth;
         int approxWidth = 6;
-        int approxDistance = 6;
+        float approxDistance = 6;
 
         // Slope properties and percentages
         protected Slope veinSlope;
@@ -80,16 +80,19 @@ namespace VeinManagerClasses
 
         }
 
+        // If you want the start/end coords to determine the distance
         public Vein(ref GeneratorContainer contInst, int id, Direction generalDirection, CoordsInt startCoords, Coords<int> endCoords,
-                        bool varyWidth, bool varyLength, bool varySlope) : base(ref contInst, id, startCoords)
+                        bool varyWidth, bool varyLength, bool varySlope, int width) : base(ref contInst, id, startCoords)
         {
             initGeneralProperties(generalDirection, endCoords, varyWidth, varyLength, varySlope);
 
             this.currentWidth = approxWidth;
             this.currentVeinDirection = calculateCurrentVeinDirection(startCoords);
             this.intendedVeinDirection = this.currentVeinDirection;
+            this.approxWidth = width;
 
-            this.approxDistance = initVaryLength(varyLength, approxDistance);
+            float distance = CommonFunctions.calculateCoordsDistance(startCoords, endCoords);
+            this.approxDistance = initVaryLength(varyLength, distance);
 
             configVeinConnectionDistance();
 
@@ -112,8 +115,10 @@ namespace VeinManagerClasses
 
         }
 
-        int initVaryLength(bool varyLength, int distance)
+        float initVaryLength(bool varyLength, float distance)
         {
+
+
             if (varyLength == false)
             {
                 return distance;
@@ -561,7 +566,7 @@ namespace VeinManagerClasses
             this.currentDistance = newDistance;
         }
 
-        protected int getDistanceGoal()
+        protected float getDistanceGoal()
         {
             return this.approxDistance;
         }

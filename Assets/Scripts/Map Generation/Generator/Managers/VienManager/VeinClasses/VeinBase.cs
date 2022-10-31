@@ -55,6 +55,10 @@ namespace VeinManagerClasses
         //                               Setters/Getters
         // ===================================================================================================
 
+        public int getId()
+        {
+            return this.veinId;
+        }
 
         public List<VeinConnection> getVeinConnections()
         {

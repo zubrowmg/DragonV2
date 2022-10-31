@@ -67,6 +67,8 @@ public class DebugControllerManager : MonoBehaviour
 
         foreach (var vein in veinList)
         {
+            //Debug.Log("Vein Id: " + vein.getId());
+
             var veinRef = vein;
             List<Tile> associatedTiles = veinRef.getAssociatedTiles();
 
