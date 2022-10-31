@@ -12,7 +12,7 @@ public class DimVeinZoneCreator : DimCreator
     int squareAreaFillMinSideLength = 6;
     float squareAreaMaxArea = 75;
 
-    int veinZoneMaxArea = 2000;
+    int veinZoneMaxArea = 2300;
     bool topOffDimList = true;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)

@@ -80,6 +80,9 @@ public abstract class DimCreator : TileAccessor
     // Should not be calling this function directly, look at getDimensionsForRoom() as an example
     protected DimensionList getDimensions(CoordsInt startCoords)
     {
+        int topOffCount = 0;
+        int topOffMax = 10;
+
         this.tileMapRef = new TwoDList<Tile>();
         DimensionList dimensionList = new DimensionList(startCoords);
         bool dimensionRejected = false;
@@ -105,8 +108,6 @@ public abstract class DimCreator : TileAccessor
 
         while (done == false)
         {
-            
-
             if (coordsToCheck.Count == 0)
             {
                 break;
@@ -131,36 +132,65 @@ public abstract class DimCreator : TileAccessor
             else
             {
                 if (getDimsToTopOffDimList == false)
+                {
                     dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
+                }
                 else
+                {
                     //dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
                     dimensionRejected = dimensionList.addDimensionWithOutExpandingDims(new SquareArea(minCoords, maxCoords, center));
-
+                }
 
                 if (dimensionRejected == false)
                 {
                     // Search for more dimensions and add them to coordsToCheck
                     findAdjacentStartPoints(dimensionList, center, ref coordsToCheck, startCoords, getDimsToTopOffDimList);
-
                 }
             }
 
             // Break out conditions
             if (dimensionList.area >= maxArea)
             {
+                
+
                 if (this.topOffDimList == true)
                 {
+                    if (coordsToCheck.Count % 50 == 0)
+                    {
+                        Debug.Log("COUNT: " + coordsToCheck.Count + "\n" +
+                              "TOP OFF COUNT: " + topOffCount);
+                    }
+                    
+
+                    if (coordsToCheck.Count == 0)
+                        topOffCount++;
+                    else
+                        topOffCount = 0;
+
+                    if (topOffCount >= topOffMax)
+                        done = true;
+
                     getDimsToTopOffDimList = true;
                 }
                 else
+                {
+                    //Debug.Log("\nDONE FOR REAL\n");
                     done = true;
+
+                }
+
+
             }
+
+
         }
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
         bool dimensionListIsAcceptable = dimensionList.finalCheck();
         if (dimensionListIsAcceptable == true)
             fillTileMap(dimensionList);
+
+
 
         return dimensionList;
     }
@@ -190,7 +220,8 @@ public abstract class DimCreator : TileAccessor
 
     }
 
-    void findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, CoordsInt startCoords, bool getDimsToTopOffDimList)
+    bool findAdjacentStartPoints(DimensionList dimensionList, CoordsInt center, ref LinkedList<CoordsInt> coordsToCheck, 
+                                 CoordsInt startCoords, bool getDimsToTopOffDimList)
     {
         int startDisplacement = this.maxAdjacentSearchDisplacement;
 
@@ -278,6 +309,8 @@ public abstract class DimCreator : TileAccessor
                 }
             }
         }
+
+        return foundNewPoint;
     }
 
     bool directionCheck(CoordsInt startCoords, Direction attemptedDir)

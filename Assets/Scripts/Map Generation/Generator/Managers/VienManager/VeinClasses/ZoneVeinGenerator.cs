@@ -182,14 +182,14 @@ public class ZoneVeinGenerator : ContainerAccessor
         int currentLength = 0;
         bool trunkFinished = false;
 
-        this.currentCoords.print("Start Coords: ");
+        //this.currentCoords.print("Start Coords: ");
 
         while (trunkFinished == false)
         {
             // Travel one unit in the current direction
             this.prevCoords = this.currentCoords;
             travelOneUnit(this.currentDirection);
-            this.currentCoords.print("Current Coords: ");
+            //this.currentCoords.print("Current Coords: ");
 
             // Record the point
 
