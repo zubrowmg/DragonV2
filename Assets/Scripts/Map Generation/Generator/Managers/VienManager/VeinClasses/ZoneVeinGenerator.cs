@@ -35,14 +35,18 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Direction and momentum
     //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
     Direction currentDirection;
-    int momentumMax = 4;
+    int momentumMax = 3;
     int currentMomentum = 0;
+    List<float> momentumPercentTable = new List<float> { .85f, .60f, .25f, .0f };
 
     // Initial zone length
     int maxTrunkLength = 10;
 
     // Vein
     VeinZone currentVeinZone;
+    List<CoordsInt> setCoords;
+    SetCoordsVein newVein;
+    int veinWidth = 5;
 
 
     public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
@@ -78,6 +82,8 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.currentZone = zone;
         this.currentCoords = new CoordsInt(0, 0);
         this.tileMapConnections = new TwoDList<Double<bool, Tile>>();
+        this.setCoords = new List<CoordsInt>();
+        this.newVein = new SetCoordsVein(ref getContainerInst(), 0, this.currentDirection, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, 5);
     }
 
     public void determineStartDirection()
@@ -104,7 +110,7 @@ public class ZoneVeinGenerator : ContainerAccessor
             Debug.LogError("ZoneVeinGenerator - determinStartDirection(): Start Direction has no direction to start in");
     }
 
-    // Don't want the Zone to generate one Tile at a time, need to setup nodes that need to be the only destination points
+    // Don't want the Zone to generate one Tile at a time, need to setup Tile nodes that need to be the only destination points
     public void setupZoneConnectionNodes()
     {
         TwoDList<Tile> allocatedTileMap = this.currentZone.getTileMapRef(); // Entire allocated dimensions
@@ -183,21 +189,21 @@ public class ZoneVeinGenerator : ContainerAccessor
         bool trunkFinished = false;
 
         //this.currentCoords.print("Start Coords: ");
+        CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
+        newVein.addSetCoord(currentWorldCoords);
 
         while (trunkFinished == false)
         {
             // Travel one unit in the current direction
             this.prevCoords = this.currentCoords;
             travelOneUnit(this.currentDirection);
-            //this.currentCoords.print("Current Coords: ");
 
             // Record the point
+            currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
+            newVein.addSetCoord(currentWorldCoords);
 
-            // Decided on a new direction
-
-            // Create the vein
-            createVein();
-
+            // Decide on a new direction
+            determineNewDirection();
 
             // Determine if the trunk is too long
             currentLength++;
@@ -205,14 +211,30 @@ public class ZoneVeinGenerator : ContainerAccessor
                 trunkFinished = true;
             break;
         }
+
+        // Create the vein once all points are choosen
+        createVein();
+    }
+
+    void determineNewDirection()
+    {
+        //momentumMax = 4;
+        //currentMomentum = 0;
+
+        bool changeDirection = false;
+        float rand = Random.Range(0f, 1f);
+
+        if (rand >= momentumPercentTable[currentMomentum])
+            changeDirection = true;
+
+        // Determine which direction should be changed to
+        //      Make sure the trunk doesn't run over itself, or will run out of bounds
+
     }
 
     void createVein()
     {
-        CoordsInt previousWorldCoords = getTileMapCoordsFromTileMapConns(this.prevCoords);
-        CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
-        SimpleVein newVein = new SimpleVein(ref getContainerInst(), 0, this.currentDirection, previousWorldCoords, currentWorldCoords, false, false, false, 5);
-        newVein.triggerVeinGeneration();
+        newVein.triggerSetCoordsVeinGeneration();
 
         // Copy tiles from the new vein to the zone vein class
         List<Tile> newVeinTiles = newVein.getAssociatedTiles();

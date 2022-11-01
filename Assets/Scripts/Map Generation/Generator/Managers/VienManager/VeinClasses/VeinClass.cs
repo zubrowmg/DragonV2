@@ -24,12 +24,12 @@ namespace VeinManagerClasses
         int minWidth = 4;
         int currentWidth;
         int approxWidth = 6;
-        float approxDistance = 6;
+        protected float approxDistance = 6;
 
         // Slope properties and percentages
         protected Slope veinSlope;
         protected Slope intendedVeinSlope;
-        TargetProbabilityManager slopeTargetManager;
+        protected TargetProbabilityManager slopeTargetManager;
 
 
         // Vein varying properties
@@ -54,6 +54,7 @@ namespace VeinManagerClasses
         // =========================================================================
         //                            End Variables
         // =========================================================================
+        
         
 
         void initGeneralProperties(Direction generalDirection, Coords<int> endCoords,
@@ -115,7 +116,7 @@ namespace VeinManagerClasses
 
         }
 
-        float initVaryLength(bool varyLength, float distance)
+        protected float initVaryLength(bool varyLength, float distance)
         {
 
 
@@ -526,6 +527,13 @@ namespace VeinManagerClasses
         }
 
         public VeinDirection calculateCurrentVeinDirection(Coords<int> currentCoords)
+        {
+            VeinDirection veinDirection = calculateCurrentVeinDirection(currentCoords, endCoords);
+
+            return veinDirection;
+        }
+
+        public VeinDirection calculateCurrentVeinDirection(Coords<int> currentCoords, Coords<int> endCoords)
         {
             VeinDirection veinDirection = VeinDirection.None_Set;
 

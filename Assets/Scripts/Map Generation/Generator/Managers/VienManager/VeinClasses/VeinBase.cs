@@ -27,6 +27,8 @@ namespace VeinManagerClasses
         protected List<VeinConnection> listOfVeinConnections = new List<VeinConnection>();
 
 
+        
+
         public VeinBase(ref GeneratorContainer contInst, int id, CoordsInt startCoords) : base(ref contInst)
         {
             this.veinId = id;
