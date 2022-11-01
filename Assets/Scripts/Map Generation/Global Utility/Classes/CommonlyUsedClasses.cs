@@ -526,4 +526,37 @@ namespace CommonlyUsedClasses
         
     }
 
+    public class QueueWrap<T>
+    {
+        List<T> queue = new List<T>();
+        int maxSize;
+
+        public QueueWrap(int maxSize)
+        {
+            this.maxSize = maxSize;
+        }
+
+        public void enqueue(T item)
+        {
+            queue.Add(item);
+
+            if (queue.Count > maxSize)
+                deque();
+        }
+
+        public void deque()
+        {
+            queue.RemoveAt(0);
+        }
+
+        public int getCount()
+        {
+            return queue.Count;
+        }
+
+        public T getElement(int index)
+        {
+            return queue[index];
+        }
+    }
 }

@@ -26,6 +26,7 @@ public class DimRoomCreator : DimCreator
     public DimRoomCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.wiggleDisplacementRange = 3;
+        this.historyWiggleDisplacementRange = 0; // Leaving this as 0 for now, as it was for Dragon v1
         this.maxAdjacentSearchDisplacement = 11;
     }
 

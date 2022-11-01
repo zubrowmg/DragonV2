@@ -12,12 +12,13 @@ public class DimVeinZoneCreator : DimCreator
     int squareAreaFillMinSideLength = 6;
     float squareAreaMaxArea = 75;
 
-    int veinZoneMaxArea = 2300;
+    int veinZoneMaxArea = 4000;
     bool topOffDimList = true;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
-        this.wiggleDisplacementRange = 0;
+        this.wiggleDisplacementRange = (int)Mathf.Sqrt(squareAreaMaxArea) - 3;
+        this.historyWiggleDisplacementRange = this.wiggleDisplacementRange;
         this.maxAdjacentSearchDisplacement = squareAreaFillMinSideLength + 3;
     }
 

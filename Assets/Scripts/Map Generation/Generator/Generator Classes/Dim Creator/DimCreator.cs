@@ -34,8 +34,14 @@ public abstract class DimCreator : TileAccessor
     // Dim Direction Bias
     protected DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
+    // History coords queue
+    QueueWrap<CoordsInt> recentlyAddedCoordsToCheck;
+    int recentlyAddedCoordsQueueSize = 40;
+    protected int historyWiggleDisplacementRange;
+
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
+        this.recentlyAddedCoordsToCheck = new QueueWrap<CoordsInt>(recentlyAddedCoordsQueueSize);
     }
 
     // =======================================================================================
@@ -155,13 +161,6 @@ public abstract class DimCreator : TileAccessor
 
                 if (this.topOffDimList == true)
                 {
-                    if (coordsToCheck.Count % 50 == 0)
-                    {
-                        Debug.Log("COUNT: " + coordsToCheck.Count + "\n" +
-                              "TOP OFF COUNT: " + topOffCount);
-                    }
-                    
-
                     if (coordsToCheck.Count == 0)
                         topOffCount++;
                     else
@@ -176,21 +175,14 @@ public abstract class DimCreator : TileAccessor
                 {
                     //Debug.Log("\nDONE FOR REAL\n");
                     done = true;
-
                 }
-
-
             }
-
-
         }
 
         // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
         bool dimensionListIsAcceptable = dimensionList.finalCheck();
         if (dimensionListIsAcceptable == true)
             fillTileMap(dimensionList);
-
-
 
         return dimensionList;
     }
@@ -340,7 +332,8 @@ public abstract class DimCreator : TileAccessor
     }
 
 
-    bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, ref LinkedList<CoordsInt> coordsToCheck, 
+    bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, 
+                        ref LinkedList<CoordsInt> coordsToCheck, 
                         CoordsInt wiggledCoords, CoordsInt startCoords, bool getDimsToTopOffDimList)
     {
         bool foundNewPoint = false;
@@ -351,6 +344,10 @@ public abstract class DimCreator : TileAccessor
         if (wiggleConditions(wiggledCoords) == true)
         {
             if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords, wiggleDisplacementRange) == true)
+            {
+                tooCloseToPreviouslyAttemptedSquareCore = true;
+            }
+            else if (coordsTooCloseToListHistoryBuffer(wiggledCoords) == true)
             {
                 tooCloseToPreviouslyAttemptedSquareCore = true;
             }
@@ -373,6 +370,26 @@ public abstract class DimCreator : TileAccessor
         return foundNewPoint;
     }
 
+    // Will check the coords list history buffer to make sure that the wiggled coords are not too close to any in the list
+    bool coordsTooCloseToListHistoryBuffer(CoordsInt wiggledCoords)
+    {
+        bool tooClose = false; 
+
+        for (int i = 0; i < recentlyAddedCoordsToCheck.getCount(); i++)
+        {
+            CoordsInt currentCoords = recentlyAddedCoordsToCheck.getElement(i);
+
+            if (currentCoords.getX() - historyWiggleDisplacementRange <= wiggledCoords.getX() && wiggledCoords.getX() <= currentCoords.getX() + historyWiggleDisplacementRange &&
+                currentCoords.getY() - historyWiggleDisplacementRange <= wiggledCoords.getY() && wiggledCoords.getY() <= currentCoords.getY() + historyWiggleDisplacementRange)
+            {
+                tooClose = true;
+                break;
+            }
+        }
+
+        return tooClose;
+    }
+
     void addCoordsToList(ref LinkedList<CoordsInt> coordsToCheck, CoordsInt wiggledCoords, CoordsInt startCoords)
     {
         // Need to add the coords into the list ordered by how far they are from the starting coords
@@ -380,6 +397,8 @@ public abstract class DimCreator : TileAccessor
         float newDistance = Mathf.Sqrt(
                                 Mathf.Pow(startCoords.getX() - wiggledCoords.getX(), 2) + 
                                 Mathf.Pow(startCoords.getY() - wiggledCoords.getY(), 2));
+
+        recentlyAddedCoordsToCheck.enqueue(wiggledCoords);
 
         if (coordsToCheck.Count == 0)
             coordsToCheck.AddLast(wiggledCoords.deepCopyInt());

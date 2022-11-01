@@ -537,7 +537,7 @@ namespace CommonlyUsedClasses
             int x = coords.getX();
             int y = coords.getY();
             bool pointRejected = false;
-            int displacement = displacemntRange = 3;
+            int displacement = displacemntRange;
 
             //Debug.Log("INPUT: " + x + "," + y);
 
