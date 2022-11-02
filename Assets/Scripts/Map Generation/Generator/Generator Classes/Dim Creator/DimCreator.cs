@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using System; // For using Enum (capital E)
+//using System; // For using Enum (capital E)
 using CommonlyUsedFunctions;
 using CommonlyUsedClasses;
 using TileManagerClasses;
@@ -224,7 +224,7 @@ public abstract class DimCreator : TileAccessor
 
         // Four for each direction
 
-        foreach (Direction dir in Enum.GetValues(typeof(Direction)))
+        foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
         {
             foundNewPoint = false;
             int displacement = startDisplacement;

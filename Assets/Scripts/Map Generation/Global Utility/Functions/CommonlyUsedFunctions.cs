@@ -37,6 +37,13 @@ namespace CommonlyUsedFunctions
         {
             return (float)Mathf.Abs(numOne - numTwo);
         }
+
+        public static T randomlySelectFromList<T>(List<T> list)
+        {
+            int randInt = Random.Range(0, list.Count);
+
+            return list[randInt];
+        }
     }
 }
 

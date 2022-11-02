@@ -81,6 +81,7 @@ namespace VeinManagerClasses
             if (setCoords.Count < 2)
                 Debug.LogError("SetCoordsVein - triggerSetCoordsVeinGeneration: Less than 2 coords added");
 
+
             bool firstLoop = true;
 
             CoordsInt prevWorldCoords = new CoordsInt(0, 0);
@@ -92,6 +93,7 @@ namespace VeinManagerClasses
                 {
                     prevWorldCoords = setCoords.Dequeue();
                     currentWorldCoords = setCoords.Dequeue();
+                    firstLoop = false;
                 }
                 else
                 {

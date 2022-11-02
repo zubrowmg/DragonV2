@@ -35,12 +35,15 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Direction and momentum
     //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
     Direction currentDirection;
-    int momentumMax = 3;
+    int maxMomentum = 3;
     int currentMomentum = 0;
-    List<float> momentumPercentTable = new List<float> { .85f, .60f, .25f, .0f };
+    float primaryDirectionPercentage = .65f;
+    List<float> momentumPercentTable = new List<float> { .85f, .60f, .25f, .05f };
+    List<Direction> primaryDir;
+    List<Direction> secondaryDir;
 
     // Initial zone length
-    int maxTrunkLength = 10;
+    int maxTrunkLength = 6;
 
     // Vein
     VeinZone currentVeinZone;
@@ -84,6 +87,8 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.tileMapConnections = new TwoDList<Double<bool, Tile>>();
         this.setCoords = new List<CoordsInt>();
         this.newVein = new SetCoordsVein(ref getContainerInst(), 0, this.currentDirection, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, 5);
+
+        setPrimaryAndSecondaryDir();
     }
 
     public void determineStartDirection()
@@ -165,6 +170,40 @@ public class ZoneVeinGenerator : ContainerAccessor
     }
 
 
+    public void setPrimaryAndSecondaryDir()
+    {
+        primaryDir = new List<Direction>();
+        secondaryDir = new List<Direction>();
+
+        if (currentZone.getDirBias().getHorizontalDir() != Direction.None)
+            primaryDir.Add(currentZone.getDirBias().getHorizontalDir());
+        if (currentZone.getDirBias().getVerticalDir() != Direction.None)
+            primaryDir.Add(currentZone.getDirBias().getVerticalDir());
+
+        foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
+        {
+            if (dir == Direction.None)
+                continue;
+
+            if (primaryDir.Contains(dir) == false)
+                secondaryDir.Add(dir);
+        }
+    }
+
+
+
+    List<Direction> getNonePrimaryDir()
+    {
+        List<Direction> primaryDir = new List<Direction>();
+
+        if (currentDirection != Direction.None)
+            primaryDir.Add(currentZone.getDirBias().getHorizontalDir());
+        if (currentDirection != Direction.None)
+            primaryDir.Add(currentZone.getDirBias().getVerticalDir());
+
+        return primaryDir;
+    }
+
     // =====================================================================================
     //                              Create Zone Vein Functions
     // =====================================================================================
@@ -188,19 +227,24 @@ public class ZoneVeinGenerator : ContainerAccessor
         int currentLength = 0;
         bool trunkFinished = false;
 
-        //this.currentCoords.print("Start Coords: ");
+        this.currentCoords.print("Start Coords: ");
         CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
         newVein.addSetCoord(currentWorldCoords);
 
         while (trunkFinished == false)
         {
+            this.currentCoords.print("Current Coords: ");
+
             // Travel one unit in the current direction
             this.prevCoords = this.currentCoords;
             travelOneUnit(this.currentDirection);
 
+
             // Record the point
             currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
             newVein.addSetCoord(currentWorldCoords);
+
+
 
             // Decide on a new direction
             determineNewDirection();
@@ -209,28 +253,16 @@ public class ZoneVeinGenerator : ContainerAccessor
             currentLength++;
             if (currentLength >= maxTrunkLength)
                 trunkFinished = true;
-            break;
+           // break;
         }
 
         // Create the vein once all points are choosen
         createVein();
     }
 
-    void determineNewDirection()
-    {
-        //momentumMax = 4;
-        //currentMomentum = 0;
+    
 
-        bool changeDirection = false;
-        float rand = Random.Range(0f, 1f);
 
-        if (rand >= momentumPercentTable[currentMomentum])
-            changeDirection = true;
-
-        // Determine which direction should be changed to
-        //      Make sure the trunk doesn't run over itself, or will run out of bounds
-
-    }
 
     void createVein()
     {
@@ -250,13 +282,14 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     public void travelOneUnit(Direction dir)
     {
-        bool directionRejected = goDir(dir);
+        //bool directionRejected = 
+        goDir(dir);
 
-        if (directionRejected == true)
-            Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction rejected, what to do?");
+        //if (directionRejected == true)
+        //    Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction rejected, what to do?");
     }
     
-    public bool goDir(Direction dir)
+    public void goDir(Direction dir)
     {
         CoordsInt attemptedTileMapCoords = this.currentCoords.deepCopyInt();
 
@@ -280,26 +313,33 @@ public class ZoneVeinGenerator : ContainerAccessor
         }
 
         // Check if the bounds are correct, also check if it can be traveled to
-        bool rejected = checkTileMapConnPoint(attemptedTileMapCoords);
+        //bool rejected = checkTileMapConnPoint(attemptedTileMapCoords);
 
-        if (rejected == false)
-        {
-            Double<bool, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(attemptedTileMapCoords);
-            CoordsInt attemptedWorldTileMapCoords = attemptedTileMapConnElement.getTwo().getTileMapCoords();
-            CoordsInt currentWorldTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTwo().getTileMapCoords();
+        //if (rejected == false)
+        //{
+        Double<bool, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(attemptedTileMapCoords);
+        CoordsInt attemptedWorldTileMapCoords = attemptedTileMapConnElement.getTwo().getTileMapCoords();
+        CoordsInt currentWorldTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTwo().getTileMapCoords();
 
-            // If the attempted to travel to coord is not exactly to the left in world coords, then reject
-            rejected = !checkGapDistance(attemptedWorldTileMapCoords, currentWorldTileMapCoords);
-            if (rejected == false)
+        // If the attempted to travel to coord is not exactly to the left in world coords, then reject
+        //rejected = !checkGapDistance(attemptedWorldTileMapCoords, currentWorldTileMapCoords);
+        checkGapDistance(attemptedWorldTileMapCoords, currentWorldTileMapCoords);
+            //if (rejected == false)
                 this.currentCoords = attemptedTileMapCoords.deepCopyInt();
-        }
+        //}
 
-        return rejected;
+        //return rejected;
     }
+
+
 
     bool checkTileMapConnPoint(CoordsInt coords)
     {
         bool rejected = false;
+
+        //Debug.Log("BOUNDS_1: " + this.tileMapConnections.getXCount() + "," + this.tileMapConnections.getYCount(coords.getX()));
+        //Debug.Log("BOUNDS_2: " + this.tileMapConnections.getXCount() + "," + this.tileMapConnections.getYCount());
+
 
         if (0 <= coords.getX() && coords.getX() < this.tileMapConnections.getXCount() &&
             0 <= coords.getY() && coords.getY() < this.tileMapConnections.getYCount())
@@ -308,7 +348,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         }
         else
         {
-            rejected = false;
+            rejected = true;
             return rejected;
         }
 
@@ -318,6 +358,109 @@ public class ZoneVeinGenerator : ContainerAccessor
             rejected = true;
 
         return rejected;
+    }
+
+    void determineNewDirection()
+    {
+        //momentumMax = 4;
+        //currentMomentum = 0;
+
+        bool changeDirection = false;
+        float randFloat = Random.Range(0f, 1f);
+        Direction attempedDir = currentDirection;
+
+        if (randFloat >= momentumPercentTable[currentMomentum])
+            changeDirection = true;
+
+        bool moveAccepted = false;
+        bool primaryDirSelected = false;
+        if (randFloat >= primaryDirectionPercentage)
+            primaryDirSelected = true;
+
+        List<Direction> rejectedDirections = new List<Direction>();
+        randFloat = Random.Range(0f, 1f);
+
+        // Determine which direction should be changed to
+        //      Make sure the trunk doesn't run over itself, or will run out of bounds
+        while (moveAccepted == false)
+        {
+            if (changeDirection == true)
+            {
+                List<Direction> possibleDirections = new List<Direction>();
+
+                while (possibleDirections.Count == 0)
+                {
+                    if (primaryDirSelected)
+                    {
+                        foreach (var dir in primaryDir)
+                        {
+                            if (rejectedDirections.Contains(dir) == false)
+                                possibleDirections.Add(dir);
+                        }
+
+                        if (possibleDirections.Count == 0)
+                            primaryDirSelected = false;
+                    }
+                    else
+                    {
+                        foreach (var dir in secondaryDir)
+                        {
+                            if (rejectedDirections.Contains(dir) == false)
+                                possibleDirections.Add(dir);
+                        }
+
+                        if (possibleDirections.Count == 0)
+                            primaryDirSelected = true;
+                    }
+                }
+
+                attempedDir = CommonFunctions.randomlySelectFromList(possibleDirections);
+            }
+
+            moveAccepted = isNextMoveValid(attempedDir);
+
+            if (moveAccepted == true)
+                currentDirection = attempedDir;
+            else if (moveAccepted == false)
+            {
+                // If the current direction will lead into a wall, then change the direction
+                if (changeDirection == false)
+                    changeDirection = true;
+                rejectedDirections.Add(currentDirection);
+            }
+
+        }
+        
+    }
+
+    // Check if the next direction will hit the edge
+    bool isNextMoveValid(Direction attempedDir)
+    {
+        CoordsInt attemptedTileMapCoords = this.currentCoords.deepCopyInt();
+
+        switch (attempedDir)
+        {
+            case Direction.North:
+                attemptedTileMapCoords.incY();
+                break;
+            case Direction.East:
+                attemptedTileMapCoords.incX();
+                break;
+            case Direction.South:
+                attemptedTileMapCoords.decY();
+                break;
+            case Direction.West:
+                attemptedTileMapCoords.decX();
+                break;
+            case Direction.None:
+                Debug.LogError("ZoneVeinGenerator - goDir(): Direction.None passed in");
+                break;
+        }
+
+        // Check if the bounds are correct, also check if it can be traveled to
+        bool accepted = !checkTileMapConnPoint(attemptedTileMapCoords);
+
+        return accepted;
     }
 
     CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)
