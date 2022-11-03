@@ -44,7 +44,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     List<Direction> secondaryDir;
 
     // Initial zone length
-    int maxTrunkLength = 15;
+    int maxTrunkLength = 12;
 
     // Vein
     VeinZone currentVeinZone;
@@ -94,7 +94,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.setCoords = new List<CoordsInt>();
 
         this.prevDirection = Direction.None;
-        this.newVein = new SetCoordsVein(ref getContainerInst(), 0, this.currentDirection, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, 5);
+        this.newVein = new SetCoordsVein(ref getContainerInst(), 0, this.currentDirection, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, this.veinWidth);
 
         this.currentVeinPass = 0;
 
@@ -228,6 +228,12 @@ public class ZoneVeinGenerator : ContainerAccessor
         //this.currentCoords.print("Start Coords: ");
         CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
         newVein.addSetCoord(currentWorldCoords);
+
+        Debug.Log("==============================");
+        Debug.Log("        TRUNK START");
+        Debug.Log("==============================");
+
+        this.currentCoords.print("START COORDS: ");
 
         while (trunkFinished == false)
         {
@@ -384,6 +390,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Checks for boundries and if the point cannot be traveled to
     bool checkTileMapConnPoint(CoordsInt coords)
     {
+        // Check Boundry
         bool rejected = !tileMapConnections.isInsideBounds(coords);
 
         if (rejected == true)
@@ -425,6 +432,14 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         // No U turns
         rejectedDirections.Add(CommonFunctions.getOppositeDir(this.prevDirection));
+
+        Debug.Log("Change Direction Top \n =======================================================================");
+        this.currentCoords.print("Current Coords: ");
+
+        foreach (var dir in rejectedDirections)
+        {
+            Debug.Log("Rejected Start: " + dir);
+        }
 
         // Determine which direction should be changed to
         //      Make sure the trunk doesn't run over itself or run out of bounds
@@ -479,12 +494,71 @@ public class ZoneVeinGenerator : ContainerAccessor
                 if (changeDirection == false)
                     changeDirection = true;
                 rejectedDirections.Add(attempedDir);
-                //Debug.Log("Rejected Dir: " + attempedDir);
+
+                // If all directions are rejected, attempt to find any direction that works
+                //      A direction can be rejected and not be locked.
+                //      For example if the algorithm decided to change directions, the current direction is rejected. But doesn't mean that it's locked
+                if (rejectedDirections.Count == 4)
+                {
+                    List<Direction> openDirections = getNotLockedDirections(this.currentCoords);
+                    List<Direction> newRejectedDirList = new List<Direction>();
+                    foreach (var dir in rejectedDirections)
+                    {
+                        // If a direction in the rejectedDir list is NOT in the openDir list then keep the direction as rejected
+                        if (openDirections.Contains(dir) == false)
+                            newRejectedDirList.Add(dir);
+                    }
+                    rejectedDirections = newRejectedDirList;
+
+                    if (rejectedDirections.Count == 4)
+                    {
+                        Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked");
+                    }
+                }
+            }
+        }
+    }
+
+    // Check which directions are not locked
+    List<Direction> getNotLockedDirections(CoordsInt coords)
+    {
+        List<Direction> notLockedDirections = new List<Direction>();
+        CoordsInt attemptedCoord = coords.deepCopyInt();
+
+        foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
+        {
+            if (dir == Direction.None)
+                continue;
+
+            switch (dir)
+            {
+                case Direction.North:
+                    attemptedCoord.incY();
+                    break;
+                case Direction.East:
+                    attemptedCoord.incX();
+                    break;
+                case Direction.South:
+                    attemptedCoord.decY();
+                    break;
+                case Direction.West:
+                    attemptedCoord.decX();
+                    break;
             }
 
+            // If point is inside the bounds then check if it can be traveled to
+            bool pointIsInsideBounds = tileMapConnections.isInsideBounds(attemptedCoord);
+            if (pointIsInsideBounds == true)
+            {
+                Double<TileTraveledToMarker, Tile> tileMapConnElement = this.tileMapConnections.getElement(attemptedCoord);
+                if (tileMapConnElement.getOne().isPassLocked(currentVeinPass) == false)
+                    notLockedDirections.Add(dir);
+            }
+
+            attemptedCoord = coords.deepCopyInt();
         }
 
-        
+        return notLockedDirections;
     }
 
     // Check if the next direction will hit the edge
@@ -516,8 +590,6 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         return accepted;
     }
-
-    
 
     CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)
     {

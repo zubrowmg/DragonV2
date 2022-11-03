@@ -45,7 +45,7 @@ namespace VeinManagerClasses
 
         public void passExistCheck(int pass)
         {
-            Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
+            //Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
             if (pass >= passLocked.Count)
             {
                 for (int i = 0; i < pass; i++)
@@ -56,8 +56,7 @@ namespace VeinManagerClasses
                         passLocked.Add(false);
                 }
             }
-            Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
-
+            //Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
         }
     }
 }
