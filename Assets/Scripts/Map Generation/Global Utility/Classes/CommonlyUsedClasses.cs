@@ -170,6 +170,24 @@ namespace CommonlyUsedClasses
         {
             return this.array[0][0].getTwo();
         }
+
+        public bool isInsideBounds(CoordsInt coords)
+        {
+            bool isInside = true;
+
+            // Boundry check
+            if (0 <= coords.getX() && coords.getX() < getXCount() &&
+                0 <= coords.getY() && coords.getY() < getYCount())
+            {
+                // Do nothing, it's within bounds
+            }
+            else
+            {
+                isInside = false;
+            }
+
+            return isInside;
+        }
     }
 
     public class RandomProbability
@@ -336,16 +354,25 @@ namespace CommonlyUsedClasses
             return new Double<T1, T2>(this.one, this.two);
         }
 
-        public T1 getOne()
+        public ref T1 getOne()
         {
-            return this.one;
+            return ref this.one;
         }
 
-        public T2 getTwo()
+        public ref T2 getTwo()
         {
-            return this.two;
+            return ref this.two;
         }
 
+        public void setOne(T1 item)
+        {
+            this.one = item;
+        }
+
+        public void setTwo(T2 item)
+        {
+            this.two = item;
+        }
     }
 
     public class Triple<T1, T2, T3> : Double<T1, T2>

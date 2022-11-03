@@ -25,7 +25,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     // Tile Map Connections
     //       Double< CanTravelTo, Tile >
-    TwoDList<Double<bool, Tile>> tileMapConnections = new TwoDList<Double<bool, Tile>>(); // Allocated dims, but only the tiles spaced out every x amount
+    TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>(); // Allocated dims, but only the tiles spaced out every x amount
     CoordsInt currentCoords = new CoordsInt(0, 0);
     CoordsInt prevCoords = new CoordsInt(0, 0);
 
@@ -35,6 +35,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Direction and momentum
     //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
     Direction currentDirection;
+    Direction prevDirection;
     int maxMomentum = 3;
     int currentMomentum = 0;
     float primaryDirectionPercentage = .65f;
@@ -43,13 +44,16 @@ public class ZoneVeinGenerator : ContainerAccessor
     List<Direction> secondaryDir;
 
     // Initial zone length
-    int maxTrunkLength = 6;
+    int maxTrunkLength = 15;
 
     // Vein
     VeinZone currentVeinZone;
     List<CoordsInt> setCoords;
     SetCoordsVein newVein;
     int veinWidth = 5;
+
+    // Vein passes (Trunk = pass0, branches are pass1, 2, 3, etc)
+    int currentVeinPass = 0;
 
 
     public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
@@ -63,9 +67,11 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
         init(veinId, ref zone);
 
+
         // Creates a grid of vein connection nodes
         //      Also sets current coords to the start coords
         setupZoneConnectionNodes();
+
         determineStartDirection();
 
         createZoneVein();
@@ -84,9 +90,13 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.currentVeinZone = new VeinZone(ref getContainerInst(), veinId, zone.getStartCoords());
         this.currentZone = zone;
         this.currentCoords = new CoordsInt(0, 0);
-        this.tileMapConnections = new TwoDList<Double<bool, Tile>>();
+        this.tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
         this.setCoords = new List<CoordsInt>();
+
+        this.prevDirection = Direction.None;
         this.newVein = new SetCoordsVein(ref getContainerInst(), 0, this.currentDirection, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, 5);
+
+        this.currentVeinPass = 0;
 
         setPrimaryAndSecondaryDir();
     }
@@ -137,14 +147,15 @@ public class ZoneVeinGenerator : ContainerAccessor
                 }
                 else
                 {
-                    bool travelAllowed = true;
+                    //bool travelTo = false;
+                    TileTraveledToMarker travelToMarker = new TileTraveledToMarker();
 
                     // Mark non vein points as not allowed to be traveled to
                     if (allocatedDimList.getGridVal(currentCoords) == 0)
-                        travelAllowed = false;
+                        travelToMarker.lockPass(currentVeinPass); // Should be 0 (trunk) at start
 
                     Tile tileRef = allocatedTileMap.getElement(currentCoords);
-                    Double<bool, Tile> newElement = new Double<bool, Tile>(travelAllowed, tileRef);
+                    Double<TileTraveledToMarker, Tile> newElement = new Double<TileTraveledToMarker, Tile>(travelToMarker, tileRef);
                     tileMapConnections.addRefElement(newCoords, ref newElement);
 
                     // Get the point that is the closest to the zone start coords
@@ -169,7 +180,6 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.currentCoords = startCoords.deepCopyInt();
     }
 
-
     public void setPrimaryAndSecondaryDir()
     {
         primaryDir = new List<Direction>();
@@ -180,6 +190,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         if (currentZone.getDirBias().getVerticalDir() != Direction.None)
             primaryDir.Add(currentZone.getDirBias().getVerticalDir());
 
+
         foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
         {
             if (dir == Direction.None)
@@ -188,20 +199,7 @@ public class ZoneVeinGenerator : ContainerAccessor
             if (primaryDir.Contains(dir) == false)
                 secondaryDir.Add(dir);
         }
-    }
 
-
-
-    List<Direction> getNonePrimaryDir()
-    {
-        List<Direction> primaryDir = new List<Direction>();
-
-        if (currentDirection != Direction.None)
-            primaryDir.Add(currentZone.getDirBias().getHorizontalDir());
-        if (currentDirection != Direction.None)
-            primaryDir.Add(currentZone.getDirBias().getVerticalDir());
-
-        return primaryDir;
     }
 
     // =====================================================================================
@@ -227,13 +225,13 @@ public class ZoneVeinGenerator : ContainerAccessor
         int currentLength = 0;
         bool trunkFinished = false;
 
-        this.currentCoords.print("Start Coords: ");
+        //this.currentCoords.print("Start Coords: ");
         CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
         newVein.addSetCoord(currentWorldCoords);
 
         while (trunkFinished == false)
         {
-            this.currentCoords.print("Current Coords: ");
+            //this.currentCoords.print("Current Coords: ");
 
             // Travel one unit in the current direction
             this.prevCoords = this.currentCoords;
@@ -247,22 +245,29 @@ public class ZoneVeinGenerator : ContainerAccessor
 
 
             // Decide on a new direction
+            if (this.currentDirection == this.prevDirection && this.currentMomentum < this.maxMomentum)
+                this.currentMomentum++;
+            else if (this.currentDirection != this.prevDirection)
+                this.currentMomentum = 0;
+
+            //Debug.Log("Prev Dir: " + prevDirection);
+            this.prevDirection = this.currentDirection;
             determineNewDirection();
+            //Debug.Log("New Dir: " + currentDirection);
 
             // Determine if the trunk is too long
             currentLength++;
             if (currentLength >= maxTrunkLength)
                 trunkFinished = true;
-           // break;
+
+            //Debug.Log("====================================================");
+
+            // break;
         }
 
         // Create the vein once all points are choosen
         createVein();
     }
-
-    
-
-
 
     void createVein()
     {
@@ -272,9 +277,6 @@ public class ZoneVeinGenerator : ContainerAccessor
         List<Tile> newVeinTiles = newVein.getAssociatedTiles();
         this.currentVeinZone.addAssociatedTiles(ref newVeinTiles);
     }
-
-
-
 
     // =====================================================================================
     //                                     Navigation Functions
@@ -317,7 +319,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         //if (rejected == false)
         //{
-        Double<bool, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(attemptedTileMapCoords);
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(attemptedTileMapCoords);
         CoordsInt attemptedWorldTileMapCoords = attemptedTileMapConnElement.getTwo().getTileMapCoords();
         CoordsInt currentWorldTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTwo().getTileMapCoords();
 
@@ -328,33 +330,69 @@ public class ZoneVeinGenerator : ContainerAccessor
                 this.currentCoords = attemptedTileMapCoords.deepCopyInt();
         //}
 
+        // Don't allow travel to a location we have already traveled to
+        //      Also don't want snaking for now, so don't allow travel to adjacent point FOR THE PREVIOUS POINT
+        //          If you limit travel for the current point then you are immediatly cutting off travel for yourself
+        markTileMapPointsAroundCoord(this.prevCoords);
+        //attemptedTileMapConnElement.setOne(false);
+        
+
+
+
         //return rejected;
     }
 
+    void markTileMapPointsAroundCoord(CoordsInt coords)
+    {
+        CoordsInt attemptedCoord = coords.deepCopyInt();
 
+        foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
+        {
+            if (dir == Direction.None)
+                continue;
 
+            switch (dir)
+            {
+                case Direction.North:
+                    attemptedCoord.incY();
+                    break;
+                case Direction.East:
+                    attemptedCoord.incX();
+                    break;
+                case Direction.South:
+                    attemptedCoord.decY();
+                    break;
+                case Direction.West:
+                    attemptedCoord.decX();
+                    break;
+            }
+
+            // If point is inside the bounds then mark it as not travelable
+            bool pointIsInsideBounds = tileMapConnections.isInsideBounds(attemptedCoord);
+            if (pointIsInsideBounds == true)
+            {
+                Double<TileTraveledToMarker, Tile> tileMapConnElement = this.tileMapConnections.getElement(attemptedCoord);
+                tileMapConnElement.getOne().lockPass(currentVeinPass);
+            }
+
+            attemptedCoord = coords.deepCopyInt();
+        }
+    }
+
+    
+
+    // Checks for boundries and if the point cannot be traveled to
     bool checkTileMapConnPoint(CoordsInt coords)
     {
-        bool rejected = false;
+        bool rejected = !tileMapConnections.isInsideBounds(coords);
 
-        //Debug.Log("BOUNDS_1: " + this.tileMapConnections.getXCount() + "," + this.tileMapConnections.getYCount(coords.getX()));
-        //Debug.Log("BOUNDS_2: " + this.tileMapConnections.getXCount() + "," + this.tileMapConnections.getYCount());
-
-
-        if (0 <= coords.getX() && coords.getX() < this.tileMapConnections.getXCount() &&
-            0 <= coords.getY() && coords.getY() < this.tileMapConnections.getYCount())
-        {
-            // Do nothing, it's within bounds
-        }
-        else
-        {
-            rejected = true;
+        if (rejected == true)
             return rejected;
-        }
 
-        Double<bool, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(coords);
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(coords);
 
-        if (attemptedTileMapConnElement.getOne() == false)
+        // Tile has already been traveled to
+        if (attemptedTileMapConnElement.getOne().isPassLocked(currentVeinPass) == true)
             rejected = true;
 
         return rejected;
@@ -368,20 +406,28 @@ public class ZoneVeinGenerator : ContainerAccessor
         bool changeDirection = false;
         float randFloat = Random.Range(0f, 1f);
         Direction attempedDir = currentDirection;
+        List<Direction> rejectedDirections = new List<Direction>();
 
         if (randFloat >= momentumPercentTable[currentMomentum])
+        {
             changeDirection = true;
+            rejectedDirections.Add(this.currentDirection);
+        }
+
+        //Debug.Log("Change Dir: " + changeDirection + "\nMomentrum %: " + momentumPercentTable[currentMomentum] + "\n% Choosen: " + randFloat);
 
         bool moveAccepted = false;
         bool primaryDirSelected = false;
+        randFloat = Random.Range(0f, 1f);
         if (randFloat >= primaryDirectionPercentage)
             primaryDirSelected = true;
 
-        List<Direction> rejectedDirections = new List<Direction>();
-        randFloat = Random.Range(0f, 1f);
+
+        // No U turns
+        rejectedDirections.Add(CommonFunctions.getOppositeDir(this.prevDirection));
 
         // Determine which direction should be changed to
-        //      Make sure the trunk doesn't run over itself, or will run out of bounds
+        //      Make sure the trunk doesn't run over itself or run out of bounds
         while (moveAccepted == false)
         {
             if (changeDirection == true)
@@ -395,7 +441,10 @@ public class ZoneVeinGenerator : ContainerAccessor
                         foreach (var dir in primaryDir)
                         {
                             if (rejectedDirections.Contains(dir) == false)
+                            {
+                                //Debug.Log("Adding Primary: " + dir);
                                 possibleDirections.Add(dir);
+                            }
                         }
 
                         if (possibleDirections.Count == 0)
@@ -406,7 +455,10 @@ public class ZoneVeinGenerator : ContainerAccessor
                         foreach (var dir in secondaryDir)
                         {
                             if (rejectedDirections.Contains(dir) == false)
+                            {
+                                //Debug.Log("Adding Secondary: " + dir);
                                 possibleDirections.Add(dir);
+                            }
                         }
 
                         if (possibleDirections.Count == 0)
@@ -426,10 +478,12 @@ public class ZoneVeinGenerator : ContainerAccessor
                 // If the current direction will lead into a wall, then change the direction
                 if (changeDirection == false)
                     changeDirection = true;
-                rejectedDirections.Add(currentDirection);
+                rejectedDirections.Add(attempedDir);
+                //Debug.Log("Rejected Dir: " + attempedDir);
             }
 
         }
+
         
     }
 
@@ -462,6 +516,8 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         return accepted;
     }
+
+    
 
     CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)
     {

@@ -53,7 +53,9 @@ public class VeinManager : ContainerAccessor
     int xAxisOneThird;
     int xAxisTwoThird;
     int xAxisOneFourth;
+    int xAxisThreeEighths;
     int xAxisTwoFourth;
+    int xAxisFiveEighths;
     int xAxisThreeFourth;
 
     int yAxis;
@@ -80,7 +82,9 @@ public class VeinManager : ContainerAccessor
         this.xAxisOneThird = tileAccessor.getTileMapDims().getMaxX() / 3;
         this.xAxisTwoThird = 2 * tileAccessor.getTileMapDims().getMaxX() / 3;
         this.xAxisOneFourth = tileAccessor.getTileMapDims().getMaxX() / 4;
+        this.xAxisThreeEighths = 3 * tileAccessor.getTileMapDims().getMaxX() / 8;
         this.xAxisTwoFourth = 2 * tileAccessor.getTileMapDims().getMaxX() / 4;
+        this.xAxisFiveEighths = 5 * tileAccessor.getTileMapDims().getMaxX() / 8;
         this.xAxisThreeFourth = 3 * tileAccessor.getTileMapDims().getMaxX() / 4;
 
         this.yAxis = tileAccessor.getTileMapDims().getMaxY();
@@ -348,7 +352,7 @@ public class VeinManager : ContainerAccessor
     Vein configSendOffVeinProps(Direction dir)
     {
         int approxWidthDistance = 6;
-        int approxVeinDistance = 30;
+        int approxVeinDistance = 45;
         Vein initVein = null;
 
         CoordsInt endDesination;
@@ -377,7 +381,7 @@ public class VeinManager : ContainerAccessor
             case Direction.South:
                 xChange = RandomProbability.getIntBasedOnPercentage(
                             new RandomProbability.RandomSelection(xAxisOneFourth, xAxisOneThird, 0f),
-                            new RandomProbability.RandomSelection(xAxisOneThird + 1, xAxisTwoThird, 1f),
+                            new RandomProbability.RandomSelection(xAxisThreeEighths + 1, xAxisFiveEighths, 1f),
                             new RandomProbability.RandomSelection(xAxisTwoThird + 1, xAxisThreeFourth, .0f));
                 yChange = 0;
                 endDesination = new CoordsInt(xChange, yChange);

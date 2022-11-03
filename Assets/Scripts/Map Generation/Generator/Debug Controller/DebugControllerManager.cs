@@ -140,7 +140,7 @@ public class DebugControllerManager : MonoBehaviour
 
     public void changeDimConnectionColor(ref Zone_New zone, Color color)
     {
-        TwoDList<Double<bool, Tile>> zoneConnTileMapRef = zone.getVeinZoneConnectionList();
+        TwoDList<Double<TileTraveledToMarker, Tile>> zoneConnTileMapRef = zone.getVeinZoneConnectionList();
 
         //Debug.Log(zone.getId());
         //zoneDimList.printMinMax();

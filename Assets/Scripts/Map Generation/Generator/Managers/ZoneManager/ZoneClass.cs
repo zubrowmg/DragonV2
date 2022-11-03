@@ -8,6 +8,7 @@ using AbilityAndThemeClasses;
 
 using CommonlyUsedClasses;
 using TileManagerClasses;
+using VeinManagerClasses;
 
 public class Zone_New
 {
@@ -21,7 +22,7 @@ public class Zone_New
     ZoneVeinGenType zoneVeinGenType = ZoneVeinGenType.Default;
     DimensionList associatedVeinZoneDim;
     TwoDList<Tile> associatedTileMap = new TwoDList<Tile>();
-    TwoDList<Double<bool, Tile>> tileMapConnections = new TwoDList<Double<bool, Tile>>();
+    TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
     DirectionBias zoneGenerationDirection;
 
 
@@ -65,12 +66,12 @@ public class Zone_New
         return ref this.associatedTileMap;
     }
 
-    public void setVeinZoneConnectionList(ref TwoDList<Double<bool, Tile>> tileMapConnections)
+    public void setVeinZoneConnectionList(ref TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections)
     {
         this.tileMapConnections = tileMapConnections;
     }
 
-    public ref TwoDList<Double<bool, Tile>> getVeinZoneConnectionList()
+    public ref TwoDList<Double<TileTraveledToMarker, Tile>> getVeinZoneConnectionList()
     {
         return ref this.tileMapConnections;
     }

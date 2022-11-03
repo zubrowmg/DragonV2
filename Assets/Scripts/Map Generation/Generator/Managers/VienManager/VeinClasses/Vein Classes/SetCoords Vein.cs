@@ -36,6 +36,11 @@ namespace VeinManagerClasses
             this.setVeinType(VeinType.Set_Coords);
         }
 
+        void init()
+        {
+            this.currentDistance = 0f;
+        }
+
         protected void initCoords(CoordsInt startCoords, CoordsInt endCoords, Direction generalDirection)
         {
             this.generalVeinDirection = generalDirection;
@@ -110,6 +115,7 @@ namespace VeinManagerClasses
                     generalDirection = Direction.West;
 
                 initCoords(prevWorldCoords, currentWorldCoords, generalDirection);
+                init();
                 triggerVeinGeneration();
             }
         }

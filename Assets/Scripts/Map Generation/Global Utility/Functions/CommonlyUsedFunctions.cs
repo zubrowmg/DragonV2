@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CommonlyUsedClasses;
-
+using CommonlyUsedDefinesAndEnums;
 
 namespace CommonlyUsedFunctions
 {
@@ -43,6 +43,32 @@ namespace CommonlyUsedFunctions
             int randInt = Random.Range(0, list.Count);
 
             return list[randInt];
+        }
+
+        public static Direction getOppositeDir(Direction dir)
+        {
+            Direction oppositeDir = Direction.None;
+
+            switch (dir)
+            {
+                case Direction.North:
+                    oppositeDir = Direction.South;
+                    break;
+                case Direction.East:
+                    oppositeDir = Direction.West;
+                    break;
+                case Direction.South:
+                    oppositeDir = Direction.North;
+                    break;
+                case Direction.West:
+                    oppositeDir = Direction.East;
+                    break;
+                case Direction.None:
+                    Debug.LogError("CommonlyUsedFuntions - getOppositeDir(): There's no opposite direction for Direction.None");
+                    break;
+            }
+
+            return oppositeDir;
         }
     }
 }
