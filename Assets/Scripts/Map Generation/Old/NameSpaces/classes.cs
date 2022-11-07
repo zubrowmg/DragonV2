@@ -673,8 +673,9 @@ namespace Classes
                         maxQueue.AddBefore(pair, newValue);
                         if (maxQueue.Count > queueSize)
                             maxQueue.RemoveLast();
+                        break;
+
                     }
-                    break;
                 }
             }
         }
@@ -738,8 +739,8 @@ namespace Classes
                         minQueue.AddBefore(pair, newValue);
                         if (minQueue.Count > queueSize)
                             minQueue.RemoveLast();
+                        break;
                     }
-                    break;
                 }
             }
         }

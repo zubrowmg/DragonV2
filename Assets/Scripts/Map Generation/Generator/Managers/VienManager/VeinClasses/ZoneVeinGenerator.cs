@@ -44,7 +44,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     List<Direction> secondaryDir;
 
     // Initial zone length
-    int maxTrunkLength = 12;
+    int maxTrunkLength = 11;
 
     // Vein
     VeinZone currentVeinZone;
@@ -152,7 +152,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                     // Mark non vein points as not allowed to be traveled to
                     if (allocatedDimList.getGridVal(currentCoords) == 0)
-                        travelToMarker.lockPass(currentVeinPass); // Should be 0 (trunk) at start
+                        travelToMarker.permaLock();
 
                     Tile tileRef = allocatedTileMap.getElement(currentCoords);
                     Double<TileTraveledToMarker, Tile> newElement = new Double<TileTraveledToMarker, Tile>(travelToMarker, tileRef);
@@ -387,23 +387,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     
 
-    // Checks for boundries and if the point cannot be traveled to
-    bool checkTileMapConnPoint(CoordsInt coords)
-    {
-        // Check Boundry
-        bool rejected = !tileMapConnections.isInsideBounds(coords);
-
-        if (rejected == true)
-            return rejected;
-
-        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(coords);
-
-        // Tile has already been traveled to
-        if (attemptedTileMapConnElement.getOne().isPassLocked(currentVeinPass) == true)
-            rejected = true;
-
-        return rejected;
-    }
+   
 
     void determineNewDirection()
     {
@@ -561,7 +545,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         return notLockedDirections;
     }
 
-    // Check if the next direction will hit the edge
+    // Check if the next direction will hit the edge, also check if a change of directions will lead into a dead end pocket
     bool isNextMoveValid(Direction attempedDir)
     {
         CoordsInt attemptedTileMapCoords = this.currentCoords.deepCopyInt();
@@ -588,7 +572,38 @@ public class ZoneVeinGenerator : ContainerAccessor
         // Check if the bounds are correct, also check if it can be traveled to
         bool accepted = !checkTileMapConnPoint(attemptedTileMapCoords);
 
+        // If we are turning, check if the turn will lead into a dead end pocket
+        if (accepted == true && attempedDir != this.prevDirection)
+            accepted = !leadsToDeadEndPocket(attemptedTileMapCoords);
+
         return accepted;
+    }
+
+    // Checks for boundries and if the point cannot be traveled to
+    bool checkTileMapConnPoint(CoordsInt coords)
+    {
+        // Check Boundry
+        bool rejected = !tileMapConnections.isInsideBounds(coords);
+
+        if (rejected == true)
+            return rejected;
+
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(coords);
+
+        // Tile has already been traveled to
+        if (attemptedTileMapConnElement.getOne().isPassLocked(currentVeinPass) == true)
+            rejected = true;
+
+        return rejected;
+    }
+
+    // Checks if a turn will lead to a dead end pocket
+    bool leadsToDeadEndPocket(CoordsInt coords)
+    {
+        // Check Boundry
+        bool leadsToDeadEnd = false;
+
+        return leadsToDeadEnd;
     }
 
     CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)

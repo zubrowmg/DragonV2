@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace VeinManagerClasses
 {
-
-
     public class TileTraveledToMarker
     {
         // Meant for Zone Vein Generation
@@ -17,13 +15,22 @@ namespace VeinManagerClasses
         //      But when we start adding branches (new passes), we don't want to restrict travel to locked off tiles
         //      That's what this class aims to allieve
 
-
+        // Perma locked is for connection points that are not travelable under any circumstance
+        //      Pass locked is for locking off points during a trunk/branch being generated
         List<bool> passLocked;
+        bool permaLocked; 
 
         public TileTraveledToMarker()
         {
             this.passLocked = new List<bool>();
+            this.permaLocked = false;
+
             lockTrunkPass();
+        }
+
+        public void permaLock()
+        {
+            this.permaLocked = true;
         }
 
         void lockTrunkPass()
@@ -33,8 +40,17 @@ namespace VeinManagerClasses
         
         public bool isPassLocked(int pass)
         {
-            passExistCheck(pass);
-            return passLocked[pass];
+            bool locked = false;
+
+            if (this.permaLocked == true)
+                locked = true;
+
+            if (locked == false)
+            {
+                passExistCheck(pass);
+                locked = passLocked[pass];
+            }
+            return locked;
         }
 
         public void lockPass(int pass)
