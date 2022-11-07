@@ -600,8 +600,15 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Checks if a turn will lead to a dead end pocket
     bool leadsToDeadEndPocket(CoordsInt coords)
     {
-        // Check Boundry
         bool leadsToDeadEnd = false;
+
+        // Go in a straight line (in the attempted direction), till you hit a locked tile
+
+        // Once the locked tile is hit, calculate the area of the enclosed space
+
+        // If it's 25%-33% of the total area, then reject the direction
+
+        // Doesn't work!!!!!!!!!!!!! Algoritm will never want to turn towards itself
 
         return leadsToDeadEnd;
     }
