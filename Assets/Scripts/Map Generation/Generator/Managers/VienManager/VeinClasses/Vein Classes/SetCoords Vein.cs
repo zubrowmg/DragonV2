@@ -16,7 +16,6 @@ namespace VeinManagerClasses
 
         public SetCoordsVein(ref GeneratorContainer contInst,
                           int id,
-                          Direction generalDirection,
                           CoordsInt startCoords,
                           CoordsInt endCoords,
                           bool varyWidth,
@@ -25,7 +24,7 @@ namespace VeinManagerClasses
                           int width)
                    : base(ref contInst,
                           id,
-                          generalDirection,
+                          Direction.None, // General Direction gets manually calculated
                           startCoords,
                           endCoords,
                           varyWidth,

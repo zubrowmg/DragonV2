@@ -35,13 +35,13 @@ public abstract class DimCreator : TileAccessor
     protected DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
     // History coords queue
-    QueueWrap<CoordsInt> recentlyAddedCoordsToCheck;
+    QueueWrapper<CoordsInt> recentlyAddedCoordsToCheck;
     int recentlyAddedCoordsQueueSize = 40;
     protected int historyWiggleDisplacementRange;
 
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
-        this.recentlyAddedCoordsToCheck = new QueueWrap<CoordsInt>(recentlyAddedCoordsQueueSize);
+        this.recentlyAddedCoordsToCheck = new QueueWrapper<CoordsInt>(recentlyAddedCoordsQueueSize);
     }
 
     // =======================================================================================

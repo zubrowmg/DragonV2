@@ -26,16 +26,20 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Tile Map Connections
     //       Double< CanTravelTo, Tile >
     TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>(); // Allocated dims, but only the tiles spaced out every x amount
-    CoordsInt currentCoords = new CoordsInt(0, 0);
-    CoordsInt prevCoords = new CoordsInt(0, 0);
+    //CoordsInt currentCoords = new CoordsInt(0, 0);
+    //CoordsInt prevCoords = new CoordsInt(0, 0);
+
+    // State and state tracker
+    ZoneVeinState currentState = new ZoneVeinState();
+    ZoneVeinStateHistory stateHistory = new ZoneVeinStateHistory();
 
     // Zone Connection Node Generation
     int gapBetweenNodes = 9;
 
     // Direction and momentum
     //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
-    Direction currentDirection;
-    Direction prevDirection;
+    //Direction currentDirection;
+    //Direction prevDirection;
     int maxMomentum = 3;
     int currentMomentum = 0;
     float primaryDirectionPercentage = .65f;
@@ -89,12 +93,16 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
         this.currentVeinZone = new VeinZone(ref getContainerInst(), veinId, zone.getStartCoords());
         this.currentZone = zone;
-        this.currentCoords = new CoordsInt(0, 0);
         this.tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
         this.setCoords = new List<CoordsInt>();
 
-        this.prevDirection = Direction.None;
-        this.newVein = new SetCoordsVein(ref getContainerInst(), 0, this.currentDirection, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, this.veinWidth);
+        this.stateHistory = new ZoneVeinStateHistory();
+        this.currentState.setCurrentCoords(new CoordsInt(0, 0));
+        this.currentState.setPrevCoords(new CoordsInt(0, 0));
+        this.currentState.setPrevDir(Direction.None);
+        this.currentState.setCurrentDir(Direction.None);
+
+        this.newVein = new SetCoordsVein(ref getContainerInst(), 0, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, this.veinWidth);
 
         this.currentVeinPass = 0;
 
@@ -109,19 +117,19 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         if (rand == 0)
         {
-            this.currentDirection = zoneDirBias.getHorizontalDir();
-            if (this.currentDirection == Direction.None)
-                this.currentDirection = zoneDirBias.getVerticalDir();
+            this.currentState.setCurrentDir(zoneDirBias.getHorizontalDir());
+            if (this.currentState.getCurrentDir() == Direction.None)
+                this.currentState.setCurrentDir(zoneDirBias.getVerticalDir());
 
         }
         else
         {
-            this.currentDirection = zoneDirBias.getVerticalDir();
-            if (this.currentDirection == Direction.None)
-                this.currentDirection = zoneDirBias.getHorizontalDir();
+            this.currentState.setCurrentDir(zoneDirBias.getVerticalDir());
+            if (this.currentState.getCurrentDir() == Direction.None)
+                this.currentState.setCurrentDir(zoneDirBias.getHorizontalDir());
         }
 
-        if (this.currentDirection == Direction.None)
+        if (this.currentState.getCurrentDir() == Direction.None)
             Debug.LogError("ZoneVeinGenerator - determinStartDirection(): Start Direction has no direction to start in");
     }
 
@@ -177,7 +185,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         // Set the current coords so that we start generating at the proper start
         startCoords = minDistance.getMinVal().Value;
-        this.currentCoords = startCoords.deepCopyInt();
+        this.currentState.setCurrentCoords(startCoords.deepCopyInt());
     }
 
     public void setPrimaryAndSecondaryDir()
@@ -226,38 +234,38 @@ public class ZoneVeinGenerator : ContainerAccessor
         bool trunkFinished = false;
 
         //this.currentCoords.print("Start Coords: ");
-        CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
+        CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords());
         newVein.addSetCoord(currentWorldCoords);
 
         Debug.Log("==============================");
         Debug.Log("        TRUNK START");
         Debug.Log("==============================");
 
-        this.currentCoords.print("START COORDS: ");
+        this.currentState.getCurrentCoords().print("START COORDS: ");
 
         while (trunkFinished == false)
         {
             //this.currentCoords.print("Current Coords: ");
 
             // Travel one unit in the current direction
-            this.prevCoords = this.currentCoords;
-            travelOneUnit(this.currentDirection);
+            this.currentState.setPrevCoords(this.currentState.getCurrentCoords());
+            travelOneUnit(this.currentState.getCurrentDir());
 
 
             // Record the point
-            currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentCoords);
+            currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords());
             newVein.addSetCoord(currentWorldCoords);
 
 
 
             // Decide on a new direction
-            if (this.currentDirection == this.prevDirection && this.currentMomentum < this.maxMomentum)
+            if (this.currentState.getCurrentDir() == this.currentState.getPrevDir() && this.currentMomentum < this.maxMomentum)
                 this.currentMomentum++;
-            else if (this.currentDirection != this.prevDirection)
+            else if (this.currentState.getCurrentDir() != this.currentState.getPrevDir())
                 this.currentMomentum = 0;
 
             //Debug.Log("Prev Dir: " + prevDirection);
-            this.prevDirection = this.currentDirection;
+            this.currentState.setPrevDir(this.currentState.getCurrentDir());
             determineNewDirection();
             //Debug.Log("New Dir: " + currentDirection);
 
@@ -266,6 +274,8 @@ public class ZoneVeinGenerator : ContainerAccessor
             if (currentLength >= maxTrunkLength)
                 trunkFinished = true;
 
+            // Track the current state
+            this.stateHistory.addState(this.currentState);
             //Debug.Log("====================================================");
 
             // break;
@@ -299,7 +309,8 @@ public class ZoneVeinGenerator : ContainerAccessor
     
     public void goDir(Direction dir)
     {
-        CoordsInt attemptedTileMapCoords = this.currentCoords.deepCopyInt();
+        CoordsInt currentCoordsCopy = this.currentState.getCurrentCoords();
+        CoordsInt attemptedTileMapCoords = currentCoordsCopy.deepCopyInt();
 
         switch (dir)
         {
@@ -327,23 +338,21 @@ public class ZoneVeinGenerator : ContainerAccessor
         //{
         Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(attemptedTileMapCoords);
         CoordsInt attemptedWorldTileMapCoords = attemptedTileMapConnElement.getTwo().getTileMapCoords();
-        CoordsInt currentWorldTileMapCoords = this.tileMapConnections.getElement(currentCoords).getTwo().getTileMapCoords();
+        CoordsInt currentWorldTileMapCoords = this.tileMapConnections.getElement(currentCoordsCopy).getTwo().getTileMapCoords();
 
         // If the attempted to travel to coord is not exactly to the left in world coords, then reject
         //rejected = !checkGapDistance(attemptedWorldTileMapCoords, currentWorldTileMapCoords);
         checkGapDistance(attemptedWorldTileMapCoords, currentWorldTileMapCoords);
             //if (rejected == false)
-                this.currentCoords = attemptedTileMapCoords.deepCopyInt();
+                this.currentState.setCurrentCoords(attemptedTileMapCoords.deepCopyInt());
         //}
 
         // Don't allow travel to a location we have already traveled to
         //      Also don't want snaking for now, so don't allow travel to adjacent point FOR THE PREVIOUS POINT
         //          If you limit travel for the current point then you are immediatly cutting off travel for yourself
-        markTileMapPointsAroundCoord(this.prevCoords);
+        markTileMapPointsAroundCoord(this.currentState.getPrevCoords());
         //attemptedTileMapConnElement.setOne(false);
         
-
-
 
         //return rejected;
     }
@@ -385,10 +394,6 @@ public class ZoneVeinGenerator : ContainerAccessor
         }
     }
 
-    
-
-   
-
     void determineNewDirection()
     {
         //momentumMax = 4;
@@ -396,13 +401,13 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         bool changeDirection = false;
         float randFloat = Random.Range(0f, 1f);
-        Direction attempedDir = currentDirection;
+        Direction attempedDir = this.currentState.getCurrentDir();
         List<Direction> rejectedDirections = new List<Direction>();
 
         if (randFloat >= momentumPercentTable[currentMomentum])
         {
             changeDirection = true;
-            rejectedDirections.Add(this.currentDirection);
+            rejectedDirections.Add(this.currentState.getCurrentDir());
         }
 
         //Debug.Log("Change Dir: " + changeDirection + "\nMomentrum %: " + momentumPercentTable[currentMomentum] + "\n% Choosen: " + randFloat);
@@ -415,10 +420,10 @@ public class ZoneVeinGenerator : ContainerAccessor
 
 
         // No U turns
-        rejectedDirections.Add(CommonFunctions.getOppositeDir(this.prevDirection));
+        rejectedDirections.Add(CommonFunctions.getOppositeDir(this.currentState.getPrevDir()));
 
         Debug.Log("Change Direction Top \n =======================================================================");
-        this.currentCoords.print("Current Coords: ");
+        this.currentState.getCurrentCoords().print("Current Coords: ");
 
         foreach (var dir in rejectedDirections)
         {
@@ -471,7 +476,7 @@ public class ZoneVeinGenerator : ContainerAccessor
             moveAccepted = isNextMoveValid(attempedDir);
 
             if (moveAccepted == true)
-                currentDirection = attempedDir;
+                this.currentState.setCurrentDir(attempedDir);
             else if (moveAccepted == false)
             {
                 // If the current direction will lead into a wall, then change the direction
@@ -484,7 +489,7 @@ public class ZoneVeinGenerator : ContainerAccessor
                 //      For example if the algorithm decided to change directions, the current direction is rejected. But doesn't mean that it's locked
                 if (rejectedDirections.Count == 4)
                 {
-                    List<Direction> openDirections = getNotLockedDirections(this.currentCoords);
+                    List<Direction> openDirections = getNotLockedDirections(this.currentState.getCurrentCoords());
                     List<Direction> newRejectedDirList = new List<Direction>();
                     foreach (var dir in rejectedDirections)
                     {
@@ -548,7 +553,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Check if the next direction will hit the edge, also check if a change of directions will lead into a dead end pocket
     bool isNextMoveValid(Direction attempedDir)
     {
-        CoordsInt attemptedTileMapCoords = this.currentCoords.deepCopyInt();
+        CoordsInt attemptedTileMapCoords = this.currentState.getCurrentCoords().deepCopyInt();
 
         switch (attempedDir)
         {
@@ -573,7 +578,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         bool accepted = !checkTileMapConnPoint(attemptedTileMapCoords);
 
         // If we are turning, check if the turn will lead into a dead end pocket
-        if (accepted == true && attempedDir != this.prevDirection)
+        if (accepted == true && attempedDir != this.currentState.getPrevDir())
             accepted = !leadsToDeadEndPocket(attemptedTileMapCoords);
 
         return accepted;

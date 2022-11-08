@@ -553,12 +553,12 @@ namespace CommonlyUsedClasses
         
     }
 
-    public class QueueWrap<T>
+    public class QueueWrapper<T>
     {
         List<T> queue = new List<T>();
         int maxSize;
 
-        public QueueWrap(int maxSize)
+        public QueueWrapper(int maxSize)
         {
             this.maxSize = maxSize;
         }
