@@ -41,7 +41,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     //Direction currentDirection;
     //Direction prevDirection;
     int maxMomentum = 3;
-    int currentMomentum = 0;
+    //int currentMomentum = 0;
     float primaryDirectionPercentage = .65f;
     List<float> momentumPercentTable = new List<float> { .85f, .60f, .25f, .05f };
     List<Direction> primaryDir;
@@ -259,10 +259,10 @@ public class ZoneVeinGenerator : ContainerAccessor
 
 
             // Decide on a new direction
-            if (this.currentState.getCurrentDir() == this.currentState.getPrevDir() && this.currentMomentum < this.maxMomentum)
-                this.currentMomentum++;
+            if (this.currentState.getCurrentDir() == this.currentState.getPrevDir() && this.currentState.getCurrentMomentum() < this.maxMomentum)
+                this.currentState.incCurrentMomentum();
             else if (this.currentState.getCurrentDir() != this.currentState.getPrevDir())
-                this.currentMomentum = 0;
+                this.currentState.resetMomentum();
 
             //Debug.Log("Prev Dir: " + prevDirection);
             this.currentState.setPrevDir(this.currentState.getCurrentDir());
@@ -394,20 +394,24 @@ public class ZoneVeinGenerator : ContainerAccessor
         }
     }
 
+    // Determine direction with no pre-determined rejected directions
     void determineNewDirection()
     {
-        //momentumMax = 4;
-        //currentMomentum = 0;
+        List<Direction> rejectedDirections = new List<Direction>();
+        determineNewDirection(rejectedDirections, "Happened Not During Rollback");
+    }
 
+    void determineNewDirection(List<Direction> rejectedDirections, string debugMessage)
+    {
         bool changeDirection = false;
         float randFloat = Random.Range(0f, 1f);
         Direction attempedDir = this.currentState.getCurrentDir();
-        List<Direction> rejectedDirections = new List<Direction>();
 
-        if (randFloat >= momentumPercentTable[currentMomentum])
+        if (randFloat >= momentumPercentTable[this.currentState.getCurrentMomentum()])
         {
             changeDirection = true;
-            rejectedDirections.Add(this.currentState.getCurrentDir());
+            if (rejectedDirections.Contains(this.currentState.getCurrentDir()) == false)
+                rejectedDirections.Add(this.currentState.getCurrentDir());
         }
 
         //Debug.Log("Change Dir: " + changeDirection + "\nMomentrum %: " + momentumPercentTable[currentMomentum] + "\n% Choosen: " + randFloat);
@@ -420,7 +424,9 @@ public class ZoneVeinGenerator : ContainerAccessor
 
 
         // No U turns
-        rejectedDirections.Add(CommonFunctions.getOppositeDir(this.currentState.getPrevDir()));
+        Direction oppositeDir = CommonFunctions.getOppositeDir(this.currentState.getPrevDir());
+        if (rejectedDirections.Contains(oppositeDir) == false)
+            rejectedDirections.Add(oppositeDir);
 
         Debug.Log("Change Direction Top \n =======================================================================");
         this.currentState.getCurrentCoords().print("Current Coords: ");
@@ -476,7 +482,10 @@ public class ZoneVeinGenerator : ContainerAccessor
             moveAccepted = isNextMoveValid(attempedDir);
 
             if (moveAccepted == true)
+            {
                 this.currentState.setCurrentDir(attempedDir);
+                this.currentState.setRejectedDir(rejectedDirections);
+            }
             else if (moveAccepted == false)
             {
                 // If the current direction will lead into a wall, then change the direction
@@ -501,7 +510,9 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                     if (rejectedDirections.Count == 4)
                     {
-                        Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked");
+                        Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" +
+                            "Rollback info: " + debugMessage);
+                        rollBackState();
                     }
                 }
             }
@@ -578,8 +589,9 @@ public class ZoneVeinGenerator : ContainerAccessor
         bool accepted = !checkTileMapConnPoint(attemptedTileMapCoords);
 
         // If we are turning, check if the turn will lead into a dead end pocket
-        if (accepted == true && attempedDir != this.currentState.getPrevDir())
-            accepted = !leadsToDeadEndPocket(attemptedTileMapCoords);
+        //      Probably depricated, instead of checking we will rollback the state if we hit a dead end pocket
+        //if (accepted == true && attempedDir != this.currentState.getPrevDir())
+        //    accepted = !leadsToDeadEndPocket(attemptedTileMapCoords);
 
         return accepted;
     }
@@ -616,6 +628,23 @@ public class ZoneVeinGenerator : ContainerAccessor
         // Doesn't work!!!!!!!!!!!!! Algoritm will never want to turn towards itself
 
         return leadsToDeadEnd;
+    }
+
+    public void rollBackState()
+    {
+        // Go to a previous state, it's set to go 2 states back or the last turn. Whichever one is less rollback
+        this.currentState = stateHistory.rollBackState();
+
+        // Revert any locked tiles
+
+        // Get the rejected direction list from the recorded state
+        //      Reject the direction of the next state, since that is where the path got stuck
+        List<Direction> rejectedDirList = this.currentState.getRejectedDirList();
+        rejectedDirList.Add(this.currentState.getNextDirection());
+
+        // Determine a new direction that can be attempted
+        determineNewDirection(rejectedDirList, "Happened During RollBack");
+
     }
 
     CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)

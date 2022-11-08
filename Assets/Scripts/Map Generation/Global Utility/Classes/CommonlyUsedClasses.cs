@@ -576,6 +576,13 @@ namespace CommonlyUsedClasses
             queue.RemoveAt(0);
         }
 
+        public T dequeLastAdded()
+        {
+            T item = queue[queue.Count - 1];
+            queue.RemoveAt(queue.Count - 1);
+            return item;
+        }
+
         public int getCount()
         {
             return queue.Count;
@@ -584,6 +591,11 @@ namespace CommonlyUsedClasses
         public T getElement(int index)
         {
             return queue[index];
+        }
+
+        public ref List<T> getQueueList()
+        {
+            return ref this.queue;
         }
     }
 }
