@@ -70,6 +70,11 @@ namespace CommonlyUsedFunctions
 
             return oppositeDir;
         }
+
+        //public static List<T> getListCopy<T>(List<T> list)
+        //{
+
+        //}
     }
 }
 

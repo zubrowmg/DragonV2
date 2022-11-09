@@ -40,7 +40,9 @@ namespace VeinManagerClasses
 
         public ZoneVeinState deepCopy()
         {
-            return new ZoneVeinState(this.currentWorldCoords, this.currentCoords, this.prevCoords, this.currentDirection, this.prevDirection, this.nextDirection, this.currentMomentum, this.rejectedDirList);
+            List<Direction> rejectedDirListCopy = new List<Direction>();
+            rejectedDirList.AddRange(this.rejectedDirList);
+            return new ZoneVeinState(this.currentWorldCoords, this.currentCoords, this.prevCoords, this.currentDirection, this.prevDirection, this.nextDirection, this.currentMomentum, rejectedDirListCopy);
         }
 
 

@@ -48,7 +48,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     List<Direction> secondaryDir;
 
     // Initial zone length
-    int maxTrunkLength = 11;
+    int maxTrunkLength = 12;
 
     // Vein
     VeinZone currentVeinZone;
@@ -635,8 +635,14 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     public void rollBackState()
     {
+        Debug.Log("\tROLLBACK______________TOP");
+        this.currentState.getCurrentCoords().print("\tPRE ROLLBACK COORDS: ");
+
         // Go to a previous state, it's set to go 2 states back or the last turn. Whichever one is less rollback
         this.currentState = stateHistory.rollBackState();
+        this.currentState.getCurrentCoords().print("\tPOST ROLLBACK COORDS: ");
+
+
 
         // Revert any locked tiles
 
@@ -644,6 +650,13 @@ public class ZoneVeinGenerator : ContainerAccessor
         //      Reject the direction of the next state, since that is where the path got stuck
         List<Direction> rejectedDirList = this.currentState.getRejectedDirList();
         rejectedDirList.Add(this.currentState.getNextDirection());
+
+
+        Debug.Log("\tREJECTED DIRS: ");
+        foreach (var dir in rejectedDirList)
+        {
+            Debug.Log("\t" + dir);
+        }
 
         // Determine a new direction that can be attempted
         bool dirForRollback = true;
