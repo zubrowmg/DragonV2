@@ -76,7 +76,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         //      Also sets current coords to the start coords
         setupZoneConnectionNodes();
 
-        determineStartDirection();
+        
 
         createZoneVein();
 
@@ -218,24 +218,21 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
         createZoneVeinTrunk();
 
-        bool done = false;
-
-        while (done == false)
-        {
-
-
-            done = true;
-        }
+        // createBranches();
     }
 
     public void createZoneVeinTrunk()
     {
+        determineStartDirection();
+
         int currentLength = 0;
         bool trunkFinished = false;
 
         //this.currentCoords.print("Start Coords: ");
-        CoordsInt currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords());
-        newVein.addSetCoord(currentWorldCoords);
+        this.currentState.setCurrentWorldCoords(getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
+        this.stateHistory.addState(this.currentState.deepCopy());
+
+        //newVein.addSetCoord(currentWorldCoords);
 
         Debug.Log("==============================");
         Debug.Log("        TRUNK START");
@@ -253,8 +250,8 @@ public class ZoneVeinGenerator : ContainerAccessor
 
 
             // Record the point
-            currentWorldCoords = getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords());
-            newVein.addSetCoord(currentWorldCoords);
+            this.currentState.setCurrentWorldCoords(getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
+            //newVein.addSetCoord(currentWorldCoords);
 
 
 
@@ -275,11 +272,14 @@ public class ZoneVeinGenerator : ContainerAccessor
                 trunkFinished = true;
 
             // Track the current state
-            this.stateHistory.addState(this.currentState);
+            this.stateHistory.addState(this.currentState.deepCopy());
             //Debug.Log("====================================================");
 
             // break;
         }
+
+        // Add all recorded world coords from the state history
+        newVein.addSetCoord(this.stateHistory.getListOfWorldCoords());
 
         // Create the vein once all points are choosen
         createVein();
@@ -398,10 +398,11 @@ public class ZoneVeinGenerator : ContainerAccessor
     void determineNewDirection()
     {
         List<Direction> rejectedDirections = new List<Direction>();
-        determineNewDirection(rejectedDirections, "Happened Not During Rollback");
+        bool dirForRollback = false;
+        determineNewDirection(rejectedDirections, dirForRollback);
     }
 
-    void determineNewDirection(List<Direction> rejectedDirections, string debugMessage)
+    void determineNewDirection(List<Direction> rejectedDirections, bool dirForRollback)
     {
         bool changeDirection = false;
         float randFloat = Random.Range(0f, 1f);
@@ -510,8 +511,10 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                     if (rejectedDirections.Count == 4)
                     {
-                        Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" +
-                            "Rollback info: " + debugMessage);
+                        if (dirForRollback == true)
+                            Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" + "Failed from Rollback");
+                        else
+                            Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" + "Failed from normal operation (not Rollback)");
                         rollBackState();
                     }
                 }
@@ -643,7 +646,8 @@ public class ZoneVeinGenerator : ContainerAccessor
         rejectedDirList.Add(this.currentState.getNextDirection());
 
         // Determine a new direction that can be attempted
-        determineNewDirection(rejectedDirList, "Happened During RollBack");
+        bool dirForRollback = true;
+        determineNewDirection(rejectedDirList, dirForRollback);
 
     }
 

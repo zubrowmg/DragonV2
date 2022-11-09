@@ -9,6 +9,8 @@ namespace VeinManagerClasses
 {
     public class ZoneVeinState
     {
+        CoordsInt currentWorldCoords = new CoordsInt(0, 0);
+
         CoordsInt currentCoords = new CoordsInt(0, 0);
         CoordsInt prevCoords = new CoordsInt(0, 0);
 
@@ -24,6 +26,22 @@ namespace VeinManagerClasses
         public ZoneVeinState()
         { }
 
+        public ZoneVeinState(CoordsInt currentWorldCoords, CoordsInt currentCoords, CoordsInt prevCoords, Direction currentDirection, Direction prevDirection, Direction nextDirection, int currentMomentum, List<Direction> rejectedDirList)
+        {
+            this.currentWorldCoords = currentWorldCoords;
+            this.currentCoords = currentCoords;
+            this.prevCoords = prevCoords;
+            this.currentDirection = currentDirection;
+            this.prevDirection = prevDirection;
+            this.nextDirection = nextDirection;
+            this.currentMomentum = currentMomentum;
+            this.rejectedDirList = rejectedDirList;
+        }
+
+        public ZoneVeinState deepCopy()
+        {
+            return new ZoneVeinState(this.currentWorldCoords, this.currentCoords, this.prevCoords, this.currentDirection, this.prevDirection, this.nextDirection, this.currentMomentum, this.rejectedDirList);
+        }
 
 
 
@@ -58,6 +76,14 @@ namespace VeinManagerClasses
             this.prevDirection = dir;
         }
 
+        public CoordsInt getCurrentWorldCoords()
+        {
+            return this.currentWorldCoords;
+        }
+        public void setCurrentWorldCoords(CoordsInt coords)
+        {
+            this.currentWorldCoords = coords;
+        }
         public CoordsInt getCurrentCoords()
         {
             return this.currentCoords;

@@ -576,6 +576,28 @@ namespace CommonlyUsedClasses
             queue.RemoveAt(0);
         }
 
+        public T enqueueGetRemovedItem(T item, out bool itemOverflow)
+        {
+            itemOverflow = false;
+            queue.Add(item);
+            T removedItem = default(T);
+
+            if (queue.Count > maxSize)
+            {
+                itemOverflow = true;
+                removedItem = dequeGetRemovedItem();
+            }
+
+            return removedItem;
+        }
+
+        public T dequeGetRemovedItem()
+        {
+            T removedItem = queue[0];
+            queue.RemoveAt(0);
+            return removedItem;
+        }
+
         public T dequeLastAdded()
         {
             T item = queue[queue.Count - 1];
