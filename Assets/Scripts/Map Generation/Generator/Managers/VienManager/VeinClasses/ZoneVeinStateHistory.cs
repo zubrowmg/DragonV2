@@ -62,6 +62,9 @@ namespace VeinManagerClasses
 
             if (firstAdd == false)
                 this.currentStraightLine.Add(newState);
+
+            newState.getCurrentCoords().print("STATE SAVED: ");
+            newState.printRejectedDir("STATE SAVED REJECTED DIR: ");
         }
 
         public ZoneVeinState rollBackState(out bool rollBackedTooFar)
@@ -75,12 +78,20 @@ namespace VeinManagerClasses
             {
                 for (int i = 0; i < rollbackAmount; i++)
                 {
+                    Debug.Log("REMOVE 1");
+                    Debug.Log("COUNT: " + currentStraightLine.Count);
+                    foreach (var state in currentStraightLine)
+                    {
+                        state.getCurrentCoords().print("STRAIGHT LINE COORDS: ");
+                    }
                     currentStraightLine.RemoveAt(currentStraightLine.Count - 1);
                 }
             }
             // This means that the current state is the turn, need to get the previous straight line list
             else if (currentStraightLine.Count == 1)
             {
+                Debug.Log("REMOVE 2");
+
                 List<ZoneVeinState> potentialRollBackList = historyQueue.dequeLastAdded(out bool queueEmpty);
 
                 if (queueEmpty == true)
