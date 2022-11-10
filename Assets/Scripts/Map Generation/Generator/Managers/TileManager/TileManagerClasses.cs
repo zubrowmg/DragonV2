@@ -140,7 +140,7 @@ namespace TileManagerClasses
             }
             else
             {
-                Debug.Log("Tile Class - getTile() attempted to access out of bounds tile: " + coords.getX() + ", " + coords.getY());
+                Debug.LogError("TileMap Class - getTile() attempted to access out of bounds tile: " + coords.getX() + ", " + coords.getY());
                 accessSuccessful = false;
             }
 

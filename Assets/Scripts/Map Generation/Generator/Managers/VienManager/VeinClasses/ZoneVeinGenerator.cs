@@ -516,6 +516,7 @@ public class ZoneVeinGenerator : ContainerAccessor
                         else
                             Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" + "Failed from normal operation (not Rollback)");
                         rollBackState();
+                        break;
                     }
                 }
             }
@@ -639,7 +640,12 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.currentState.getCurrentCoords().print("\tPRE ROLLBACK COORDS: ");
 
         // Go to a previous state, it's set to go 2 states back or the last turn. Whichever one is less rollback
-        this.currentState = stateHistory.rollBackState();
+        this.currentState = stateHistory.rollBackState(out bool rollBackedTooFar);
+        if (rollBackedTooFar == true)
+        {
+            Debug.LogError("ZoneVeinGenerator - rollBackState(): ROLLBACKED TOO FAR");
+            return;
+        }
         this.currentState.getCurrentCoords().print("\tPOST ROLLBACK COORDS: ");
 
 

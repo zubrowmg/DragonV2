@@ -598,10 +598,21 @@ namespace CommonlyUsedClasses
             return removedItem;
         }
 
-        public T dequeLastAdded()
+        public T dequeLastAdded(out bool queueEmpty)
         {
-            T item = queue[queue.Count - 1];
-            queue.RemoveAt(queue.Count - 1);
+            int index = queue.Count - 1;
+            queueEmpty = false;
+
+            if (index < 0)
+            {
+                queueEmpty = true;
+                return default(T);
+            }
+            
+
+            T item = queue[index];
+            queue.RemoveAt(index);
+
             return item;
         }
 

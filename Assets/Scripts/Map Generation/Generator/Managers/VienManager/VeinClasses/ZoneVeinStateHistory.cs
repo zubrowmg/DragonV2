@@ -31,8 +31,13 @@ namespace VeinManagerClasses
 
         public void addState(ZoneVeinState newState)
         {
+            bool firstAdd = false;
+
             if (currentStraightLine.Count == 0)
+            {
                 currentStraightLine.Add(newState);
+                firstAdd = true;
+            }
 
             ZoneVeinState currentState = getCurrentState();
 
@@ -56,14 +61,15 @@ namespace VeinManagerClasses
                 this.currentStraightLine = new List<ZoneVeinState>();
             }
 
-            this.currentStraightLine.Add(newState);
+            if (firstAdd == false)
+                this.currentStraightLine.Add(newState);
         }
 
-        public ZoneVeinState rollBackState()
+        public ZoneVeinState rollBackState(out bool rollBackedTooFar)
         {
             // It's easier to manipulate the raw history queue
             //List<List<ZoneVeinState>> rawHistoryQueue = historyQueue.getQueueList();
-
+            rollBackedTooFar = false;
             
             // Roll back the roll back amount as long as it doesn't rollback the last trun
             if (currentStraightLine.Count > rollbackAmount)
@@ -75,7 +81,13 @@ namespace VeinManagerClasses
             }
             else
             {
-                currentStraightLine = historyQueue.dequeLastAdded();
+                List<ZoneVeinState> potentialRollBackList = historyQueue.dequeLastAdded(out bool queueEmpty);
+
+                if (queueEmpty == true)
+                    rollBackedTooFar = true;
+                else
+                    currentStraightLine = potentialRollBackList;
+
             }
 
             return getCurrentState();
@@ -88,6 +100,8 @@ namespace VeinManagerClasses
         // =================================================================================
         ZoneVeinState getCurrentState()
         {
+            ZoneVeinState test = this.currentStraightLine[this.currentStraightLine.Count - 1];
+
             return this.currentStraightLine[this.currentStraightLine.Count - 1];
         }
 
