@@ -21,8 +21,7 @@ namespace VeinManagerClasses
 
 
         // Roll back conditions
-        //      We either rollback 2 states or if the last turn if it's 1 state ago
-        int rollbackAmount = 2; // Go back 2 states
+        int rollbackAmount = 1; 
 
         public ZoneVeinStateHistory()
         { }
@@ -79,7 +78,8 @@ namespace VeinManagerClasses
                     currentStraightLine.RemoveAt(currentStraightLine.Count - 1);
                 }
             }
-            else
+            // This means that the current state is the turn, need to get the previous straight line list
+            else if (currentStraightLine.Count == 1)
             {
                 List<ZoneVeinState> potentialRollBackList = historyQueue.dequeLastAdded(out bool queueEmpty);
 
@@ -89,6 +89,8 @@ namespace VeinManagerClasses
                     currentStraightLine = potentialRollBackList;
 
             }
+            else
+                Debug.LogError("ZoneVeinStateHistory - rollBackState(): IDK how you got here");
 
             return getCurrentState();
         }
@@ -135,6 +137,15 @@ namespace VeinManagerClasses
             }
 
             return worldCoords;
+        }
+
+        public int getLength()
+        {
+            int discardedCount = this.discardedWorldCoords.Count;
+            int historyQueueCount = this.historyQueue.getCount();
+            int currentLineCount = this.currentStraightLine.Count;
+
+            return discardedCount + historyQueueCount + currentLineCount;
         }
     }
 }

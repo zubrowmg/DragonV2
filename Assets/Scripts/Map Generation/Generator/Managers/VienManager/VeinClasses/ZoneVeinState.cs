@@ -41,7 +41,7 @@ namespace VeinManagerClasses
         public ZoneVeinState deepCopy()
         {
             List<Direction> rejectedDirListCopy = new List<Direction>();
-            rejectedDirList.AddRange(this.rejectedDirList);
+            rejectedDirListCopy.AddRange(this.rejectedDirList);
             return new ZoneVeinState(this.currentWorldCoords, this.currentCoords, this.prevCoords, this.currentDirection, this.prevDirection, this.nextDirection, this.currentMomentum, rejectedDirListCopy);
         }
 
@@ -127,6 +127,18 @@ namespace VeinManagerClasses
         public List<Direction> getRejectedDirList()
         {
             return this.rejectedDirList;
+        }
+        public void clearRejectedDir()
+        {
+            this.rejectedDirList = new List<Direction>();
+        }
+        public void printRejectedDir(string msg)
+        {
+            Debug.Log(msg);
+            foreach (var dir in this.rejectedDirList)
+            {
+                Debug.Log(dir);
+            }
         }
     }
 }

@@ -26,22 +26,20 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Tile Map Connections
     //       Double< CanTravelTo, Tile >
     TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>(); // Allocated dims, but only the tiles spaced out every x amount
-    //CoordsInt currentCoords = new CoordsInt(0, 0);
-    //CoordsInt prevCoords = new CoordsInt(0, 0);
 
     // State and state tracker
     ZoneVeinState currentState = new ZoneVeinState();
     ZoneVeinStateHistory stateHistory = new ZoneVeinStateHistory();
+
+    // Rollback
+    bool currentlyInRollBack = false;
 
     // Zone Connection Node Generation
     int gapBetweenNodes = 9;
 
     // Direction and momentum
     //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
-    //Direction currentDirection;
-    //Direction prevDirection;
     int maxMomentum = 3;
-    //int currentMomentum = 0;
     float primaryDirectionPercentage = .65f;
     List<float> momentumPercentTable = new List<float> { .85f, .60f, .25f, .05f };
     List<Direction> primaryDir;
@@ -101,6 +99,9 @@ public class ZoneVeinGenerator : ContainerAccessor
         this.currentState.setPrevCoords(new CoordsInt(0, 0));
         this.currentState.setPrevDir(Direction.None);
         this.currentState.setCurrentDir(Direction.None);
+
+        this.currentlyInRollBack = false;
+
 
         this.newVein = new SetCoordsVein(ref getContainerInst(), 0, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, this.veinWidth);
 
@@ -225,7 +226,6 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
         determineStartDirection();
 
-        int currentLength = 0;
         bool trunkFinished = false;
 
         //this.currentCoords.print("Start Coords: ");
@@ -242,7 +242,12 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         while (trunkFinished == false)
         {
-            //this.currentCoords.print("Current Coords: ");
+            // Determine if the trunk is too long
+            if (this.stateHistory.getLength() >= maxTrunkLength)
+            {
+                trunkFinished = true;
+                break;
+            }
 
             // Travel one unit in the current direction
             this.currentState.setPrevCoords(this.currentState.getCurrentCoords());
@@ -264,18 +269,21 @@ public class ZoneVeinGenerator : ContainerAccessor
             //Debug.Log("Prev Dir: " + prevDirection);
             this.currentState.setPrevDir(this.currentState.getCurrentDir());
             determineNewDirection();
+            this.currentlyInRollBack = false;
+
             //Debug.Log("New Dir: " + currentDirection);
 
-            // Determine if the trunk is too long
-            currentLength++;
-            if (currentLength >= maxTrunkLength)
-                trunkFinished = true;
+            
 
             // Track the current state
             this.stateHistory.addState(this.currentState.deepCopy());
-            //Debug.Log("====================================================");
+            this.currentState.getCurrentCoords().print("STATE SAVED: ");
+            this.currentState.printRejectedDir("STATE SAVED REJECTED DIR: ");
 
-            // break;
+            // Clear any variables in current state that aren't easily overwritten
+            //      Mainly lists
+            this.currentState.clearRejectedDir();
+
         }
 
         // Add all recorded world coords from the state history
@@ -486,6 +494,11 @@ public class ZoneVeinGenerator : ContainerAccessor
             {
                 this.currentState.setCurrentDir(attempedDir);
                 this.currentState.setRejectedDir(rejectedDirections);
+
+                foreach (var dir in rejectedDirections)
+                {
+                    Debug.Log("Final Rejected Dirs: " + dir);
+                }
             }
             else if (moveAccepted == false)
             {
@@ -503,7 +516,7 @@ public class ZoneVeinGenerator : ContainerAccessor
                     List<Direction> newRejectedDirList = new List<Direction>();
                     foreach (var dir in rejectedDirections)
                     {
-                        // If a direction in the rejectedDir list is NOT in the openDir list then keep the direction as rejected
+                        // If a direction in the rejectedDir list is NOT in the open Direction list then keep the direction as rejected
                         if (openDirections.Contains(dir) == false)
                             newRejectedDirList.Add(dir);
                     }
@@ -515,7 +528,20 @@ public class ZoneVeinGenerator : ContainerAccessor
                             Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" + "Failed from Rollback");
                         else
                             Debug.LogError("ZoneVeinGenerator - determinNewDirection(): Failed to find a new direction. All directions are locked. \n" + "Failed from normal operation (not Rollback)");
+
+
+                        foreach (var dir in rejectedDirections)
+                        {
+                            Debug.Log("Final Rejected Dirs: " + dir);
+                        }
+
+                        // If this is the first iteration of a roll back, then the current state isn't recorded yet
+                        //      We want to rollback from the current state, not the previous state which is recorded
+                        if (this.currentlyInRollBack == false)
+                            this.stateHistory.addState(this.currentState.deepCopy());
+
                         rollBackState();
+                        this.currentlyInRollBack = true;
                         break;
                     }
                 }
@@ -661,7 +687,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         Debug.Log("\tREJECTED DIRS: ");
         foreach (var dir in rejectedDirList)
         {
-            Debug.Log("\t" + dir);
+            Debug.Log("\t\t" + dir);
         }
 
         // Determine a new direction that can be attempted
