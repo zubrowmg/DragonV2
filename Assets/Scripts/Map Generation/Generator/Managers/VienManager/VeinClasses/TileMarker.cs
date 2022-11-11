@@ -59,6 +59,12 @@ namespace VeinManagerClasses
             passLocked[pass] = true;
         }
 
+        public void unlockPass(int pass)
+        {
+            passExistCheck(pass);
+            passLocked[pass] = false;
+        }
+
         public void passExistCheck(int pass)
         {
             //Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);

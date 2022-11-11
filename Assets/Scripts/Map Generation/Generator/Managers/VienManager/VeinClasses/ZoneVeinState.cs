@@ -122,7 +122,11 @@ namespace VeinManagerClasses
 
         public void setRejectedDir(List<Direction> rejectedDir)
         {
-            this.rejectedDirList.AddRange(rejectedDir);
+            foreach (var dir in rejectedDir)
+            {
+                if (this.rejectedDirList.Contains(dir) == false)
+                    this.rejectedDirList.Add(dir);
+            }
         }
         public List<Direction> getRejectedDirList()
         {
