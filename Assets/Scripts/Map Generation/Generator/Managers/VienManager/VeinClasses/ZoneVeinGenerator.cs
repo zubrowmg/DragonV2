@@ -415,19 +415,16 @@ public class ZoneVeinGenerator : ContainerAccessor
         determineNewDirection(rejectedDirections, dirForRollback);
     }
 
-    void determineNewDirection(List<Direction> rejectedDirections, bool dirForRollback)
+    bool determineIfDirNeedsToBeChanged(ref List<Direction> rejectedDirections, bool dirForRollback, Direction attempedDir)
     {
-        bool changeDirection = false;
         float randFloat = Random.Range(0f, 1f);
-        Direction attempedDir = this.currentState.getCurrentDir();
-
+        bool changeDirection = false;
 
         // Momentum Check
         if (randFloat >= momentumPercentTable[this.currentState.getCurrentMomentum()]/* && dirForRollback == false*/)
         {
             changeDirection = true;
-            if (rejectedDirections.Contains(this.currentState.getCurrentDir()) == false)
-                rejectedDirections.Add(this.currentState.getCurrentDir());
+            CommonFunctions.addIfItemDoesntExist(ref rejectedDirections, this.currentState.getCurrentDir());
         }
         // If the current dir is rejected, then we have to change directions
         else if (rejectedDirections.Contains(attempedDir) == true)
@@ -437,19 +434,74 @@ public class ZoneVeinGenerator : ContainerAccessor
         if (dirForRollback == true)
             changeDirection = true;
 
-        //Debug.Log("Change Dir: " + changeDirection + "\nMomentrum %: " + momentumPercentTable[currentMomentum] + "\n% Choosen: " + randFloat);
+        return changeDirection;
+    }
 
-        bool moveAccepted = false;
+    bool detemineIfPrimaryDirShouldBeSelected()
+    {
         bool primaryDirSelected = false;
-        randFloat = Random.Range(0f, 1f);
+        float randFloat = Random.Range(0f, 1f);
         if (randFloat >= primaryDirectionPercentage)
             primaryDirSelected = true;
 
+        return primaryDirSelected;
+    }
+
+    Direction selectDirBasedOnRejectedDir(List<Direction> rejectedDirections, ref bool primaryDirSelected)
+    {
+        List<Direction> possibleDirections = new List<Direction>();
+
+        while (possibleDirections.Count == 0)
+        {
+            if (primaryDirSelected)
+            {
+                foreach (var dir in primaryDir)
+                {
+                    if (rejectedDirections.Contains(dir) == false)
+                    {
+                        Debug.Log("Adding Primary: " + dir);
+                        possibleDirections.Add(dir);
+                    }
+                }
+
+                if (possibleDirections.Count == 0)
+                    primaryDirSelected = false;
+            }
+            else
+            {
+                foreach (var dir in secondaryDir)
+                {
+                    if (rejectedDirections.Contains(dir) == false)
+                    {
+                        Debug.Log("Adding Secondary: " + dir);
+                        possibleDirections.Add(dir);
+                    }
+                }
+
+                if (possibleDirections.Count == 0)
+                    primaryDirSelected = true;
+            }
+        }
+
+        return CommonFunctions.randomlySelectFromList(possibleDirections);
+    }
+
+    void determineNewDirection(List<Direction> rejectedDirections, bool dirForRollback)
+    {
+        // Permanently rejected dirs are directions that the current state absolutly cannot go to
+        //      Ex Out of bounds, tile is locked
+        List<Direction> permanentlyRejectedDir = new List<Direction>(rejectedDirections);
+
+        // Determine if we need to change directions
+        Direction attempedDir = this.currentState.getCurrentDir();
+        bool changeDirection = determineIfDirNeedsToBeChanged(ref rejectedDirections, dirForRollback, attempedDir);
+
+        // Select if the next direction should be based on the primary or secondary directions
+        bool primaryDirSelected = detemineIfPrimaryDirShouldBeSelected();
 
         // No U turns
         Direction oppositeDir = CommonFunctions.getOppositeDir(this.currentState.getPrevDir());
-        if (rejectedDirections.Contains(oppositeDir) == false)
-            rejectedDirections.Add(oppositeDir);
+        CommonFunctions.addIfItemDoesntExist(ref rejectedDirections, oppositeDir);
 
         Debug.Log("Change Direction Top \n =======================================================================");
         this.currentState.getCurrentCoords().print("Current Coords: ");
@@ -461,46 +513,11 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         // Determine which direction should be changed to
         //      Make sure the trunk doesn't run over itself or run out of bounds
+        bool moveAccepted = false;
         while (moveAccepted == false)
         {
             if (changeDirection == true)
-            {
-                List<Direction> possibleDirections = new List<Direction>();
-
-                while (possibleDirections.Count == 0)
-                {
-                    if (primaryDirSelected)
-                    {
-                        foreach (var dir in primaryDir)
-                        {
-                            if (rejectedDirections.Contains(dir) == false)
-                            {
-                                Debug.Log("Adding Primary: " + dir);
-                                possibleDirections.Add(dir);
-                            }
-                        }
-
-                        if (possibleDirections.Count == 0)
-                            primaryDirSelected = false;
-                    }
-                    else
-                    {
-                        foreach (var dir in secondaryDir)
-                        {
-                            if (rejectedDirections.Contains(dir) == false)
-                            {
-                                Debug.Log("Adding Secondary: " + dir);
-                                possibleDirections.Add(dir);
-                            }
-                        }
-
-                        if (possibleDirections.Count == 0)
-                            primaryDirSelected = true;
-                    }
-                }
-
-                attempedDir = CommonFunctions.randomlySelectFromList(possibleDirections);
-            }
+                attempedDir = selectDirBasedOnRejectedDir(rejectedDirections, ref primaryDirSelected);
 
             Debug.Log("\tATTEMPTED DIR: " + attempedDir);
             moveAccepted = isNextMoveValid(attempedDir);
@@ -522,8 +539,7 @@ public class ZoneVeinGenerator : ContainerAccessor
                 if (changeDirection == false)
                     changeDirection = true;
 
-                if (rejectedDirections.Contains(attempedDir) == false)
-                    rejectedDirections.Add(attempedDir);
+                CommonFunctions.addIfItemDoesntExist(ref rejectedDirections, attempedDir);
 
                 // If all directions are rejected, attempt to find any direction that works
                 //      A direction can be rejected and not be locked.
@@ -555,16 +571,15 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                         // If this is the first iteration of a roll back, then the current state isn't recorded yet
                         //      We want to rollback from the current state, not the previous state which is recorded
+                        this.currentlyInRollBack = true;
+                        Debug.Log("SET ROLL BACK TO TRUE");
                         if (this.currentlyInRollBack == false)
                         {
                             this.stateHistory.addState(this.currentState.deepCopy());
                             Debug.Log("CURRENTLY IN ROLL BACK: " + this.currentlyInRollBack);
                         }
-                        this.currentlyInRollBack = true;
-                        Debug.Log("SET ROLL BACK TO TRUE");
 
                         rollBackState();
-                        
 
                         break;
                     }
@@ -703,20 +718,13 @@ public class ZoneVeinGenerator : ContainerAccessor
         // Revert any locked tiles, has to be coords around the current coords that get unlock
         //      Then relock the previous coords
         //      If the rollback happens at a turn then you need to relock the prev coords and the coords before that
+        ZoneVeinState prevState = this.stateHistory.getStateBeforeCurrentState();
+
         bool lockTileMapConn = false;
         markTileMapPointsAroundCoord(this.currentState.getCurrentCoords(), lockTileMapConn);
         lockTileMapConn = true;
         markTileMapPointsAroundCoord(this.currentState.getPrevCoords(), lockTileMapConn);
-
-
-        // Add ref to previous state in ZoneVeinState
-        //  then relock, this.currentState.getPrevState().getPrevCoords()
-        //
-        //
-        //
-
-
-
+        markTileMapPointsAroundCoord(prevState.getPrevCoords(), lockTileMapConn);
 
         // Get the rejected direction list from the recorded state
         //      Reject the direction of the next state, since that is where the path got stuck

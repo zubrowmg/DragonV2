@@ -16,7 +16,7 @@ namespace VeinManagerClasses
         //      2. historyQueue[0][0]
         //      3. currentStraightLine[0]
         List<ZoneVeinState> currentStraightLine = new List<ZoneVeinState>();
-        QueueWrapper<List<ZoneVeinState>> historyQueue = new QueueWrapper<List<ZoneVeinState>>(3);
+        QueueWrapper<List<ZoneVeinState>> historyQueue = new QueueWrapper<List<ZoneVeinState>>(4);
         List<CoordsInt> discardedWorldCoords = new List<CoordsInt>();
 
 
@@ -113,9 +113,26 @@ namespace VeinManagerClasses
         // =================================================================================
         ZoneVeinState getCurrentState()
         {
-            ZoneVeinState test = this.currentStraightLine[this.currentStraightLine.Count - 1];
-
             return this.currentStraightLine[this.currentStraightLine.Count - 1];
+        }
+
+        public ZoneVeinState getStateBeforeCurrentState()
+        {
+            int currentLineCount = this.currentStraightLine.Count;
+            ZoneVeinState prevState = new ZoneVeinState();
+
+            if (currentLineCount >= 2)
+                prevState = this.currentStraightLine[this.currentStraightLine.Count - 2];
+            else if (currentLineCount == 1)
+            {
+                List<ZoneVeinState> lastAddedHistoryQueueList = this.historyQueue.getElement(this.historyQueue.getCount() - 1);
+                prevState = lastAddedHistoryQueueList[lastAddedHistoryQueueList.Count - 1];
+            }
+            else if (currentLineCount == 0)
+                Debug.LogError("ZoneVeinStateHistory Class - getStateBeforeCurrentState(): Trying to get the previous state, but there is none. " +
+                    "\n\tEither we rolled back too far, rolling back at the start of generation (AKA there is no history), or history class is not properly loading currentStraightLine");
+
+            return prevState;
         }
 
         public List<CoordsInt> getListOfWorldCoords()

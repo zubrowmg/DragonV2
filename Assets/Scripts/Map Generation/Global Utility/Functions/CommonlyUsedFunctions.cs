@@ -71,10 +71,11 @@ namespace CommonlyUsedFunctions
             return oppositeDir;
         }
 
-        //public static List<T> getListCopy<T>(List<T> list)
-        //{
-
-        //}
+        public static void addIfItemDoesntExist<T>(ref List<T> list, T item)
+        {
+            if (list.Contains(item) == false)
+                list.Add(item);
+        }
     }
 }
 
