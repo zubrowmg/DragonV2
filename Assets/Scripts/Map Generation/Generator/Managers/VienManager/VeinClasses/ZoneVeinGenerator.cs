@@ -493,6 +493,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         List<Direction> permanentlyRejectedDir = new List<Direction>(rejectedDirections);
 
         // Determine if we need to change directions
+        //      Don't permanently reject this dir yet
         Direction attempedDir = this.currentState.getCurrentDir();
         bool changeDirection = determineIfDirNeedsToBeChanged(ref rejectedDirections, dirForRollback, attempedDir);
 
@@ -502,6 +503,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         // No U turns
         Direction oppositeDir = CommonFunctions.getOppositeDir(this.currentState.getPrevDir());
         CommonFunctions.addIfItemDoesntExist(ref rejectedDirections, oppositeDir);
+        CommonFunctions.addIfItemDoesntExist(ref permanentlyRejectedDir, oppositeDir);
 
         Debug.Log("Change Direction Top \n =======================================================================");
         this.currentState.getCurrentCoords().print("Current Coords: ");
@@ -526,7 +528,7 @@ public class ZoneVeinGenerator : ContainerAccessor
             if (moveAccepted == true)
             {
                 this.currentState.setCurrentDir(attempedDir);
-                this.currentState.setRejectedDir(rejectedDirections);
+                this.currentState.setRejectedDir(permanentlyRejectedDir);
 
                 foreach (var dir in rejectedDirections)
                 {
@@ -540,22 +542,15 @@ public class ZoneVeinGenerator : ContainerAccessor
                     changeDirection = true;
 
                 CommonFunctions.addIfItemDoesntExist(ref rejectedDirections, attempedDir);
+                CommonFunctions.addIfItemDoesntExist(ref permanentlyRejectedDir, attempedDir);
 
                 // If all directions are rejected, attempt to find any direction that works
-                //      A direction can be rejected and not be locked.
-                //      For example if the algorithm decided to change directions, the current direction is rejected. But doesn't mean that it's locked
                 if (rejectedDirections.Count == 4)
                 {
-                    List<Direction> openDirections = getNotLockedDirections(this.currentState.getCurrentCoords());
-                    List<Direction> newRejectedDirList = new List<Direction>();
-                    foreach (var dir in rejectedDirections)
-                    {
-                        // If a direction in the rejectedDir list is NOT in the open Direction list then keep the direction as rejected
-                        if (openDirections.Contains(dir) == false)
-                            newRejectedDirList.Add(dir);
-                    }
-                    rejectedDirections = newRejectedDirList;
+                    // This will only open up possible directions if momentum check decided to change directions
+                    rejectedDirections = permanentlyRejectedDir;
 
+                    // If all directions are rejected, then we need to rollback
                     if (rejectedDirections.Count == 4)
                     {
                         if (dirForRollback == true)
@@ -571,16 +566,16 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                         // If this is the first iteration of a roll back, then the current state isn't recorded yet
                         //      We want to rollback from the current state, not the previous state which is recorded
-                        this.currentlyInRollBack = true;
-                        Debug.Log("SET ROLL BACK TO TRUE");
+                        
                         if (this.currentlyInRollBack == false)
                         {
                             this.stateHistory.addState(this.currentState.deepCopy());
-                            Debug.Log("CURRENTLY IN ROLL BACK: " + this.currentlyInRollBack);
                         }
+                        this.currentlyInRollBack = true;
+                        Debug.Log("SET ROLL BACK TO TRUE");
+                        Debug.Log("CURRENTLY IN ROLL BACK: " + this.currentlyInRollBack);
 
                         rollBackState();
-
                         break;
                     }
                 }

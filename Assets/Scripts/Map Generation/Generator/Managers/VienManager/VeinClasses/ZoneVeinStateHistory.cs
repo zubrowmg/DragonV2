@@ -48,6 +48,9 @@ namespace VeinManagerClasses
             {
                 List<ZoneVeinState> discardedStates = historyQueue.enqueueGetRemovedItem(this.currentStraightLine, out bool itemOverflow);
 
+                Debug.Log("TURN SAVED");
+
+
                 // Record the discarded world coords
                 if (itemOverflow == true)
                 {
@@ -61,7 +64,11 @@ namespace VeinManagerClasses
             }
 
             if (firstAdd == false)
+            {
+                Debug.Log("STRAIGHT LINE SAVED");
                 this.currentStraightLine.Add(newState);
+
+            }
 
             newState.getCurrentCoords().print("STATE SAVED: ");
             newState.printRejectedDir("STATE SAVED REJECTED DIR: ");
