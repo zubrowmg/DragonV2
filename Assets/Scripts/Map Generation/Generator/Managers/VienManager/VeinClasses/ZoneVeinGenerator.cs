@@ -372,8 +372,6 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
         {
-            
-
             switch (dir)
             {
                 case Direction.North:
@@ -394,13 +392,14 @@ public class ZoneVeinGenerator : ContainerAccessor
 
             // If point is inside the bounds then mark it as not travelable
             bool pointIsInsideBounds = tileMapConnections.isInsideBounds(attemptedCoord);
+            attemptedCoord.print("\t\t\t LOCK: " + lockTileMapConn + "   COORDS: ");
             if (pointIsInsideBounds == true)
             {
                 Double<TileTraveledToMarker, Tile> tileMapConnElement = this.tileMapConnections.getElement(attemptedCoord);
                 if (lockTileMapConn == true)
-                    tileMapConnElement.getOne().lockPass(currentVeinPass);
+                    tileMapConnElement.getOne().incLockPass(currentVeinPass);
                 else
-                    tileMapConnElement.getOne().unlockPass(currentVeinPass);
+                    tileMapConnElement.getOne().decLockPass(currentVeinPass);
             }
 
             attemptedCoord = coords.deepCopyInt();
@@ -717,9 +716,9 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         bool lockTileMapConn = false;
         markTileMapPointsAroundCoord(this.currentState.getCurrentCoords(), lockTileMapConn);
-        lockTileMapConn = true;
-        markTileMapPointsAroundCoord(this.currentState.getPrevCoords(), lockTileMapConn);
-        markTileMapPointsAroundCoord(prevState.getPrevCoords(), lockTileMapConn);
+        //lockTileMapConn = true;
+        //markTileMapPointsAroundCoord(this.currentState.getPrevCoords(), lockTileMapConn);
+        //markTileMapPointsAroundCoord(prevState.getPrevCoords(), lockTileMapConn);
 
         // Get the rejected direction list from the recorded state
         //      Reject the direction of the next state, since that is where the path got stuck

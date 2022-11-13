@@ -17,15 +17,15 @@ namespace VeinManagerClasses
 
         // Perma locked is for connection points that are not travelable under any circumstance
         //      Pass locked is for locking off points during a trunk/branch being generated
-        List<bool> passLocked;
-        bool permaLocked; 
+        List<int> passLocked; // 0 is unlocked, any other int means that it needs that number of unlocks to unlock
+        bool permaLocked;
 
         public TileTraveledToMarker()
         {
-            this.passLocked = new List<bool>();
+            this.passLocked = new List<int>();
             this.permaLocked = false;
 
-            lockTrunkPass();
+            initLockTrunkPass();
         }
 
         public void permaLock()
@@ -33,9 +33,10 @@ namespace VeinManagerClasses
             this.permaLocked = true;
         }
 
-        void lockTrunkPass()
+        // Initilize passLocked[0] (trunk pass) as unlocked
+        void initLockTrunkPass()
         {
-            this.passLocked.Add(false);
+            this.passLocked.Add(0);
         }
         
         public bool isPassLocked(int pass)
@@ -48,21 +49,22 @@ namespace VeinManagerClasses
             if (locked == false)
             {
                 passExistCheck(pass);
-                locked = passLocked[pass];
+                if (passLocked[pass] > 0)
+                    locked = true;
             }
             return locked;
         }
 
-        public void lockPass(int pass)
+        public void incLockPass(int pass)
         {
             passExistCheck(pass);
-            passLocked[pass] = true;
+            passLocked[pass]++;
         }
 
-        public void unlockPass(int pass)
+        public void decLockPass(int pass)
         {
             passExistCheck(pass);
-            passLocked[pass] = false;
+            passLocked[pass]--;
         }
 
         public void passExistCheck(int pass)
@@ -75,7 +77,7 @@ namespace VeinManagerClasses
                     if (i < passLocked.Count)
                         continue;
                     else
-                        passLocked.Add(false);
+                        passLocked.Add(0);
                 }
             }
             //Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
