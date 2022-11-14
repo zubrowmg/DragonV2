@@ -558,6 +558,11 @@ namespace CommonlyUsedClasses
         List<T> queue = new List<T>();
         int maxSize;
 
+        public QueueWrapper()
+        {
+            this.maxSize = System.Int32.MaxValue;
+        }
+
         public QueueWrapper(int maxSize)
         {
             this.maxSize = maxSize;
@@ -626,7 +631,7 @@ namespace CommonlyUsedClasses
             return queue[index];
         }
 
-        public ref List<T> getQueueList()
+        public ref List<T> getRawQueueList()
         {
             return ref this.queue;
         }

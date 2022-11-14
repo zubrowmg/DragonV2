@@ -53,10 +53,10 @@ namespace VeinManagerClasses
         //                                   Setters/Getters
         // =================================================================================
 
-        public Direction getNextDirection()
-        {
-            return this.nextDirection;
-        }
+        //public Direction getNextDirection()
+        //{
+        //    return this.nextDirection;
+        //}
         public void setNextDirection(Direction dir)
         {
             this.nextDirection = dir;

@@ -14,9 +14,7 @@ namespace VeinManagerClasses
         // State order is as follows:
         //      1. discardedWorldCoords[0] (if you want world coords, else disregard discardedWorldCoords)
         //      2. historyQueue[0][0]
-        //      3. currentStraightLine[0]
-        List<ZoneVeinState> currentStraightLine = new List<ZoneVeinState>();
-        QueueWrapper<List<ZoneVeinState>> historyQueue = new QueueWrapper<List<ZoneVeinState>>(15);
+        QueueWrapper<ZoneVeinState> historyQueue = new QueueWrapper<ZoneVeinState>(50);
         List<CoordsInt> discardedWorldCoords = new List<CoordsInt>();
 
 
@@ -30,44 +28,17 @@ namespace VeinManagerClasses
 
         public void addState(ZoneVeinState newState)
         {
-            bool firstAdd = false;
-
-            if (currentStraightLine.Count == 0)
+            if (historyQueue.getCount() == 0)
             {
-                currentStraightLine.Add(newState);
-                firstAdd = true;
+                this.historyQueue.enqueue(newState);
             }
-
-            ZoneVeinState currentState = getCurrentState();
-
-            this.currentStraightLine[this.currentStraightLine.Count - 1].setNextDirection(newState.getCurrentDir());
-
-
-            // If the direction has changed then add the current straight line list to the history queue and create a new staight line list
-            if (currentState.getCurrentDir() != newState.getCurrentDir())
+            else 
             {
-                List<ZoneVeinState> discardedStates = historyQueue.enqueueGetRemovedItem(this.currentStraightLine, out bool itemOverflow);
+                List<ZoneVeinState> rawList = this.historyQueue.getRawQueueList();
+                rawList[rawList.Count - 1].setNextDirection(newState.getCurrentDir());
 
-                Debug.Log("TURN SAVED");
-
-
-                // Record the discarded world coords
-                if (itemOverflow == true)
-                {
-                    foreach (var state in discardedStates)
-                    {
-                        this.discardedWorldCoords.Add(state.getCurrentWorldCoords());
-                    }
-                }
-
-                this.currentStraightLine = new List<ZoneVeinState>();
-            }
-
-            if (firstAdd == false)
-            {
-                Debug.Log("STRAIGHT LINE SAVED");
-                this.currentStraightLine.Add(newState);
-
+                //Debug.Log("STRAIGHT LINE SAVED");
+                this.historyQueue.enqueue(newState);
             }
 
             newState.getCurrentCoords().print("STATE SAVED: ");
@@ -81,34 +52,23 @@ namespace VeinManagerClasses
             rollBackedTooFar = false;
             
             // Roll back the roll back amount as long as it doesn't rollback the last trun
-            if (currentStraightLine.Count > rollbackAmount)
+            if (historyQueue.getCount() > rollbackAmount)
             {
                 for (int i = 0; i < rollbackAmount; i++)
                 {
                     Debug.Log("REMOVE 1");
-                    Debug.Log("COUNT: " + currentStraightLine.Count);
-                    foreach (var state in currentStraightLine)
+                    ZoneVeinState test = historyQueue.dequeLastAdded(out bool queueEmpty);
+                    test.getCurrentCoords().print("\t\t\tREMOVING COORDS: ");
+
+                    if (queueEmpty == true)
                     {
-                        state.getCurrentCoords().print("STRAIGHT LINE COORDS: ");
+                        rollBackedTooFar = true;
+                        break;
                     }
-                    currentStraightLine.RemoveAt(currentStraightLine.Count - 1);
                 }
             }
-            // This means that the current state is the turn, need to get the previous straight line list
-            else if (currentStraightLine.Count == 1)
-            {
-                Debug.Log("REMOVE 2");
-
-                List<ZoneVeinState> potentialRollBackList = historyQueue.dequeLastAdded(out bool queueEmpty);
-
-                if (queueEmpty == true)
-                    rollBackedTooFar = true;
-                else
-                    currentStraightLine = potentialRollBackList;
-
-            }
             else
-                Debug.LogError("ZoneVeinStateHistory - rollBackState(): IDK how you got here");
+                rollBackedTooFar = true;
 
             return getCurrentState();
         }
@@ -120,30 +80,13 @@ namespace VeinManagerClasses
         // =================================================================================
         ZoneVeinState getCurrentState()
         {
-            return this.currentStraightLine[this.currentStraightLine.Count - 1];
+            return this.historyQueue.getElement(this.historyQueue.getCount() - 1);
+            //return this.currentStraightLine[this.currentStraightLine.Count - 1];
         }
 
         public ZoneVeinState getStateBeforeCurrentState()
         {
-            int currentLineCount = this.currentStraightLine.Count;
-            ZoneVeinState prevState = new ZoneVeinState();
-
-            if (currentLineCount >= 2)
-                prevState = this.currentStraightLine[this.currentStraightLine.Count - 2];
-            else if (currentLineCount == 1)
-            {
-                if (this.historyQueue.getCount() == 0)
-                    Debug.LogError("ZoneVeinStateHistory Class - getStateBeforeCurrentState()___1: Trying to get the previous state, but there is none. " +
-                    "\n\tEither we rolled back too far, rolling back at the start of generation (AKA there is no history), or history class is not properly loading currentStraightLine");
-
-                List<ZoneVeinState> lastAddedHistoryQueueList = this.historyQueue.getElement(this.historyQueue.getCount() - 1);
-                prevState = lastAddedHistoryQueueList[lastAddedHistoryQueueList.Count - 1];
-            }
-            else if (currentLineCount == 0)
-                Debug.LogError("ZoneVeinStateHistory Class - getStateBeforeCurrentState()___2: Trying to get the previous state, but there is none. " +
-                    "\n\tEither we rolled back too far, rolling back at the start of generation (AKA there is no history), or history class is not properly loading currentStraightLine");
-
-            return prevState;
+            return this.historyQueue.getElement(this.historyQueue.getCount() - 2);
         }
 
         public List<CoordsInt> getListOfWorldCoords()
@@ -159,21 +102,10 @@ namespace VeinManagerClasses
             // Second add the history queue states world coords
             for (int i = 0; i < this.historyQueue.getCount(); i++)
             {
-                List<ZoneVeinState> currentStateList = this.historyQueue.getElement(i);
-
-                foreach (var state in currentStateList)
-                {
-                    worldCoords.Add(state.getCurrentWorldCoords());
-                    //state.getCurrentWorldCoords().print("   WORLD COORDS: ");
-                }
-            }
-
-            // Third add the current straight line states world coords
-            foreach (var state in this.currentStraightLine)
-            {
+                ZoneVeinState state = this.historyQueue.getElement(i);
                 worldCoords.Add(state.getCurrentWorldCoords());
-                //state.getCurrentWorldCoords().print("   WORLD COORDS: ");
             }
+
 
             return worldCoords;
         }
@@ -182,9 +114,8 @@ namespace VeinManagerClasses
         {
             int discardedCount = this.discardedWorldCoords.Count;
             int historyQueueCount = this.historyQueue.getCount();
-            int currentLineCount = this.currentStraightLine.Count;
 
-            return discardedCount + historyQueueCount + currentLineCount;
+            return discardedCount + historyQueueCount;
         }
     }
 }
