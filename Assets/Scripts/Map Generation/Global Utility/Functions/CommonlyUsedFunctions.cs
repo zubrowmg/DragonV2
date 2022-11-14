@@ -76,6 +76,12 @@ namespace CommonlyUsedFunctions
             if (list.Contains(item) == false)
                 list.Add(item);
         }
+
+        public static void addIfItemDoesntExist<T>(ref List<T> list, List<T> itemList)
+        {
+            foreach (var currentItem in itemList)
+                addIfItemDoesntExist(ref list, currentItem);
+        }
     }
 }
 
