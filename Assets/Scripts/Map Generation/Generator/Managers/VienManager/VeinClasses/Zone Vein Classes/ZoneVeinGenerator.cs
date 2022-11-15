@@ -17,12 +17,15 @@ public class ZoneVeinGenerator : ContainerAccessor
     //      This class should make sure that the vein placement is spacially placed correctly. No over crossing veins
     //      Should place vein Connect points at the start and end, and a few others on the ends
 
+    // This class also handles basic zone vein connection setup
+
     // !!!!!!!!!!!!!!!!!!!!!!!!
     //      At the end this class should export the end product as a vein class
     // !!!!!!!!!!!!!!!!!!!!!!!!
 
     ZoneVeinGeneratorContainer zoneVeinGenContainer = new ZoneVeinGeneratorContainer();
     ZoneVeinNavigationController zoneVeinNavigationController;
+    ZoneVeinDiGraphContoller zoneVeinDiGraphController;
 
     // Zone Connection Node Generation
     int gapBetweenNodes = 9;
@@ -30,6 +33,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
     {
         this.zoneVeinNavigationController = new ZoneVeinNavigationController(ref this.zoneVeinGenContainer, ref contInst);
+        this.zoneVeinDiGraphController = new ZoneVeinDiGraphContoller(ref this.zoneVeinGenContainer, ref contInst);
     }
     // =====================================================================================
     //                                     Main Function
@@ -63,6 +67,7 @@ public class ZoneVeinGenerator : ContainerAccessor
         zoneVeinGenContainer.currentVeinPass = 0;
 
         zoneVeinNavigationController.init();
+        zoneVeinDiGraphController.init();
     }
 
     // Don't want the Zone to generate one Tile at a time, need to setup Tile nodes that need to be the only destination points

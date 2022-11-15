@@ -4,8 +4,6 @@ using UnityEngine;
 
 using CommonlyUsedClasses;
 using TileManagerClasses;
-using CommonlyUsedFunctions;
-using CommonlyUsedDefinesAndEnums;
 using VeinManagerClasses;
 
 public class ZoneVeinGeneratorContainer
@@ -13,8 +11,8 @@ public class ZoneVeinGeneratorContainer
     public Zone_New currentZone;
 
     // Tile Map Connections
-    //       Double< CanTravelTo, Tile >
-    public TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>(); // Allocated dims, but only the tiles spaced out every x amount
+    //              Double<         CanTravelTo, Tile >
+    public TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
 
     // Vein passes (Trunk = pass0, branches are pass1, 2, 3, etc)
     public int currentVeinPass = 0;
