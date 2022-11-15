@@ -20,7 +20,7 @@ public class Main : MonoBehaviour
         System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
         stopWatch.Start();
 
-        int seed = (int)System.DateTime.Now.Ticks;//1550803247;// (int)System.DateTime.Now.Ticks;
+        int seed = 1550803247;// (int)System.DateTime.Now.Ticks;
         seed = seed < 0 ? seed * -1 : seed;
         Random.InitState(seed);
         Debug.Log("Seed: " + seed);

@@ -41,8 +41,8 @@ namespace VeinManagerClasses
                 //this.historyQueue.enqueue(newState);
             //}
 
-            newState.getCurrentCoords().print("STATE SAVED: ");
-            newState.printRejectedDir("STATE SAVED REJECTED DIR: ");
+            //newState.getCurrentCoords().print("STATE SAVED: ");
+            //newState.printRejectedDir("STATE SAVED REJECTED DIR: ");
         }
 
         public ZoneVeinState rollBackState(out bool rollBackedTooFar)
@@ -56,9 +56,9 @@ namespace VeinManagerClasses
             {
                 for (int i = 0; i < rollbackAmount; i++)
                 {
-                    Debug.Log("REMOVE 1");
+                    //Debug.Log("REMOVE 1");
                     ZoneVeinState test = historyQueue.dequeLastAdded(out bool queueEmpty);
-                    test.getCurrentCoords().print("\t\t\tREMOVING COORDS: ");
+                    //test.getCurrentCoords().print("\t\t\tREMOVING COORDS: ");
 
                     if (queueEmpty == true)
                     {
