@@ -28,18 +28,18 @@ namespace VeinManagerClasses
 
         public void addState(ZoneVeinState newState)
         {
-            if (historyQueue.getCount() == 0)
-            {
+            //if (historyQueue.getCount() == 0)
+            //{
                 this.historyQueue.enqueue(newState);
-            }
-            else 
-            {
-                List<ZoneVeinState> rawList = this.historyQueue.getRawQueueList();
-                rawList[rawList.Count - 1].setNextDirection(newState.getCurrentDir());
+            //}
+            //else 
+            //{
+            //    List<ZoneVeinState> rawList = this.historyQueue.getRawQueueList();
+                //rawList[rawList.Count - 1].setNextDirection(newState.getCurrentDir());
 
                 //Debug.Log("STRAIGHT LINE SAVED");
-                this.historyQueue.enqueue(newState);
-            }
+                //this.historyQueue.enqueue(newState);
+            //}
 
             newState.getCurrentCoords().print("STATE SAVED: ");
             newState.printRejectedDir("STATE SAVED REJECTED DIR: ");

@@ -9,6 +9,7 @@ namespace VeinManagerClasses
 {
     public class ZoneVeinState
     {
+        // Previous dir is the way the state came from, current state is where the next state will be
         CoordsInt currentWorldCoords = new CoordsInt(0, 0);
 
         CoordsInt currentCoords = new CoordsInt(0, 0);
@@ -45,22 +46,10 @@ namespace VeinManagerClasses
             return new ZoneVeinState(this.currentWorldCoords, this.currentCoords, this.prevCoords, this.currentDirection, this.prevDirection, this.nextDirection, this.currentMomentum, rejectedDirListCopy);
         }
 
-
-
-
-
         // =================================================================================
         //                                   Setters/Getters
         // =================================================================================
 
-        //public Direction getNextDirection()
-        //{
-        //    return this.nextDirection;
-        //}
-        public void setNextDirection(Direction dir)
-        {
-            this.nextDirection = dir;
-        }
         public Direction getCurrentDir()
         {
             return this.currentDirection;
