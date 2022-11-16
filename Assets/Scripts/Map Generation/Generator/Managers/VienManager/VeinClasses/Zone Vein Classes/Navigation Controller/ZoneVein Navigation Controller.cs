@@ -139,7 +139,7 @@ namespace VeinManagerClasses
                 // Record the point
                 this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
 
-                // Decide on a new direction
+                // Handle momentum
                 if (this.currentState.getCurrentDir() == this.currentState.getPrevDir() && this.currentState.getCurrentMomentum() < this.maxMomentum)
                     this.currentState.incCurrentMomentum();
                 else if (this.currentState.getCurrentDir() != this.currentState.getPrevDir())
