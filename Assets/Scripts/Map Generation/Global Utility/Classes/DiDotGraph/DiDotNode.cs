@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using CommonlyUsedFunctions;
+
 namespace DiDotGraphClasses
 {
     public class DiDotNode<T>
@@ -16,7 +18,7 @@ namespace DiDotGraphClasses
 
         public void addNode(ref DiDotNode<T> node)
         {
-            listOfConnections.Add(node);
+            CommonFunctions.addIfItemDoesntExist(ref listOfConnections, node);
         }
     }
 }
