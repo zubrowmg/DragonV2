@@ -33,7 +33,6 @@ namespace VeinManagerClasses
         int maxTrunkLength = 18;
 
         // Vein
-        
         SetCoordsVein newVein;
         int veinWidth = 5;
 
@@ -48,7 +47,7 @@ namespace VeinManagerClasses
 
         public void init()
         {
-            this.stateHistory = new ZoneVeinStateHistory();
+            this.stateHistory.init();
             this.currentState.setCurrentCoords(new CoordsInt(0, 0));
             this.currentState.setPrevCoords(new CoordsInt(0, 0));
             this.currentState.setPrevDir(Direction.None);
@@ -111,7 +110,8 @@ namespace VeinManagerClasses
         //                              Create Zone Vein Functions
         // =====================================================================================
 
-        public void createZoneVeinTrunk(CoordsInt startCoords)
+        // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
+        public List<CoordsInt> createZoneVeinTrunk(CoordsInt startCoords)
         {
             this.currentState.setCurrentCoords(startCoords.deepCopyInt());
 
@@ -158,11 +158,13 @@ namespace VeinManagerClasses
                 this.currentState.clearRejectedDir();
             }
 
-            // Add all recorded world coords from the state history
+            // Add all recorded world coords from the state history and trigger vein generation
             newVein.addSetCoord(this.stateHistory.getListOfWorldCoords());
-
-            // Create the vein once all points are choosen
             createVein();
+
+            List<CoordsInt> listOfZoneVeinCoords = this.stateHistory.getListOfZoneVeinCoords();
+
+            return listOfZoneVeinCoords;
         }
 
         void createVein()

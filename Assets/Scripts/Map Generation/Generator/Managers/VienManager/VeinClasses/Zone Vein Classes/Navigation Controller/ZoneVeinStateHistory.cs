@@ -16,6 +16,7 @@ namespace VeinManagerClasses
         //      2. historyQueue[0][0]
         QueueWrapper<ZoneVeinState> historyQueue = new QueueWrapper<ZoneVeinState>(50);
         List<CoordsInt> discardedWorldCoords = new List<CoordsInt>();
+        List<CoordsInt> discardedZoneVeinCoords = new List<CoordsInt>();
 
 
         // Roll back conditions
@@ -24,31 +25,25 @@ namespace VeinManagerClasses
         public ZoneVeinStateHistory()
         { }
 
-        
+        public void init()
+        {
+            this.historyQueue = new QueueWrapper<ZoneVeinState>(50);
+            this.discardedWorldCoords = new List<CoordsInt>();
+            this.discardedZoneVeinCoords = new List<CoordsInt>();
+        }
 
         public void addState(ZoneVeinState newState)
         {
-            //if (historyQueue.getCount() == 0)
-            //{
-                this.historyQueue.enqueue(newState);
-            //}
-            //else 
-            //{
-            //    List<ZoneVeinState> rawList = this.historyQueue.getRawQueueList();
-                //rawList[rawList.Count - 1].setNextDirection(newState.getCurrentDir());
-
-                //Debug.Log("STRAIGHT LINE SAVED");
-                //this.historyQueue.enqueue(newState);
-            //}
-
-            //newState.getCurrentCoords().print("STATE SAVED: ");
-            //newState.printRejectedDir("STATE SAVED REJECTED DIR: ");
+            ZoneVeinState overflowState =  this.historyQueue.enqueueGetRemovedItem(newState, out bool queueOverlow);
+            if (queueOverlow == true)
+            {
+                discardedWorldCoords.Add(overflowState.getCurrentWorldCoords());
+                discardedZoneVeinCoords.Add(overflowState.getCurrentCoords());
+            }
         }
 
         public ZoneVeinState rollBackState(out bool rollBackedTooFar)
         {
-            // It's easier to manipulate the raw history queue
-            //List<List<ZoneVeinState>> rawHistoryQueue = historyQueue.getQueueList();
             rollBackedTooFar = false;
             
             // Roll back the roll back amount as long as it doesn't rollback the last trun
@@ -56,9 +51,7 @@ namespace VeinManagerClasses
             {
                 for (int i = 0; i < rollbackAmount; i++)
                 {
-                    //Debug.Log("REMOVE 1");
                     ZoneVeinState test = historyQueue.dequeLastAdded(out bool queueEmpty);
-                    //test.getCurrentCoords().print("\t\t\tREMOVING COORDS: ");
 
                     if (queueEmpty == true)
                     {
@@ -108,6 +101,27 @@ namespace VeinManagerClasses
 
 
             return worldCoords;
+        }
+
+        public List<CoordsInt> getListOfZoneVeinCoords()
+        {
+            List<CoordsInt> zoneVeinCoords = new List<CoordsInt>();
+
+            // First add the discarded world coords
+            foreach (var coords in discardedZoneVeinCoords)
+            {
+                zoneVeinCoords.Add(coords);
+            }
+
+            // Second add the history queue states world coords
+            for (int i = 0; i < this.historyQueue.getCount(); i++)
+            {
+                ZoneVeinState state = this.historyQueue.getElement(i);
+                zoneVeinCoords.Add(state.getCurrentCoords());
+            }
+
+
+            return zoneVeinCoords;
         }
 
         public int getLength()

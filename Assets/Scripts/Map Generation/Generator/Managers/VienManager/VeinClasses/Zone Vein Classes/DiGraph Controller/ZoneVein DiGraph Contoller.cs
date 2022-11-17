@@ -38,6 +38,10 @@ namespace VeinManagerClasses
             {
                 CoordsInt prevCoord = coords[i];
                 CoordsInt currentCoord = coords[i + 1];
+
+                //prevCoord.print("FIRST COORDS: ");
+                //currentCoord.print("SECOND COORDS: ");
+
                 this.diGraph.addObject(ref prevCoord, ref currentCoord);
             }
         }
@@ -46,6 +50,20 @@ namespace VeinManagerClasses
         {
             // Analyze the graph
             this.diGraph.analyzeGraph();
+
+            List<List<DiDotNode<CoordsInt>>> listOfEdges = this.diGraph.getListOfEdges();
+
+            Debug.LogError("DUPLICATE COORD BUG!!!!!!!!!");
+            Debug.Log("======= New Edge =======");
+            Debug.Log("EDGE COUNT: " + listOfEdges.Count);
+
+            foreach (List<DiDotNode<CoordsInt>> edge in listOfEdges)
+            {
+                foreach (var coord in edge)
+                {
+                    coord.getObject().print("COORD: ");
+                }
+            }
 
             // Detemine what needs to be done to the graph
 
