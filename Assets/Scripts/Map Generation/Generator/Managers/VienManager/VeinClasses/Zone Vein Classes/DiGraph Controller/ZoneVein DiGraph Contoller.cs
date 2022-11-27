@@ -51,22 +51,32 @@ namespace VeinManagerClasses
             // Analyze the graph
             this.diGraph.analyzeGraph();
 
-            List<List<DiDotNode<CoordsInt>>> listOfEdges = this.diGraph.getListOfEdges();
-
-            Debug.LogError("DUPLICATE COORD BUG!!!!!!!!!");
-            Debug.Log("======= New Edge =======");
-            Debug.Log("EDGE COUNT: " + listOfEdges.Count);
-
-            foreach (List<DiDotNode<CoordsInt>> edge in listOfEdges)
-            {
-                foreach (var coord in edge)
-                {
-                    coord.getObject().print("COORD: ");
-                }
-            }
+            this.print("TEMP");
 
             // Detemine what needs to be done to the graph
 
+        }
+
+        void print(string message)
+        {
+            List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
+
+            Debug.Log(message);
+            Debug.Log("EDGE COUNT: " + listOfEdges.Count);
+            Debug.Log("EDGE LIST:");
+
+            string edgeList = "";
+            int i = 0;
+            foreach (DiDotEdge<CoordsInt> edge in listOfEdges)
+            {
+                edgeList = "\tEDGE_" + i;
+                foreach (var coord in edge.getNodeList())
+                {
+                    edgeList = edgeList + " " + coord.getObject().getPrintString();
+                }
+                i++;
+                Debug.Log(edgeList);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CommonlyUsedClasses;
+using CommonlyUsedFunctions;
 
 namespace DiDotGraphClasses
 {
@@ -17,7 +18,8 @@ namespace DiDotGraphClasses
         //T currentObject = default(T);
 
         // Current Graph Characteristics
-        List<List<DiDotNode<T>>> listOfEdges = new List<List<DiDotNode<T>>>();
+        List<DiDotEdge<T>> listOfEdges = new List<DiDotEdge<T>>();
+        List<DiDotCircularEdge<T>> listOfCircularEdges = new List<DiDotCircularEdge<T>>();
 
         public DiDotGraph()
         {
@@ -79,60 +81,74 @@ namespace DiDotGraphClasses
         //                              Di Dot Analysis Functions
         // =====================================================================================
 
+        // Will analyze the graph to get a list of edges and list of circular edges
+        //    
         public void analyzeGraph()
         {
-            listOfEdges = new List<List<DiDotNode<T>>>();
-
-            // Only analyze if there's bee an edit to the graph
+            // Only analyze if there's been an edit to the graph
             if (this.diGraphChanged == true)
             {
-                // Get a node to start at
-                DiDotNode<T> startNode = findNodeStartForAnalysis();
-                List<DiDotNode<T>> doNotTravelList = new List<DiDotNode<T>>();
+                traverseGraph();
 
-                List<DiDotNode<T>> currentEdge = getEdgeStartingFromNodeStart(startNode, ref doNotTravelList);
-
-                listOfEdges.Add(currentEdge);
+                analyzeGraphStats();
             }
 
             this.diGraphChanged = false;
         }
 
-        // Will get a list of nodes aka an edge, starting from a specified node
-        List<DiDotNode<T>> getEdgeStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)
+        public void analyzeGraphStats()
         {
-            List<DiDotNode<T>> currentPath = new List<DiDotNode<T>>();
-            getEdgeStartingFromNode(startNode, ref currentPath, ref doNotTravelList);
-            return currentPath;
+
         }
 
-
-
-        void getEdgeStartingFromNode(DiDotNode<T> currentNode, ref List<DiDotNode<T>> currentPath, ref List<DiDotNode<T>> doNotTravelList)
+        // Will traverse the graph to get a list of edges and list of circular edges
+        //      Currently only supports graphs that are connected, aka will not work for a graph split in two
+        public void traverseGraph()
         {
-            currentPath.Add(currentNode);
+            listOfEdges = new List<DiDotEdge<T>>();
+            bool foundAllEdges = false;
 
-            // Go through each connection in the current node
-            foreach (var nextNode in currentNode.getRawListOfConnections())
+            // Get a node to start at
+            DiDotNode<T> startNode = findNodeStartForAnalysis();
+            List<DiDotNode<T>> doNotTravelList = new List<DiDotNode<T>>();
+
+            Queue<DiDotNode<T>> nodesToCheckQueue = new Queue<DiDotNode<T>>();
+            List<DiDotNode<T>> intersectionNodesExplored = new List<DiDotNode<T>>();
+            intersectionNodesExplored.Add(startNode);
+
+            // Trying to find all edges in the graph
+            while (foundAllEdges == false)
             {
-                bool nodeCanBeTraveledTo = !doNotTravelList.Contains(nextNode);
+                // Will get a list of edges from a node, the node supplied SHOULD be an endnode or intersecting node
+                List<DiDotEdge<T>> currentListOfEdges = getEdgesStartingFromNodeStart(startNode, ref doNotTravelList);
+                CommonFunctions.addIfItemDoesntExist(ref listOfEdges, currentListOfEdges);
 
-                // If this node hasn't been traveled to or is not on the doNotTravelList then proceed
-                if (nodeCanBeTraveledTo == true)
+                // Find any intersecting nodes and add nodes the nodes to check queue
+                foreach (var edge in currentListOfEdges)
                 {
-                    // If we hit a dead end or an intersection, then we end the search here
-                    if (nextNode.isDeadEnd() == true || nextNode.isIntersection() == true)
+                    DiDotNode<T> nodeOne = edge.getNodeOne();
+                    DiDotNode<T> nodeTwo = edge.getNodeTwo();
+                    if (nodeOne.isIntersection() == true && intersectionNodesExplored.Contains(nodeOne) == false)
                     {
-                        doNotTravelList.Add(nextNode);
-                        currentPath.Add(nextNode);
+                        intersectionNodesExplored.Add(nodeOne);
+                        nodesToCheckQueue.Enqueue(nodeOne);
                     }
-                    else
+                    if (nodeTwo.isIntersection() == true && intersectionNodesExplored.Contains(nodeTwo) == false)
                     {
-                        doNotTravelList.Add(nextNode);
-                        getEdgeStartingFromNode(nextNode, ref currentPath, ref doNotTravelList);
+                        intersectionNodesExplored.Add(nodeTwo);
+                        nodesToCheckQueue.Enqueue(nodeTwo);
                     }
                 }
+
+                if (nodesToCheckQueue.Count == 0)
+                    foundAllEdges = true;
+                else
+                    startNode = nodesToCheckQueue.Dequeue();
             }
+
+
+             // Check if any edges are circular
+            
         }
 
         DiDotNode<T> findNodeStartForAnalysis()
@@ -193,12 +209,65 @@ namespace DiDotGraphClasses
         }
 
         // =====================================================================================
+        //                            Recursive Search Functions
+        // =====================================================================================
+
+        // Will get a list of nodes aka an edge, starting from a specified node
+        List<DiDotEdge<T>> getEdgesStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)
+        {
+            List<DiDotEdge<T>> listOfEdges = new List<DiDotEdge<T>>();
+            List<DiDotNode<T>> currentPath = new List<DiDotNode<T>>();
+            getEdgeStartingFromNode(startNode, ref currentPath, ref doNotTravelList, ref listOfEdges);
+            return listOfEdges;
+        }
+
+
+        void getEdgeStartingFromNode(DiDotNode<T> currentNode, ref List<DiDotNode<T>> currentPath, ref List<DiDotNode<T>> doNotTravelList, ref List<DiDotEdge<T>> listOfEdges)
+        {
+            currentPath.Add(currentNode);
+            CommonFunctions.addIfItemDoesntExist(ref doNotTravelList, currentNode);
+
+            // Go through each connection in the current node
+            foreach (var nextNode in currentNode.getRawListOfConnections())
+            {
+                bool nodeCanBeTraveledTo = !doNotTravelList.Contains(nextNode);
+
+                // If this node hasn't been traveled to or is not on the doNotTravelList then proceed
+                if (nodeCanBeTraveledTo == true)
+                {
+                    // If we hit a dead end or an intersection, then we end the search here
+                    if (nextNode.isDeadEnd() == true || nextNode.isIntersection() == true)
+                    {
+                        CommonFunctions.addIfItemDoesntExist(ref doNotTravelList, nextNode);
+
+                        List<DiDotNode<T>> tempPath = new List<DiDotNode<T>>(currentPath); // Need to create a new list
+                        tempPath.Add(nextNode);
+
+                        bool firstNodeIsNodeOne = true;
+                        DiDotEdge<T> newEdge = new DiDotEdge<T>(tempPath, firstNodeIsNodeOne);
+                        listOfEdges.Add(newEdge);
+                    }
+                    else
+                    {
+                        getEdgeStartingFromNode(nextNode, ref currentPath, ref doNotTravelList, ref listOfEdges);
+                    }
+                }
+            }
+
+            // I think C# is retaining currentPath values across the recursion
+            //     I have no idea WHY and nothing is useful online 
+            //     So once you exit this function delete the current node
+            currentPath.Remove(currentNode);
+        }
+
+        // =====================================================================================
         //                              Getters and Setters
         // =====================================================================================
 
-        public List<List<DiDotNode<T>>> getListOfEdges()
+        public List<DiDotEdge<T>> getListOfEdges()
         {
             return this.listOfEdges;
         }
+
     }
 }

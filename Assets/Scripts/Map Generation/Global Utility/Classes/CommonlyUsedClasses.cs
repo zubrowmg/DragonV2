@@ -53,6 +53,10 @@ namespace CommonlyUsedClasses
             Debug.Log(msg + x + "," + y);
         }
         
+        public string getPrintString()
+        {
+            return "(" + x.ToString() + "," + y.ToString() + ")";
+        }
     }
 
     public class CoordsInt : Coords<int>

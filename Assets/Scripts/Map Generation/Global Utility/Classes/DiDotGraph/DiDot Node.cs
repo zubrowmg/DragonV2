@@ -16,9 +16,9 @@ namespace DiDotGraphClasses
             this.nodeObject = obj;
         }
 
-        public T getObject()
+        public ref T getObject()
         {
-            return this.nodeObject;
+            return ref this.nodeObject;
         }
 
         public void addNode(ref DiDotNode<T> node)
