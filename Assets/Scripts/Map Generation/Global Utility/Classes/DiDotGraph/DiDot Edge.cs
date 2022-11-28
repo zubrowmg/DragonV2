@@ -18,8 +18,13 @@ namespace DiDotGraphClasses
         List<DiDotEdge<T>> nodeOneEdges = new List<DiDotEdge<T>>();
         List<DiDotEdge<T>> nodeTwoEdges = new List<DiDotEdge<T>>();
 
-        public DiDotEdge(List<DiDotNode<T>> list, bool firstIsNodeOne)
+        int id = -1;
+        bool firstIsNodeOne = false;
+
+        public DiDotEdge(List<DiDotNode<T>> list, bool firstIsNodeOne, int id)
         {
+            this.id = id;
+            this.firstIsNodeOne = firstIsNodeOne;
 
             if (firstIsNodeOne == false)
                 list.Reverse();
@@ -27,6 +32,28 @@ namespace DiDotGraphClasses
             addNodeAsStart(list[0]);
             addNodeAsEnd(list[list.Count - 1]);
             this.orderedNodeList = new List<DiDotNode<T>>(list);
+        }
+
+        // For deep copies
+        public DiDotEdge(DiDotNode<T> nodeOne, DiDotNode<T> nodeTwo, List<DiDotNode<T>> orderedNodeList, 
+            List<DiDotEdge<T>> nodeOneEdges, List<DiDotEdge<T>> nodeTwoEdges, bool firstIsNodeOne, int id)
+        {
+            this.id = id;
+            this.firstIsNodeOne = firstIsNodeOne;
+
+            this.nodeOne = nodeOne;
+            this.nodeTwo = nodeTwo;
+            this.nodeOneEdges = nodeOneEdges;
+            this.nodeTwoEdges = nodeTwoEdges;
+
+            addNodeAsStart(orderedNodeList[0]);
+            addNodeAsEnd(orderedNodeList[orderedNodeList.Count - 1]);
+            this.orderedNodeList = new List<DiDotNode<T>>(orderedNodeList);
+        }
+
+        public DiDotEdge<T> deepCopy()
+        {
+            return new DiDotEdge<T>(this.nodeOne, this.nodeTwo, this.orderedNodeList, this.nodeOneEdges, this.nodeTwoEdges, this.firstIsNodeOne, this.id);
         }
 
         public bool addEdgeConnections(ref DiDotEdge<T> connectingEdge)
@@ -81,6 +108,21 @@ namespace DiDotGraphClasses
         public ref List<DiDotNode<T>> getNodeList()
         {
             return ref this.orderedNodeList;
+        }
+
+        public ref List<DiDotEdge<T>> getNodeOneEdgeConnections()
+        {
+            return ref this.nodeOneEdges;
+        }
+
+        public ref List<DiDotEdge<T>> getNodeTwoEdgeConnections()
+        {
+            return ref this.nodeTwoEdges;
+        }
+
+        public int getId()
+        {
+            return this.id;
         }
     }
 }

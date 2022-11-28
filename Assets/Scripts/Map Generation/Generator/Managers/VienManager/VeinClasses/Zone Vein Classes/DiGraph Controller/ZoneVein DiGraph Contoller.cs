@@ -61,21 +61,34 @@ namespace VeinManagerClasses
         {
             List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
 
-            Debug.Log(message);
-            Debug.Log("EDGE COUNT: " + listOfEdges.Count);
-            Debug.Log("EDGE LIST:");
+            Debug.Log(message + 
+                      "\nEDGE COUNT: " + listOfEdges.Count + 
+                      "\nEDGE LIST:");
 
-            string edgeList = "";
-            int i = 0;
+            string strOutput = "";
             foreach (DiDotEdge<CoordsInt> edge in listOfEdges)
             {
-                edgeList = "\tEDGE_" + i;
+                strOutput = "\tEDGE_" + edge.getId();
                 foreach (var coord in edge.getNodeList())
                 {
-                    edgeList = edgeList + " " + coord.getObject().getPrintString();
+                    strOutput = strOutput + " " + coord.getObject().getPrintString();
                 }
-                i++;
-                Debug.Log(edgeList);
+
+                List<DiDotEdge<CoordsInt>> nodeOneEdges = edge.getNodeOneEdgeConnections();
+                List<DiDotEdge<CoordsInt>> nodeTwoEdges = edge.getNodeTwoEdgeConnections();
+
+                foreach (var edgeConnection in nodeOneEdges)
+                {
+                    strOutput = strOutput + "\t" + "E_" + edge.getId() + " <-> " + "E_" + edgeConnection.getId() + ": " + edge.getNodeOne().getObject().getPrintString();
+                }
+
+                foreach (var edgeConnection in nodeTwoEdges)
+                {
+                    strOutput = strOutput + "\t" + "E_" + edge.getId() + " <-> " + "E_" + edgeConnection.getId() + ": " + edge.getNodeTwo().getObject().getPrintString();
+                }
+
+
+                Debug.Log(strOutput);
             }
         }
     }
