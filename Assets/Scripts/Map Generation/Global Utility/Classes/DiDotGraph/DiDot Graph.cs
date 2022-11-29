@@ -21,7 +21,8 @@ namespace DiDotGraphClasses
         List<DiDotEdge<T>> listOfEdges = new List<DiDotEdge<T>>();
         List<DiDotCircularEdge<T>> listOfCircularEdges = new List<DiDotCircularEdge<T>>();
 
-        int currentId = 0;
+        int currentEdgeId = 0;
+        int currentCircularEdgeId = 0;
 
         public DiDotGraph()
         {
@@ -90,9 +91,10 @@ namespace DiDotGraphClasses
             // Only analyze if there's been an edit to the graph
             if (this.diGraphChanged == true)
             {
-                this.currentId = 0;
+                this.currentEdgeId = 0;
+                this.currentCircularEdgeId = 0;
 
-                traverseGraph();
+                identifyGraphEdges();
                 analyzeGraphStats();
             }
 
@@ -101,12 +103,18 @@ namespace DiDotGraphClasses
 
         public void analyzeGraphStats()
         {
-
+            // For now this function doesn't do anything, for basic enablement I only care about number of edges and circular edge
+            //      In the future I want stats such as:
+            //          - How central the circular edges are
+            //          - How big the circular edges are
+            //          - Amount of dead ends
+            //          - Length of dead ends
+            //          - Any stats will help future controllers to decide their next move
         }
 
         // Will traverse the graph to get a list of edges and list of circular edges
         //      Currently only supports graphs that are connected, aka will not work for a graph split in two
-        public void traverseGraph()
+        public void identifyGraphEdges()
         {
             this.listOfEdges = new List<DiDotEdge<T>>();
             this.listOfCircularEdges = new List<DiDotCircularEdge<T>>();
@@ -119,16 +127,52 @@ namespace DiDotGraphClasses
             //      Traverses entire graph
             //      Should also connect edges to one another
             List<DiDotEdge<T>> currentListOfEdges = getEdgesStartingFromNodeStart(startNode, ref doNotTravelList);
-            CommonFunctions.addIfItemDoesntExist(ref listOfEdges, currentListOfEdges);
+            CommonFunctions.addIfItemDoesntExist(ref this.listOfEdges, currentListOfEdges);
 
             // Check if any edges are circular
             // Go through each edge in the list and find all possible routes back to the same edge (AKA a circular edge)
+            List<DiDotEdge<T>> alreadyCheckedEdges = new List<DiDotEdge<T>>();
             foreach (var edge in this.listOfEdges)
             {
-                List<List<DiDotEdge<T>>> listOfCircularEdges = new List<List<DiDotGraphClasses.DiDotEdge<T>>>();
+                List<List<DiDotEdge<T>>> listOfCircularEdges = new List<List<DiDotEdge<T>>>();
 
-                // If list of circular edges is greater than 1, means we have multiple circular paths that need to be broken up
+                // If the edge is already a part of a circular edge, then don't search for it
+                if (alreadyCheckedEdges.Contains(edge) == false)
+                    listOfCircularEdges = getCircularEdgesStart(edge);
+
+                if (listOfCircularEdges.Count == 1)
+                {
+                    createAndAddCircularEdge(listOfCircularEdges[0]);
+                    alreadyCheckedEdges.AddRange(listOfCircularEdges[0]);
+                }
+                // If list of circular edges is greater than 1, means we have multiple circular paths
+                //      Idea is that we only need to create the smallest circular edge in the list
+                //      If there are multiple circular edges with the same edge count (that are min edge count), then create all of them
+                else if (listOfCircularEdges.Count > 1)
+                {
+                    List<DiDotEdge<T>> smallestCircularEdge = CommonFunctions.getSmallestListCount(listOfCircularEdges);
+                    List<List<DiDotEdge<T>>> listOfMinCircularEdges = new List<List<DiDotEdge<T>>>();
+
+                    foreach (var cirEdge in listOfCircularEdges)
+                    {
+                        if (cirEdge.Count == smallestCircularEdge.Count)
+                            listOfMinCircularEdges.Add(cirEdge);
+                    }
+
+                    foreach (var cirEdge in listOfMinCircularEdges)
+                    {
+                        createAndAddCircularEdge(cirEdge);
+                        alreadyCheckedEdges.AddRange(cirEdge);
+                    }
+                }
             }
+        }
+
+        void createAndAddCircularEdge(List<DiDotEdge<T>> edge)
+        {
+            DiDotCircularEdge<T> newCircularEdge = new DiDotCircularEdge<T>(edge, currentCircularEdgeId);
+            this.listOfCircularEdges.Add(newCircularEdge);
+            currentCircularEdgeId++;
         }
 
         DiDotNode<T> findNodeStartForAnalysis()
@@ -229,8 +273,8 @@ namespace DiDotGraphClasses
 
                         // Create a new edge
                         bool firstNodeIsNodeOne = true;
-                        DiDotEdge<T> newEdge = new DiDotEdge<T>(tempPath, firstNodeIsNodeOne, this.currentId);
-                        currentId++;
+                        DiDotEdge<T> newEdge = new DiDotEdge<T>(tempPath, firstNodeIsNodeOne, this.currentEdgeId);
+                        currentEdgeId++;
                         listOfEdges.Add(newEdge);
 
                         // Connect to previous edge, if prev edge is null then that means this is the first edge found
@@ -267,6 +311,110 @@ namespace DiDotGraphClasses
             currentPath.Remove(currentNode);
         }
 
+        // Will get a list of nodes aka an edge, starting from a specified node
+        List<List<DiDotEdge<T>>> getCircularEdgesStart(DiDotEdge<T> startEdge)
+        {
+            List<List<DiDotEdge<T>>> listOfCircularEdges = new List<List<DiDotEdge<T>>>();
+            List<DiDotEdge<T>> doNotTravelList = new List<DiDotEdge<T>>();
+            List<DiDotEdge<T>> currentPath = new List<DiDotEdge<T>>();
+            DiDotNode<T> startEdgeNode = startEdge.getNodeOne();
+
+            // If any node is a dead end, then it's impossible for it to be a circular edge
+            if (startEdge.nodeOneIsDeadEnd() == true || startEdge.nodeTwoIsDeadEnd() == true)
+                return listOfCircularEdges;
+
+            getCircularEdges(startEdge, startEdgeNode, startEdge, startEdgeNode, ref currentPath, ref doNotTravelList, ref listOfCircularEdges);
+            return listOfCircularEdges;
+        }
+
+
+        void getCircularEdges(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode, DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode,
+                            ref List<DiDotEdge<T>> currentPath, ref List<DiDotEdge<T>> doNotTravelList, ref List<List<DiDotEdge<T>>> listOfCircularEdges)
+        {
+            currentPath.Add(currentEdge);
+            CommonFunctions.addIfItemDoesntExist(ref doNotTravelList, currentEdge);
+
+            // Determine which edge connections to iterate through
+            List<DiDotEdge<T>> edgeConnections;
+            DiDotNode<T> nextEdgeBaseNode;
+            if (currentEdgeNode.Equals(currentEdge.getNodeOne()) == true)
+            {
+                edgeConnections = currentEdge.getNodeOneEdgeConnections();
+                nextEdgeBaseNode = currentEdge.getNodeOne();
+            }
+            else
+            {
+                edgeConnections = currentEdge.getNodeTwoEdgeConnections();
+                nextEdgeBaseNode = currentEdge.getNodeTwo();
+            }
+
+            // Go through each connection in the current edge
+            foreach (var nextEdge in edgeConnections)
+            {
+                bool edgeCanBeTraveledTo = !doNotTravelList.Contains(nextEdge);
+
+                // If this edge hasn't been traveled to or is not on the doNotTravelList then proceed
+                if (edgeCanBeTraveledTo == true)
+                {
+                    // Figure out which node in the current edge connects to the next edge
+                    bool nodeOneConnects = currentEdge.nodeOneConnectsToGivenEdge(nextEdge);
+                    bool deadEnd = false;
+                    if (nodeOneConnects == true)
+                        deadEnd = nextEdge.nodeTwoIsDeadEnd();
+                    else
+                        deadEnd = nextEdge.nodeOneIsDeadEnd();
+
+                    // If we make it back to the starting edge it can mean two things
+                    if (nextEdge.Equals(startEdge) == true)
+                    {
+                        // If we hit the starting node of the starting edge, then we have a clean circular edge
+                        //      Else we hit the other end of the starting edge, meaning that the graph probably has another circular edge
+                        //      Ex. x is the starting node
+                        //            x---o---o
+                        //                |   |
+                        //                o---o
+                        DiDotNode<T> connectingNode = currentEdge.getNodeThatConnectsToGivenEdge(nextEdge);
+
+                        // Record the clean edge
+                        if (connectingNode.Equals(startEdgeNode) == true)
+                        {
+                            // Need to create a new edge list for memory reasons
+                            List<DiDotEdge<T>> tempPath = new List<DiDotEdge<T>>(currentPath);
+                            tempPath.Add(nextEdge);
+
+                            // Connect to previous edge, if prev edge is null then that means this is the first edge found
+                            listOfCircularEdges.Add(tempPath);
+                        }
+                    }
+                    // If we hit a dead end stop here
+                    else if (deadEnd == true)
+                    {
+
+                    }
+                    // Else continue searching
+                    else
+                    {
+                        // Need to get the next edge node, should be opposite of the base node
+                        DiDotNode<T> nextEdgeNode;
+                        if (nextEdge.getNodeOne().Equals(nextEdgeBaseNode) == true)
+                            nextEdgeNode = nextEdge.getNodeTwo();
+                        else
+                            nextEdgeNode = nextEdge.getNodeOne();
+
+                        getCircularEdges(startEdge, startEdgeNode, nextEdge, nextEdgeNode, ref currentPath, ref doNotTravelList, ref listOfCircularEdges);
+                    }
+                        
+
+                }
+            }
+
+            // I think C# is retaining currentPath values across the recursion
+            //     I have no idea WHY and nothing is useful online 
+            //     So once you exit this function delete the current node
+            currentPath.Remove(currentEdge);
+            doNotTravelList.Remove(currentEdge);
+        }
+
         // =====================================================================================
         //                              Getters and Setters
         // =====================================================================================
@@ -276,5 +424,9 @@ namespace DiDotGraphClasses
             return this.listOfEdges;
         }
 
+        public List<DiDotCircularEdge<T>> getListOfCircularEdges()
+        {
+            return this.listOfCircularEdges;
+        }
     }
 }

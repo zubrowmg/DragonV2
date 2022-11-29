@@ -124,5 +124,43 @@ namespace DiDotGraphClasses
         {
             return this.id;
         }
+
+        public bool nodeOneConnectsToGivenEdge(DiDotEdge<T> edge)
+        {
+            bool nodeOneConnects = false;
+            if (nodeOneEdges.Contains(edge))
+                nodeOneConnects = true;
+            return nodeOneConnects;
+        }
+
+        public bool nodeOneIsDeadEnd()
+        {
+            bool deadEnd = false;
+            if (nodeOneEdges.Count == 0)
+                deadEnd = true;
+            return deadEnd;
+        }
+
+        public bool nodeTwoIsDeadEnd()
+        {
+            bool deadEnd = false;
+            if (nodeTwoEdges.Count == 0)
+                deadEnd = true;
+            return deadEnd;
+        }
+
+        public DiDotNode<T> getNodeThatConnectsToGivenEdge(DiDotEdge<T> edge)
+        {
+            DiDotNode<T> nodeConnection = null;
+
+            if (nodeOneEdges.Contains(edge) == true)
+                nodeConnection = nodeOne;
+            else if (nodeTwoEdges.Contains(edge) == true)
+                nodeConnection = nodeTwo;
+            else
+                Debug.LogError("DiDotEdge Class - getNodeThatConnectsToGivenEdge(): Edge_" + edge.getId() + " does not connect to this Edge_" + getId());
+
+            return nodeConnection;
+        }
     }
 }

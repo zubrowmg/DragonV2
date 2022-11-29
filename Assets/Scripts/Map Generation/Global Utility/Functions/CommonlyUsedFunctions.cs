@@ -82,6 +82,17 @@ namespace CommonlyUsedFunctions
             foreach (var currentItem in itemList)
                 addIfItemDoesntExist(ref list, currentItem);
         }
+
+        public static List<T> getSmallestListCount<T>(List<List<T>> list)
+        {
+            List<T> smallestCount = list[0];
+            foreach (var indexList in list)
+            {
+                if (indexList.Count < smallestCount.Count)
+                    smallestCount = indexList;
+            }
+            return smallestCount;
+        }
     }
 }
 

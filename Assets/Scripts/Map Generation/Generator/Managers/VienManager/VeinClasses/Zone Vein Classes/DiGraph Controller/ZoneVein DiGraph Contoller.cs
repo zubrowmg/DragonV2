@@ -12,6 +12,14 @@ namespace VeinManagerClasses
         ZoneVeinGeneratorContainer zoneVeinGenContainer;
         DiDotGraph<CoordsInt> diGraph;
 
+
+        // Vein Zone Properties
+        int minEdgeCount = 6;
+        int newlyAddedMinEdgeLength = 3;
+
+        int minCircularEdgeCount = 1;
+        int maxCircularEdgeCount = 1;
+
         public ZoneVeinDiGraphContoller(ref ZoneVeinGeneratorContainer zoneVeinGenContainerInst, ref GeneratorContainer contInst) : base(ref contInst)
         {
             this.zoneVeinGenContainer = zoneVeinGenContainerInst;
@@ -51,15 +59,16 @@ namespace VeinManagerClasses
             // Analyze the graph
             this.diGraph.analyzeGraph();
 
-            this.print("TEMP");
+            this.print("================= " + zoneVeinGenContainer.currentVeinZone.getId().ToString() + " =================");
 
-            // Detemine what needs to be done to the graph
+            // Detemine what needs to be done to the graph based on the non hit min conditions
 
         }
 
         void print(string message)
         {
             List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
+            List<DiDotCircularEdge<CoordsInt>> listOfCircularEdges = this.diGraph.getListOfCircularEdges();
 
             Debug.Log(message + 
                       "\nEDGE COUNT: " + listOfEdges.Count + 
@@ -88,6 +97,18 @@ namespace VeinManagerClasses
                 }
 
 
+                Debug.Log(strOutput);
+            }
+
+            strOutput = "";
+            foreach (DiDotCircularEdge<CoordsInt> cirEdge in listOfCircularEdges)
+            {
+                strOutput = "\tCIR_EDGE_" + cirEdge.getId();
+                foreach (var edge in cirEdge.getEdgeList())
+                {
+                    strOutput = strOutput + "  E_" + edge.getId();
+                }
+              
                 Debug.Log(strOutput);
             }
         }

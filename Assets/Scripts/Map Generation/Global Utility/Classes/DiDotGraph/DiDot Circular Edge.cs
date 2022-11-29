@@ -8,11 +8,21 @@ namespace DiDotGraphClasses
     {
         List<DiDotEdge<T>> listOfEdges = new List<DiDotEdge<T>>();
 
-        public DiDotCircularEdge(List<DiDotEdge<T>> listOfEdges)
+        int id = -1;
+
+        public DiDotCircularEdge(List<DiDotEdge<T>> listOfEdges, int id)
         {
             this.listOfEdges = listOfEdges;
+            this.id = id;
         }
 
-
+        public int getId()
+        {
+            return this.id;
+        }
+        public List<DiDotEdge<T>> getEdgeList()
+        {
+            return this.listOfEdges;
+        }
     }
 }
