@@ -139,8 +139,10 @@ public class ZoneVeinGenerator : ContainerAccessor
         List<CoordsInt> listOfZoneVeinCoords = this.zoneVeinNavigationController.createZoneVeinTrunk(startCoords);
         this.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
 
+        bool graphIsDone = false;
+
         // Have the Di Graph Controller decide where the next connection point should be
-        this.zoneVeinDiGraphController.decideEndPoints();
+        graphIsDone = this.zoneVeinDiGraphController.decideEndPoints();
 
         // createBranches();
     }

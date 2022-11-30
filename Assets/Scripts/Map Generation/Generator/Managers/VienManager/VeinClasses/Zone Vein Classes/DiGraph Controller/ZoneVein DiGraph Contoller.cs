@@ -7,18 +7,30 @@ using CommonlyUsedClasses;
 
 namespace VeinManagerClasses
 {
+    enum GraphEdgeType { None, Edge, CircularEdge }
+
     public class ZoneVeinDiGraphContoller : ContainerAccessor
     {
+        
+
         ZoneVeinGeneratorContainer zoneVeinGenContainer;
         DiDotGraph<CoordsInt> diGraph;
 
+        // Vein Zone Order of adding edges/circular edges
+        //Queue<GraphEdgeType> edgeAddOrder = new Queue<GraphEdgeType>();
 
         // Vein Zone Properties
-        int minEdgeCount = 6;
-        int newlyAddedMinEdgeLength = 3;
-
         int minCircularEdgeCount = 1;
         int maxCircularEdgeCount = 1;
+        int targetCircularEdgeCount = 0;
+
+        int minEdgeCount = 3;
+        int maxEdgeCount = 4;
+        int targetEdgeCount = 0;
+
+        int newlyAddedMinEdgeLength = 3; // 3 nodes
+
+       
 
         public ZoneVeinDiGraphContoller(ref ZoneVeinGeneratorContainer zoneVeinGenContainerInst, ref GeneratorContainer contInst) : base(ref contInst)
         {
@@ -32,11 +44,9 @@ namespace VeinManagerClasses
         public void init()
         {
             this.diGraph = new DiDotGraph<CoordsInt>();
+            this.targetEdgeCount = Random.Range(minEdgeCount, maxEdgeCount + 1);
+            this.targetCircularEdgeCount = Random.Range(minCircularEdgeCount, maxCircularEdgeCount + 1);
         }
-
-        // =====================================================================================
-        //                              DiGraph Control Functions
-        // =====================================================================================
 
         // Add a line of nodes to the graph
         public void addNodes(List<CoordsInt> coords)
@@ -54,14 +64,81 @@ namespace VeinManagerClasses
             }
         }
 
-        public void decideEndPoints()
+
+        // =====================================================================================
+        //                           DiGraph Conditional Control Functions
+        // =====================================================================================
+
+        bool edgeConditionHit()
         {
+            bool conditionMet = true;
+            if (this.diGraph.getNumOfNonCircularEdges() < this.targetEdgeCount)
+                conditionMet = false;
+            return conditionMet;
+        }
+
+        bool circularEdgeConditionHit()
+        {
+            bool conditionMet = true;
+            if (this.diGraph.getNumOfCircularEdges() < this.targetCircularEdgeCount)
+                conditionMet = false;
+            return conditionMet;
+        }
+
+        // =====================================================================================
+        //                              DiGraph Control Functions
+        // =====================================================================================
+
+        GraphEdgeType decideNextEdgeType()
+        {
+            bool edgeConditionMet = edgeConditionHit();
+            bool circularEdgeConditionMet = circularEdgeConditionHit();
+            GraphEdgeType nextEdgeType = GraphEdgeType.None;
+
+            if (edgeConditionMet == true && circularEdgeConditionMet == true)
+                nextEdgeType = Random.Range(0, 2) == 0 ? GraphEdgeType.Edge : GraphEdgeType.CircularEdge;
+            else if (edgeConditionMet == true)
+                nextEdgeType = GraphEdgeType.Edge;
+            else if (circularEdgeConditionMet == true)
+                nextEdgeType = GraphEdgeType.CircularEdge;
+
+            return nextEdgeType;
+        }
+
+        public bool decideEndPoints()
+        {
+            bool graphIsDone = false;
             // Analyze the graph
             this.diGraph.analyzeGraph();
 
             this.print("================= " + zoneVeinGenContainer.currentVeinZone.getId().ToString() + " =================");
 
             // Detemine what needs to be done to the graph based on the non hit min conditions
+            GraphEdgeType nextEdgeType = decideNextEdgeType();
+            switch(nextEdgeType)
+            {
+                case GraphEdgeType.None:
+                    graphIsDone = true;
+                    break;
+
+                case GraphEdgeType.Edge:
+                    decideEdgePoints();
+                    break;
+
+                case GraphEdgeType.CircularEdge:
+                    decideCircularEdgePoints();
+                    break;
+            }
+
+            return graphIsDone;
+        }
+
+        void decideEdgePoints()
+        {
+
+        }
+        void decideCircularEdgePoints()
+        {
 
         }
 

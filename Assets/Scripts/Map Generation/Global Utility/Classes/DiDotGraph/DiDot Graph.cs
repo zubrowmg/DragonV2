@@ -19,6 +19,7 @@ namespace DiDotGraphClasses
 
         // Current Graph Characteristics
         List<DiDotEdge<T>> listOfEdges = new List<DiDotEdge<T>>();
+        List<DiDotEdge<T>> listOfNonCircularEdges = new List<DiDotEdge<T>>();
         List<DiDotCircularEdge<T>> listOfCircularEdges = new List<DiDotCircularEdge<T>>();
 
         int currentEdgeId = 0;
@@ -96,6 +97,7 @@ namespace DiDotGraphClasses
 
                 identifyGraphEdges();
                 analyzeGraphStats();
+
             }
 
             this.diGraphChanged = false;
@@ -117,6 +119,7 @@ namespace DiDotGraphClasses
         public void identifyGraphEdges()
         {
             this.listOfEdges = new List<DiDotEdge<T>>();
+            this.listOfNonCircularEdges = new List<DiDotEdge<T>>();
             this.listOfCircularEdges = new List<DiDotCircularEdge<T>>();
 
             // Get a node to start at
@@ -165,6 +168,22 @@ namespace DiDotGraphClasses
                         alreadyCheckedEdges.AddRange(cirEdge);
                     }
                 }
+            }
+
+            // Add to listOfNonCircularEdges, basically any edges that aren't also circular edges
+            foreach (var edge in this.listOfEdges)
+            {
+                bool edgeIsNotCircular = true;
+                foreach (var cirEdge in this.listOfCircularEdges)
+                {
+                    if (cirEdge.circularEdgeContains(edge) == true)
+                    {
+                        edgeIsNotCircular = false;
+                        break;
+                    }
+                }
+                if (edgeIsNotCircular == true)
+                    this.listOfNonCircularEdges.Add(edge);
             }
         }
 
@@ -423,10 +442,28 @@ namespace DiDotGraphClasses
         {
             return this.listOfEdges;
         }
+        public int getNumOfEdges()
+        {
+            return this.listOfEdges.Count;
+        }
 
         public List<DiDotCircularEdge<T>> getListOfCircularEdges()
         {
             return this.listOfCircularEdges;
+        }
+        public int getNumOfCircularEdges()
+        {
+            return this.listOfCircularEdges.Count;
+        }
+
+
+        public List<DiDotEdge<T>> getListOfNonCircularEdges()
+        {
+            return this.listOfNonCircularEdges;
+        }
+        public int getNumOfNonCircularEdges()
+        {
+            return this.listOfNonCircularEdges.Count;
         }
     }
 }

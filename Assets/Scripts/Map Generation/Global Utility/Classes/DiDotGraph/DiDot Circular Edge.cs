@@ -24,5 +24,10 @@ namespace DiDotGraphClasses
         {
             return this.listOfEdges;
         }
+
+        public bool circularEdgeContains(DiDotEdge<T> edge)
+        {
+            return listOfEdges.Contains(edge);
+        }
     }
 }
