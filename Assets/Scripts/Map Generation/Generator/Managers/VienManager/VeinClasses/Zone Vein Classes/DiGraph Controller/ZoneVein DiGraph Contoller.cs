@@ -11,7 +11,9 @@ namespace VeinManagerClasses
 
     public class ZoneVeinDiGraphContoller : ContainerAccessor
     {
-        
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //  Future enhancement idea, for zones that need to have more of an identy refer to enhacements section in binder
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         ZoneVeinGeneratorContainer zoneVeinGenContainer;
         DiDotGraph<CoordsInt> diGraph;
@@ -122,24 +124,30 @@ namespace VeinManagerClasses
                     break;
 
                 case GraphEdgeType.Edge:
-                    decideEdgePoints();
+                    configureNewEdge();
                     break;
 
                 case GraphEdgeType.CircularEdge:
-                    decideCircularEdgePoints();
+                    configureCicularNewEdge();
                     break;
             }
 
             return graphIsDone;
         }
 
-        void decideEdgePoints()
+        void configureNewEdge()
         {
+            // 1. Scan the allocated tile map connection for an empty space
+            // 2. Determine a close point in the di graph controller
+            // 3. Get the direction from the point to the empty space
+            // Basic configuration for now, expecting something more deliberate in the future
 
+            zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpace();
         }
-        void decideCircularEdgePoints()
-        {
 
+        void configureCicularNewEdge()
+        {
+            
         }
 
         void print(string message)

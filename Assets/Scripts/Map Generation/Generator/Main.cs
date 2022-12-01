@@ -32,6 +32,7 @@ public class Main : MonoBehaviour
 
         stopWatch.Stop();
         Debug.Log("Generation Time:  " + (stopWatch.ElapsedMilliseconds * .001) + "s");
+        Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nWHENEVER YOU ARE DONE WITH A FEATURE CHECK THE ENHANCEMENT TAB IN BINDER\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
 
         // Give the debug manager access to generation manager

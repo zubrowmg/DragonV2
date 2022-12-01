@@ -24,16 +24,17 @@ public class ZoneVeinGenerator : ContainerAccessor
     // !!!!!!!!!!!!!!!!!!!!!!!!
 
     ZoneVeinGeneratorContainer zoneVeinGenContainer = new ZoneVeinGeneratorContainer();
-    ZoneVeinNavigationController zoneVeinNavigationController;
-    ZoneVeinDiGraphContoller zoneVeinDiGraphController;
+    //ZoneVeinNavigationController zoneVeinNavigationController;
+    //ZoneVeinDiGraphContoller zoneVeinDiGraphController;
 
     // Zone Connection Node Generation
     int gapBetweenNodes = 9;
 
     public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
     {
-        this.zoneVeinNavigationController = new ZoneVeinNavigationController(ref this.zoneVeinGenContainer, ref contInst);
-        this.zoneVeinDiGraphController = new ZoneVeinDiGraphContoller(ref this.zoneVeinGenContainer, ref contInst);
+        ZoneVeinNavigationController zoneVeinNavigationController = new ZoneVeinNavigationController(ref this.zoneVeinGenContainer, ref contInst);
+        ZoneVeinDiGraphContoller zoneVeinDiGraphController = new ZoneVeinDiGraphContoller(ref this.zoneVeinGenContainer, ref contInst);
+        this.zoneVeinGenContainer.assignControllerInstances(ref zoneVeinNavigationController, ref zoneVeinDiGraphController);
     }
     // =====================================================================================
     //                                     Main Function
@@ -66,8 +67,8 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         zoneVeinGenContainer.currentVeinPass = 0;
 
-        zoneVeinNavigationController.init();
-        zoneVeinDiGraphController.init();
+        zoneVeinGenContainer.zoneVeinNavigationController.init();
+        zoneVeinGenContainer.zoneVeinDiGraphController.init();
     }
 
     // Don't want the Zone to generate one Tile at a time, need to setup Tile nodes that need to be the only destination points
@@ -136,13 +137,13 @@ public class ZoneVeinGenerator : ContainerAccessor
     public void createZoneVein(CoordsInt startCoords)
     {
         // Create the main "trunk" of the zone vein
-        List<CoordsInt> listOfZoneVeinCoords = this.zoneVeinNavigationController.createZoneVeinTrunk(startCoords);
-        this.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
+        List<CoordsInt> listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.createZoneVeinTrunk(startCoords);
+        this.zoneVeinGenContainer.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
 
         bool graphIsDone = false;
 
         // Have the Di Graph Controller decide where the next connection point should be
-        graphIsDone = this.zoneVeinDiGraphController.decideEndPoints();
+        graphIsDone = this.zoneVeinGenContainer.zoneVeinDiGraphController.decideEndPoints();
 
         // createBranches();
     }

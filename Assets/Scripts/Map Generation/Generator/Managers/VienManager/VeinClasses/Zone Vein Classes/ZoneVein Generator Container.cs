@@ -8,6 +8,10 @@ using VeinManagerClasses;
 
 public class ZoneVeinGeneratorContainer
 {
+    // Main two controllers
+    public ZoneVeinNavigationController zoneVeinNavigationController;
+    public ZoneVeinDiGraphContoller zoneVeinDiGraphController;
+
     public Zone_New currentZone;
 
     // Tile Map Connections
@@ -22,7 +26,22 @@ public class ZoneVeinGeneratorContainer
 
     public ZoneVeinGeneratorContainer()
     {
+        
     }
+
+    // =====================================================================================
+    //                                    Init Functions
+    // =====================================================================================
+
+    public void assignControllerInstances(ref ZoneVeinNavigationController navControllerInst, ref ZoneVeinDiGraphContoller diGraphControllerInst)
+    {
+        this.zoneVeinNavigationController = navControllerInst;
+        this.zoneVeinDiGraphController = diGraphControllerInst;
+    }
+
+    // =====================================================================================
+    //                                    
+    // =====================================================================================
 
     public CoordsInt getTileMapCoordsFromTileMapConns(CoordsInt coords)
     {
