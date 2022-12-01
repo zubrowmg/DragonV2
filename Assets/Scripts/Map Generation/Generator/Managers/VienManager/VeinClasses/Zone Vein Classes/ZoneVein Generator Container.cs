@@ -8,9 +8,12 @@ using VeinManagerClasses;
 
 public class ZoneVeinGeneratorContainer
 {
+    public bool debugMode = false;
+
     // Main two controllers
     public ZoneVeinNavigationController zoneVeinNavigationController;
     public ZoneVeinDiGraphContoller zoneVeinDiGraphController;
+    public DimVeinZoneCreator dimVeinZoneCreator;
 
     public Zone_New currentZone;
 
@@ -24,19 +27,23 @@ public class ZoneVeinGeneratorContainer
     // The output vein zone
     public VeinZone currentVeinZone;
 
-    public ZoneVeinGeneratorContainer()
+    public ZoneVeinGeneratorContainer(bool debugMode)
     {
-        
+        this.debugMode = debugMode;
+
     }
 
     // =====================================================================================
     //                                    Init Functions
     // =====================================================================================
 
-    public void assignControllerInstances(ref ZoneVeinNavigationController navControllerInst, ref ZoneVeinDiGraphContoller diGraphControllerInst)
+    public void assignControllerInstances(ref ZoneVeinNavigationController navControllerInst, 
+                                          ref ZoneVeinDiGraphContoller diGraphControllerInst,
+                                          ref DimVeinZoneCreator dimVeinZoneCreator)
     {
         this.zoneVeinNavigationController = navControllerInst;
         this.zoneVeinDiGraphController = diGraphControllerInst;
+        this.dimVeinZoneCreator = dimVeinZoneCreator;
     }
 
     // =====================================================================================

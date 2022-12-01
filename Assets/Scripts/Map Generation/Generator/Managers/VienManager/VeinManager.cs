@@ -94,8 +94,8 @@ public class VeinManager : ContainerAccessor
         this.yAxisTwoFourth = 2 * tileAccessor.getTileMapDims().getMaxY() / 4;
         this.yAxisThreeFourth = 3 * tileAccessor.getTileMapDims().getMaxY() / 4;
 
-        this.zoneVeinGenerator = new ZoneVeinGenerator(ref contInst);
         this.dimVeinZoneCreator = new DimVeinZoneCreator(ref contInst);
+        this.zoneVeinGenerator = new ZoneVeinGenerator(debugMode, ref contInst, ref this.dimVeinZoneCreator);
     }
 
     // ============================================================================

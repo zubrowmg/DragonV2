@@ -23,18 +23,21 @@ public class ZoneVeinGenerator : ContainerAccessor
     //      At the end this class should export the end product as a vein class
     // !!!!!!!!!!!!!!!!!!!!!!!!
 
-    ZoneVeinGeneratorContainer zoneVeinGenContainer = new ZoneVeinGeneratorContainer();
+    ZoneVeinGeneratorContainer zoneVeinGenContainer;
     //ZoneVeinNavigationController zoneVeinNavigationController;
     //ZoneVeinDiGraphContoller zoneVeinDiGraphController;
 
     // Zone Connection Node Generation
     int gapBetweenNodes = 9;
 
-    public ZoneVeinGenerator(ref GeneratorContainer contInst) : base(ref contInst)
+    public ZoneVeinGenerator(bool debugMode, ref GeneratorContainer contInst, ref DimVeinZoneCreator dimVeinZoneCreator) : base(ref contInst)
     {
+        this.zoneVeinGenContainer = new ZoneVeinGeneratorContainer(debugMode);
+
         ZoneVeinNavigationController zoneVeinNavigationController = new ZoneVeinNavigationController(ref this.zoneVeinGenContainer, ref contInst);
         ZoneVeinDiGraphContoller zoneVeinDiGraphController = new ZoneVeinDiGraphContoller(ref this.zoneVeinGenContainer, ref contInst);
-        this.zoneVeinGenContainer.assignControllerInstances(ref zoneVeinNavigationController, ref zoneVeinDiGraphController);
+
+        this.zoneVeinGenContainer.assignControllerInstances(ref zoneVeinNavigationController, ref zoneVeinDiGraphController, ref dimVeinZoneCreator);
     }
     // =====================================================================================
     //                                     Main Function

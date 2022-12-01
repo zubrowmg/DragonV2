@@ -157,8 +157,13 @@ public abstract class DimCreator : TileAccessor
             // Break out conditions
             if (dimensionList.area >= maxArea)
             {
-                
-
+                // Top off dim list, this is used to make dim areas that are not rectangular into a rectangular shape
+                //      Ex: 
+                //          ---------       ---------
+                //          | xxxxx |       | xxxxx |
+                //          |    xx |   =>  | xxxxx |
+                //          |    xx |       | xxxxx |
+                //          ---------       ---------
                 if (this.topOffDimList == true)
                 {
                     if (coordsToCheck.Count == 0)

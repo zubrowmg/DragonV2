@@ -540,10 +540,22 @@ namespace VeinManagerClasses
         // =====================================================================================
         //                           DiGraph Controller Help Functions
         // =====================================================================================
-
         public void findEmptySpace()
         {
+            // Breaks tileMapConnections into 3x3 grid
+            //      Then randomly 
+            var tileMapRef = this.zoneVeinGenContainer.tileMapConnections;
 
+            CoordsInt startCoords = new CoordsInt(0, 0);
+            DirectionBias noDirectionBias = new DirectionBias(Direction.None, Direction.None);
+
+            CoordsInt tileMapMin = new CoordsInt(0, 0);
+            CoordsInt tileMapMax = new CoordsInt(tileMapRef.getXCount() - 1, tileMapRef.getYCount() - 1);
+
+            CoordsInt restrictedDimsMin = tileMapRef.getElement(tileMapMin).getTwo().getTileMapCoords();
+            CoordsInt restrictedDimsMax = tileMapRef.getElement(tileMapMax).getTwo().getTileMapCoords();
+
+            //DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(startCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias);
         }
     }
 }

@@ -213,4 +213,18 @@ public class DimVeinZoneCreator : DimCreator
 
         return newDimList;
     }
+
+    public DimensionList getDimensionsInRestrictedTileArea(CoordsInt startCoords, bool debugMode, DirectionBias directionBias)
+    {
+        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
+
+        //directionBias.print();
+
+        DimensionList newDimList = getDimensions(startCoords);
+
+        if (debugMode)
+            markSelectedGridForDebug(newDimList);
+
+        return newDimList;
+    }
 }
