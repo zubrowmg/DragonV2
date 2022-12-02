@@ -7,18 +7,28 @@ using CommonlyUsedClasses;
 
 public class DimVeinZoneCreator : DimCreator
 {
-
     // Defualt Vein Zone Creator Variables
-    int squareAreaFillMinSideLength = 6;
-    float squareAreaMaxArea = 75;
+    int defualtSquareAreaFillMinSideLength = 6;
+    float defualtSquareAreaMaxArea = 75;
 
-    int veinZoneMaxArea = 4000;
-    bool topOffDimList = true;
+    int defualtVeinZoneMaxArea = 4000;
+    bool defualtTopOffDimList = true;
+
+    // Restricted Free Space Creator Variables
+    int restrictedSquareAreaFillMinSideLength = 4;
+    float restrictedSquareAreaMaxArea = 8;
+
+    int restrictedMaxArea = 30;
+    bool restrictedTopOffDimList = true;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {
-        this.wiggleDisplacementRange = (int)Mathf.Sqrt(squareAreaMaxArea) - 3;
         this.historyWiggleDisplacementRange = this.wiggleDisplacementRange;
+    }
+
+    void init(float squareAreaMaxArea, int squareAreaFillMinSideLength)
+    {
+        this.wiggleDisplacementRange = (int)Mathf.Sqrt(squareAreaMaxArea) - 3;
         this.maxAdjacentSearchDisplacement = squareAreaFillMinSideLength + 3;
     }
 
@@ -106,7 +116,7 @@ public class DimVeinZoneCreator : DimCreator
                     CoordsInt coordsToCheck = new CoordsInt(x, minCoords.getY());
 
                     // If there's a vein then don't expand the bounds
-                    if (tileIsVein(coordsToCheck) == true)
+                    if (tileIsVein(coordsToCheck) == true || coordAreInsideAllocatedBounds(coordsToCheck) == false)
                     {
                         yMinLocked = true;
                         minCoords.incY();
@@ -118,7 +128,7 @@ public class DimVeinZoneCreator : DimCreator
                     CoordsInt coordsToCheck = new CoordsInt(x, maxCoords.getY());
                     
                     // If there's a vein then don't expand the bounds
-                    if (tileIsVein(coordsToCheck) == true)
+                    if (tileIsVein(coordsToCheck) == true || coordAreInsideAllocatedBounds(coordsToCheck) == false)
                     {
                         yMaxLocked = true;
                         maxCoords.decY();
@@ -161,7 +171,7 @@ public class DimVeinZoneCreator : DimCreator
                     CoordsInt coordsToCheck = new CoordsInt(minCoords.getX(), y);
 
                     // If there's a vein then don't expand the bounds
-                    if (tileIsVein(coordsToCheck) == true)
+                    if (tileIsVein(coordsToCheck) == true || coordAreInsideAllocatedBounds(coordsToCheck) == false)
                     {
                         xMinLocked = true;
                         minCoords.incX();
@@ -174,7 +184,7 @@ public class DimVeinZoneCreator : DimCreator
                     CoordsInt coordsToCheck = new CoordsInt(maxCoords.getX(), y);
                     
                     // If there's a vein then don't expand the bounds
-                    if (tileIsVein(coordsToCheck) == true)
+                    if (tileIsVein(coordsToCheck) == true || coordAreInsideAllocatedBounds(coordsToCheck) == false)
                     {
                         xMaxLocked = true;
                         maxCoords.decX();
@@ -201,7 +211,8 @@ public class DimVeinZoneCreator : DimCreator
 
     public DimensionList getDimensionsForVeinZone(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, out TwoDList<Tile> tileMapRef)
     {
-        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
+        init(defualtSquareAreaMaxArea, defualtSquareAreaFillMinSideLength);
+        setDimensionVariables(defualtSquareAreaFillMinSideLength, defualtVeinZoneMaxArea, defualtSquareAreaMaxArea, directionBias, this.defualtTopOffDimList, getTileMapDims());
 
         //directionBias.print();
 
@@ -214,9 +225,10 @@ public class DimVeinZoneCreator : DimCreator
         return newDimList;
     }
 
-    public DimensionList getDimensionsInRestrictedTileArea(CoordsInt startCoords, bool debugMode, DirectionBias directionBias)
+    public DimensionList getDimensionsInRestrictedTileArea(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims)
     {
-        setDimensionVariables(squareAreaFillMinSideLength, veinZoneMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
+        init(restrictedSquareAreaMaxArea, restrictedSquareAreaFillMinSideLength);
+        setDimensionVariables(restrictedSquareAreaFillMinSideLength, restrictedMaxArea, restrictedSquareAreaMaxArea, directionBias, this.restrictedTopOffDimList, restrictedDims);
 
         //directionBias.print();
 

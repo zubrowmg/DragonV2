@@ -12,7 +12,7 @@ public abstract class DimCreator : TileAccessor
 {
     // Class is meant to be used for capturing a collection of square areas
 
-    // Top off dim list is a way to fill in the rest of the dim list, without further expanding the dim list
+    // Top off dim list is a way to fill in gaps in the dim list, without further expanding the dim list
     //      Pretty much only used for zone vein generation
     bool topOffDimList = false;
 
@@ -38,6 +38,9 @@ public abstract class DimCreator : TileAccessor
     QueueWrapper<CoordsInt> recentlyAddedCoordsToCheck;
     int recentlyAddedCoordsQueueSize = 40;
     protected int historyWiggleDisplacementRange;
+
+    // Allocated tile map dims
+    protected Dimensions allocatedTileMapDims;
 
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
@@ -265,11 +268,9 @@ public abstract class DimCreator : TileAccessor
 
             while (!foundNewPoint)
             {
-                //print("DISPLACEMENT: " + x + "," + y);
-                bool tooCloseToPreviouslyAttemptedSquareCore = false;
 
                 CoordsInt wiggledCoords = new CoordsInt(x, y);
-                foundNewPoint = checkDisplacentAndWiggle(ref tooCloseToPreviouslyAttemptedSquareCore, 
+                foundNewPoint = checkDisplacentAndWiggle(out bool tooCloseToPreviouslyAttemptedSquareCore,
                                     dimensionList, ref coordsToCheck, wiggledCoords, startCoords, getDimsToTopOffDimList);
                 if (tooCloseToPreviouslyAttemptedSquareCore)
                     break;
@@ -337,10 +338,10 @@ public abstract class DimCreator : TileAccessor
     }
 
 
-    bool checkDisplacentAndWiggle(ref bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, 
-                        ref LinkedList<CoordsInt> coordsToCheck, 
-                        CoordsInt wiggledCoords, CoordsInt startCoords, bool getDimsToTopOffDimList)
+    bool checkDisplacentAndWiggle(out bool tooCloseToPreviouslyAttemptedSquareCore, DimensionList dimensionList, 
+                        ref LinkedList<CoordsInt> coordsToCheck, CoordsInt wiggledCoords, CoordsInt startCoords, bool getDimsToTopOffDimList)
     {
+        tooCloseToPreviouslyAttemptedSquareCore = false;
         bool foundNewPoint = false;
 
         // If the grid is a vein and is not occupied and the point is not already added then add the point
@@ -348,6 +349,8 @@ public abstract class DimCreator : TileAccessor
         //        The dimension list will reject the square gaps, but 
         if (wiggleConditions(wiggledCoords) == true)
         {
+            if (coordAreInsideAllocatedBounds(wiggledCoords) == false)
+                foundNewPoint = false;
             if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords, wiggleDisplacementRange) == true)
             {
                 tooCloseToPreviouslyAttemptedSquareCore = true;
@@ -458,11 +461,22 @@ public abstract class DimCreator : TileAccessor
         }
     }
 
+    // Normally the boundries are going to be the entire tile map
+    //      But in the case that we want to look for space in a restricted area we need to check
+    protected bool coordAreInsideAllocatedBounds(CoordsInt coords)
+    {
+        bool isInsideBounds = false;
+        if (allocatedTileMapDims.getMinX() <= coords.getX() && coords.getX() <= allocatedTileMapDims.getMaxX() &&
+            allocatedTileMapDims.getMinY() <= coords.getY() && coords.getY() <= allocatedTileMapDims.getMaxY())
+            isInsideBounds = true;
+        return isInsideBounds;
+    }
+
     // =======================================================================================
     //                                  Setters/Getters
     // =======================================================================================
 
-    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias, bool topOffDimList)
+    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias, bool topOffDimList, Dimensions allocatedTileMapDims)
     {
         this.minSideLength = minSideLength;
         this.maxSqaureAreaArea = individualMaxSquareArea;
@@ -470,5 +484,6 @@ public abstract class DimCreator : TileAccessor
         this.directionBias = directionBias;
 
         this.topOffDimList = topOffDimList;
+        this.allocatedTileMapDims = allocatedTileMapDims;
     }
 }

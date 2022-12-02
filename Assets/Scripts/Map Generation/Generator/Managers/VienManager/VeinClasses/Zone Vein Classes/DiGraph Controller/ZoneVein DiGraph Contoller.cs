@@ -4,10 +4,10 @@ using UnityEngine;
 
 using DiDotGraphClasses;
 using CommonlyUsedClasses;
+using VeinEnums;
 
 namespace VeinManagerClasses
 {
-    enum GraphEdgeType { None, Edge, CircularEdge }
 
     public class ZoneVeinDiGraphContoller : ContainerAccessor
     {
@@ -97,11 +97,11 @@ namespace VeinManagerClasses
             bool circularEdgeConditionMet = circularEdgeConditionHit();
             GraphEdgeType nextEdgeType = GraphEdgeType.None;
 
-            if (edgeConditionMet == true && circularEdgeConditionMet == true)
+            if (edgeConditionMet == false && circularEdgeConditionMet == false)
                 nextEdgeType = Random.Range(0, 2) == 0 ? GraphEdgeType.Edge : GraphEdgeType.CircularEdge;
-            else if (edgeConditionMet == true)
+            else if (edgeConditionMet == false)
                 nextEdgeType = GraphEdgeType.Edge;
-            else if (circularEdgeConditionMet == true)
+            else if (circularEdgeConditionMet == false)
                 nextEdgeType = GraphEdgeType.CircularEdge;
 
             return nextEdgeType;
@@ -131,6 +131,8 @@ namespace VeinManagerClasses
                     configureCicularNewEdge();
                     break;
             }
+
+            Debug.Log("NEXT EDGE TYPE: " + nextEdgeType);
 
             return graphIsDone;
         }

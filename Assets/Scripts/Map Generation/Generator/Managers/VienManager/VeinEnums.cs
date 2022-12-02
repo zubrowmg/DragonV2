@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace VeinEnums
 {
+    // For normal vein creation
     public enum VeinType { Simple, U, Zone, Set_Coords, None_Set };
     public enum VeinDirection { Left, Right, None_Set };
 
@@ -16,5 +17,8 @@ namespace VeinEnums
     public enum UVeinType { Shift, Widen, Shift_Widen };
     public enum UVeinStage { Part1, Part2, Part3, Part4 };
 
+
+    // For DiGraph Controller
+    enum GraphEdgeType { None, Edge, CircularEdge }
 
 }

@@ -542,18 +542,21 @@ namespace VeinManagerClasses
         // =====================================================================================
         public void findEmptySpace()
         {
-            // Breaks tileMapConnections into 3x3 grid
-            //      Then randomly 
-            var tileMapRef = this.zoneVeinGenContainer.tileMapConnections;
+            // Uses dimVeinZoneCreator to find empty space in a restricted tile map dimension (The one that the zone is restricted to)
+            //      Does not check all locations in the tile map, does a "lazy job". Coords checked are based on the size of allocated tile map for the zone
+            TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getTileMapRef();
 
             CoordsInt startCoords = new CoordsInt(0, 0);
             DirectionBias noDirectionBias = new DirectionBias(Direction.None, Direction.None);
 
             CoordsInt tileMapMin = new CoordsInt(0, 0);
-            CoordsInt tileMapMax = new CoordsInt(tileMapRef.getXCount() - 1, tileMapRef.getYCount() - 1);
+            CoordsInt tileMapMax = new CoordsInt(allocatedTileMap.getXCount() - 1, allocatedTileMap.getYCount() - 1);
 
-            CoordsInt restrictedDimsMin = tileMapRef.getElement(tileMapMin).getTwo().getTileMapCoords();
-            CoordsInt restrictedDimsMax = tileMapRef.getElement(tileMapMax).getTwo().getTileMapCoords();
+            CoordsInt restrictedDimsMin = allocatedTileMap.getElement(tileMapMin).getTileMapCoords();
+            CoordsInt restrictedDimsMax = allocatedTileMap.getElement(tileMapMax).getTileMapCoords();
+
+            restrictedDimsMin.print("MIN DIM: ");
+            restrictedDimsMax.print("MAX DIM: ");
 
             //DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(startCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias);
         }

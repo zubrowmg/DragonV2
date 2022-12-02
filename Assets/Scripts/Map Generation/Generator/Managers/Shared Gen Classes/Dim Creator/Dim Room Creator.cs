@@ -265,7 +265,7 @@ public class DimRoomCreator : DimCreator
     {
         DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
-        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
+        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList, getTileMapDims());
         return getDimensions(startCoords);
     }
 
@@ -273,7 +273,7 @@ public class DimRoomCreator : DimCreator
     {
         DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
-        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList);
+        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList, getTileMapDims());
         return getDimensions(startCoords);
     }
 
