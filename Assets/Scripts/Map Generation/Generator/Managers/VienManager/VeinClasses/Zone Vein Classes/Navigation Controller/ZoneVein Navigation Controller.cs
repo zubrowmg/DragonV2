@@ -540,6 +540,9 @@ namespace VeinManagerClasses
         // =====================================================================================
         //                           DiGraph Controller Help Functions
         // =====================================================================================
+
+        
+
         public void findEmptySpace()
         {
             // Uses dimVeinZoneCreator to find empty space in a restricted tile map dimension (The one that the zone is restricted to)
@@ -558,6 +561,12 @@ namespace VeinManagerClasses
             restrictedDimsMin.print("MIN DIM: ");
             restrictedDimsMax.print("MAX DIM: ");
 
+            List<CoordsInt> reducedCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
+
+            foreach (var coord in reducedCoordsList)
+            {
+                coord.print("\tREDUCED: ");
+            }
             //DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(startCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias);
         }
     }

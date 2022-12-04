@@ -192,6 +192,57 @@ namespace CommonlyUsedClasses
 
             return isInside;
         }
+
+        // Returns a reduced list of coords based on the size
+        public List<CoordsInt> getReducedCoordsList()
+        {
+            int minAxisPoints = 3;
+            int minDisplacementLength = 3;
+            int maxDisplacementLength = 6;
+
+            List<CoordsInt> reducedCoordsList = new List<CoordsInt>();
+
+            // Compute the x and y displacement amount
+            int xDisplacement = calculateAxisDisplacment(minAxisPoints, minDisplacementLength, maxDisplacementLength, getXCount());
+            int yDisplacement = calculateAxisDisplacment(minAxisPoints, minDisplacementLength, maxDisplacementLength, getYCount());
+
+            for (int x = 0; x < getXCount() - 1; x += xDisplacement)
+            {
+                for (int y = 0; y < getYCount() - 1; y += yDisplacement)
+                {
+
+                    CoordsInt selectedCoord = new CoordsInt(x, y);
+                    reducedCoordsList.Add(selectedCoord);
+                }
+            }
+
+            return reducedCoordsList;
+        }
+
+        int calculateAxisDisplacment(int minAxisPoints, int minDisplacementLength, int maxDisplacementLength, int axisLength)
+        {
+            bool displacementCalculated = false;
+            int axisPointCount = minAxisPoints;
+            int displacement = 0;
+            while (displacementCalculated == false)
+            {
+                displacement = Mathf.FloorToInt(axisLength / (axisPointCount - 1));
+
+                if (minDisplacementLength <= displacement && displacement <= maxDisplacementLength)
+                    displacementCalculated = true;
+                // For small graphs return a larger displacement by dividing it in half
+                else if (displacement < minDisplacementLength)
+                {
+
+                    axisPointCount = 3;
+                    displacement = Mathf.FloorToInt(axisLength / (axisPointCount - 1));
+                    displacement--;
+                    displacementCalculated = true;
+                }
+                axisPointCount++;
+            }
+            return displacement;
+        }
     }
 
     public class RandomProbability
