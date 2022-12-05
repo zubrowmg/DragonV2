@@ -93,6 +93,15 @@ namespace CommonlyUsedFunctions
             }
             return smallestCount;
         }
+
+        public static int calculateArea(CoordsInt minCoords, CoordsInt maxCoords)
+        {
+            int xDiff = (int)CommonFunctions.calculateDifference(minCoords.getX(), maxCoords.getX());
+            int yDiff = (int)CommonFunctions.calculateDifference(minCoords.getY(), maxCoords.getY());
+
+            int area = (xDiff + 1) * (yDiff + 1);
+            return area;
+        }
     }
 }
 

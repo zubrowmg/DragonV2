@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using CommonlyUsedFunctions;
+
 namespace CommonlyUsedClasses
 {
     public class SquareArea
@@ -67,13 +69,15 @@ namespace CommonlyUsedClasses
 
     public class Dimensions
     {
-        Coords<int> minCoords;
-        Coords<int> maxCoords;
+        CoordsInt minCoords;
+        CoordsInt maxCoords;
+        int area;
 
-        public Dimensions(Coords<int> minCoords, Coords<int> maxCoords)
+        public Dimensions(CoordsInt minCoords, CoordsInt maxCoords)
         {
             this.minCoords = minCoords;
             this.maxCoords = maxCoords;
+            this.area = CommonFunctions.calculateArea(minCoords, maxCoords);
         }
 
         public int getMinX()
@@ -94,6 +98,11 @@ namespace CommonlyUsedClasses
         public int getMaxY()
         {
             return maxCoords.getY();
+        }
+
+        public int getArea()
+        {
+            return this.area;
         }
     }
 
@@ -620,10 +629,10 @@ namespace CommonlyUsedClasses
             }
         }
 
-        public void printMinMax()
+        public void printMinMax(string str)
         {
-            minCoords.print("DIM MIN: ");
-            maxCoords.print("DIM MAX: ");
+            minCoords.print(str + "DIM MIN: ");
+            maxCoords.print(str + "DIM MAX: ");
         }
 
         public CoordsInt getStartCoords()

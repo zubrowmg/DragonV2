@@ -128,7 +128,8 @@ namespace VeinManagerClasses
                     break;
 
                 case GraphEdgeType.CircularEdge:
-                    configureCicularNewEdge();
+                    configureNewEdge();
+                    //configureCicularNewEdge();
                     break;
             }
 

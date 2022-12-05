@@ -16,9 +16,9 @@ public class DimVeinZoneCreator : DimCreator
 
     // Restricted Free Space Creator Variables
     int restrictedSquareAreaFillMinSideLength = 4;
-    float restrictedSquareAreaMaxArea = 8;
+    float restrictedSquareAreaMaxArea = 48;
 
-    int restrictedMaxArea = 30;
+    int restrictedMaxArea = 150;
     bool restrictedTopOffDimList = true;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
@@ -58,6 +58,8 @@ public class DimVeinZoneCreator : DimCreator
         int yMinUnlockCount = 0; int yMaxUnlockCount = 0;
 
         //Debug.Log("MAX AREA: " + maxSqaureAreaArea);
+
+        //Debug.Log
 
         while (area < maxSqaureAreaArea)
         {
@@ -225,10 +227,10 @@ public class DimVeinZoneCreator : DimCreator
         return newDimList;
     }
 
-    public DimensionList getDimensionsInRestrictedTileArea(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims)
+    public DimensionList getDimensionsInRestrictedTileArea(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims, int maxTotalArea)
     {
         init(restrictedSquareAreaMaxArea, restrictedSquareAreaFillMinSideLength);
-        setDimensionVariables(restrictedSquareAreaFillMinSideLength, restrictedMaxArea, restrictedSquareAreaMaxArea, directionBias, this.restrictedTopOffDimList, restrictedDims);
+        setDimensionVariables(restrictedSquareAreaFillMinSideLength, maxTotalArea, restrictedSquareAreaMaxArea, directionBias, this.restrictedTopOffDimList, restrictedDims);
 
         //directionBias.print();
 

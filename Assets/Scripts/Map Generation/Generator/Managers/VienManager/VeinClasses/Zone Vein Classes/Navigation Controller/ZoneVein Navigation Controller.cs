@@ -549,7 +549,6 @@ namespace VeinManagerClasses
             //      Does not check all locations in the tile map, does a "lazy job". Coords checked are based on the size of allocated tile map for the zone
             TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getTileMapRef();
 
-            CoordsInt startCoords = new CoordsInt(0, 0);
             DirectionBias noDirectionBias = new DirectionBias(Direction.None, Direction.None);
 
             CoordsInt tileMapMin = new CoordsInt(0, 0);
@@ -557,17 +556,30 @@ namespace VeinManagerClasses
 
             CoordsInt restrictedDimsMin = allocatedTileMap.getElement(tileMapMin).getTileMapCoords();
             CoordsInt restrictedDimsMax = allocatedTileMap.getElement(tileMapMax).getTileMapCoords();
+            Dimensions restricedDims = new Dimensions(restrictedDimsMin, restrictedDimsMax);
 
             restrictedDimsMin.print("MIN DIM: ");
             restrictedDimsMax.print("MAX DIM: ");
 
-            List<CoordsInt> reducedCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
+            List<CoordsInt> reducedTileMapCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
 
-            foreach (var coord in reducedCoordsList)
+            // Restict the search area according to the amount of points
+            int maxTotalSearchArea = Mathf.FloorToInt(restricedDims.getArea() / reducedTileMapCoordsList.Count);
+
+            Debug.Log("RESTRICED AREA: " + restricedDims.getArea());
+            Debug.Log("SEARCH AREA: " + maxTotalSearchArea);
+            //foreach (var coord in reducedCoordsList)
+            //{
+            //    coord.print("\tREDUCED: ");
+            //}
+
+            foreach (var coords in reducedTileMapCoordsList)
             {
-                coord.print("\tREDUCED: ");
+                coords.print("\tCOORD: ");
+                CoordsInt checkSpaceCoords = allocatedTileMap.getElement(coords).getTileMapCoords();
+                DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
+                emptySpaceDimList.printMinMax("\t");
             }
-            //DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(startCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias);
         }
     }
 }

@@ -206,11 +206,10 @@ namespace CommonlyUsedClasses
             int xDisplacement = calculateAxisDisplacment(minAxisPoints, minDisplacementLength, maxDisplacementLength, getXCount());
             int yDisplacement = calculateAxisDisplacment(minAxisPoints, minDisplacementLength, maxDisplacementLength, getYCount());
 
-            for (int x = 0; x < getXCount() - 1; x += xDisplacement)
+            for (int x = 0; x < getXCount(); x += xDisplacement)
             {
-                for (int y = 0; y < getYCount() - 1; y += yDisplacement)
+                for (int y = 0; y < getYCount(); y += yDisplacement)
                 {
-
                     CoordsInt selectedCoord = new CoordsInt(x, y);
                     reducedCoordsList.Add(selectedCoord);
                 }
@@ -224,23 +223,31 @@ namespace CommonlyUsedClasses
             bool displacementCalculated = false;
             int axisPointCount = minAxisPoints;
             int displacement = 0;
+
+            // Axis length needs to be decremented or else you get displacement that is 1 unit to much depending on axis length
+            // If you want x amount of points, then you need to divide be x - 1
+            //      Ex. 3 points, divide length by 2
+            axisLength -= 1;
+            axisPointCount -= 1;
+
             while (displacementCalculated == false)
             {
-                displacement = Mathf.FloorToInt(axisLength / (axisPointCount - 1));
+                displacement = Mathf.FloorToInt(axisLength / axisPointCount);
 
                 if (minDisplacementLength <= displacement && displacement <= maxDisplacementLength)
                     displacementCalculated = true;
                 // For small graphs return a larger displacement by dividing it in half
+                //      axisPointCount should 
                 else if (displacement < minDisplacementLength)
                 {
 
-                    axisPointCount = 3;
-                    displacement = Mathf.FloorToInt(axisLength / (axisPointCount - 1));
-                    displacement--;
+                    axisPointCount = 2;
+                    displacement = Mathf.FloorToInt(axisLength / axisPointCount);
                     displacementCalculated = true;
                 }
                 axisPointCount++;
             }
+
             return displacement;
         }
     }

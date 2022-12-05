@@ -17,8 +17,8 @@ namespace TileManagerClasses
         Tile selectedTile = null;
 
         // Properties
-        Coords<int> minDim = new Coords<int>(0, 0);
-        Coords<int> maxDim = new Coords<int>(147 * 2 * 2 * 2, 72 * 2 * 2 * 2);
+        CoordsInt minDim = new CoordsInt(0, 0);
+        CoordsInt maxDim = new CoordsInt(147 * 2 * 2 * 2, 72 * 2 * 2 * 2);
 
         Dimensions tileMapDimensions;
 
