@@ -64,6 +64,12 @@ namespace CommonlyUsedClasses
         {
             return this.startCoords;
         }
+
+        public void print()
+        {
+            minCoords.print("\tSQUARE AREA MIN: ");
+            maxCoords.print("\tSQUARE AREA MAX: ");
+        }
     }
 
 
@@ -146,6 +152,15 @@ namespace CommonlyUsedClasses
             CoordsInt prevMin = minCoords.deepCopyInt();
             CoordsInt prevMax = maxCoords.deepCopyInt();
 
+
+            //if (newArea.xMin() == 600 && newArea.yMin() == 205 &&
+            //    newArea.xMax() == 600 && newArea.yMax() == 211)
+            //{
+            //    Debug.Log("FOUND IT");
+            //}
+
+
+
             if (newArea.xMin() < minCoords.getX())
                 minCoords.setX(newArea.xMin());
             if (newArea.yMin() < minCoords.getY())
@@ -190,6 +205,9 @@ namespace CommonlyUsedClasses
             Coords<int> newMin = new Coords<int>(newArea.xMin(), newArea.yMin());
             Coords<int> newMax = new Coords<int>(newArea.xMax(), newArea.yMax());
 
+            //Debug.Log("WITHOUT EXPANDING");
+            //newArea.print();
+
             if (newArea.xMin() < minCoords.getX())
                 newMin.setX(minCoords.getX());
             if (newArea.yMin() < minCoords.getY())
@@ -216,11 +234,20 @@ namespace CommonlyUsedClasses
                 return dimensionListIsAcceptable;
 
             //Debug.Log("=========================================================");
-
+            minCoords.print("\tMIN COORDS: ");
+            maxCoords.print("\tMAX COORDS: ");
 
             // Checks all square areas to see if any are touching by a single unit, if they are then delete everything
+            //      Checks the next row/columns for touching square areas
             foreach (SquareArea square in squareArealist)
             {
+                bool isOneUnitWide = false;
+                bool isOneUnitTall = false;
+                if (CommonFunctions.calculateDifference(square.xMin(), square.xMax()) == 0f)
+                    isOneUnitWide = true;
+                if (CommonFunctions.calculateDifference(square.yMin(), square.yMax()) == 0f)
+                    isOneUnitTall = true;
+
                 CoordsInt tempCoord = new CoordsInt(0, 0);
 
                 int yMaxCount = 0;
@@ -228,13 +255,33 @@ namespace CommonlyUsedClasses
                 int xMaxCount = 0;
                 int xMinCount = 0;
 
+                // If any of these checks are negative that means that the current square area is on the edge
+                //      No need to check these 
                 int yMaxCheck = square.yMax() - minCoords.getY() + 1;
+                bool checkingTopPerimeter = false;
+                if (yMaxCheck < grid[0].Count)
+                    checkingTopPerimeter = true;
+
                 int yMinCheck = square.yMin() - minCoords.getY() - 1;
+                bool checkingBotPerimeter = false;
+                if (yMinCheck >= 0)
+                    checkingBotPerimeter = true;
+
                 int xMinCheck = square.xMin() - minCoords.getX() - 1;
+                bool checkingLeftPerimeter = false;
+                if (xMinCheck >= 0)
+                    checkingLeftPerimeter = true;
+
                 int xMaxCheck = square.xMax() - minCoords.getX() + 1;
+                bool checkingRightPerimeter = false;
+                if (xMaxCheck < grid.Count)
+                    checkingRightPerimeter = true;
+
+                //Debug.Log("CHECK MIN: " + xMinCheck + ", " + yMinCheck + "\nCHECK MAX:" + xMaxCheck + ", " + yMaxCheck);
+                Debug.Log("SQUARE MIN: " + square.xMin() + ", " + square.yMin() + "\nSQAURE MAX: " + square.xMax() + ", " + square.yMax());
 
                 // Check top perimeter
-                if (yMaxCheck < grid[0].Count)
+                if (checkingTopPerimeter == true)
                 {
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
@@ -250,41 +297,31 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMaxCount && yMaxCount < minTouchingWidth)
                     {
-                        if (0 < yMinCount && yMinCount < minTouchingWidth)
+                        
+                        if (topRightCheckForTopCheck(tempCoord) == true)
                         {
-                            // Check top right corner, spaces represent square areas
-                            //      01 11
-                            //
-                            //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                            //      11 11
+                            // Nothing
+                        }
+                        
 
-                            if (grid[tempCoord.getX() + 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() - 1] == 1)
-                            {
-                                // Nothing
-                            }
-                            // Check top left corner, spaces represent square areas
-                            //      11 10
-                            //
-                            //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                            //      11 11
-
-                            else if (grid[tempCoord.getX() - 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() - 1][tempCoord.getY() - 1] == 1)
-                            {
-                                // Nothing
-                            }
-                            else
-                            {
-                                Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
-                                dimensionListIsAcceptable = false;
-                                break;
-                            }
+                        else if (topLeftCheckForTopCheck(tempCoord) == true)
+                        {
+                            // Nothing
+                        }
+                        else
+                        {
+                            Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
+                            dimensionListIsAcceptable = false;
+                            break;
                         }
                     }
                 }
 
                 // Check bot perimeter
-                if (yMinCheck >= 0)
+                if (checkingBotPerimeter == true)
                 {
+
+                Debug.Log("TEMP___0");
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
                         if (grid[x][yMinCheck] == 1)
@@ -298,21 +335,16 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMinCount && yMinCount < minTouchingWidth)
                     {
-                        // Check bottom right corner, spaces represent square areas
-                        //      11 11
-                        //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                        //      
-                        //      01 11
-                        if (grid[tempCoord.getX() + 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() + 1] == 1)
+                Debug.Log("TEMP___2");
+
+                        tempCoord.print("TEMP COORDS: ");
+                        Debug.Log("GRID DIMS: " + grid.Count + ", " + grid[0].Count);
+                        
+                        if (botRightCheckForBottomCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
-                        // Check bottom left corner, spaces represent square areas
-                        //      11 11
-                        //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                        //      
-                        //      11 10
-                        else if (grid[tempCoord.getX() - 1][tempCoord.getY()] == 1 && grid[tempCoord.getX() - 1][tempCoord.getY() + 1] == 1)
+                        else if (botLeftCheckForBottomCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
@@ -322,11 +354,13 @@ namespace CommonlyUsedClasses
                             dimensionListIsAcceptable = false;
                             break;
                         }
+                Debug.Log("TEMP___3");
                     }
                 }
+                Debug.Log("TEMP___4");
 
                 // Check right perimeter
-                if (xMaxCheck < grid.Count)
+                if (checkingRightPerimeter == true)
                 {
                     for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
@@ -343,22 +377,12 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < xMaxCount && xMaxCount < minTouchingWidth)
                     {
-                        // Check bottom right corner, spaces represent square areas
-                        //      11 00
-                        //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                        //      
-                        //      11 11
-                        if (grid[tempCoord.getX() - 1][tempCoord.getY() - 1] == 1 && grid[tempCoord.getX()][tempCoord.getY() - 1] == 1)
+                       
+                        if (botRightCheckForRightCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
-                        // Check top right corner, spaces represent square areas
-                        //      11 11     
-                        //
-                        //      11 11       Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                        //      11 00
-
-                        else if (grid[tempCoord.getX() - 1][tempCoord.getY() + 1] == 1 && grid[tempCoord.getX()][tempCoord.getY() + 1] == 1)
+                        else if (topRightCheckForRightCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
@@ -372,7 +396,7 @@ namespace CommonlyUsedClasses
                 }
 
                 // Check left perimeter
-                if (xMinCheck >= 0)
+                if (checkingLeftPerimeter == true)
                 {
                     for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
@@ -387,21 +411,13 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < xMinCount && xMinCount < minTouchingWidth)
                     {
-                        // Check bottom left corner, spaces represent square areas
-                        //      00 11
-                        //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                        //      
-                        //      11 11
-                        if (grid[tempCoord.getX()][tempCoord.getY() - 1] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() - 1] == 1)
+                        
+                        if (botLefftCheckForLeftCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
-                        // Check top left corner, spaces represent square areas
-                        //      11 11
-                        //
-                        //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
-                        //      00 11
-                        else if (grid[tempCoord.getX()][tempCoord.getY() + 1] == 1 && grid[tempCoord.getX() + 1][tempCoord.getY() + 1] == 1)
+                        
+                        else if (topLeftCheckForLeftCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
@@ -413,7 +429,6 @@ namespace CommonlyUsedClasses
                         }
                     }
                 }
-
             }
 
             if (dimensionListIsAcceptable == false)
@@ -423,7 +438,116 @@ namespace CommonlyUsedClasses
 
             return dimensionListIsAcceptable;
         }
+        private bool topRightCheckForTopCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE TOP EDGE PERIMETER OF A SQUARE AREA
+            // Check top right corner, spaces represent square areas
+            //      01 11
+            //
+            //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+            //      11 11
+            bool pass = false;
+            if (grid[coord.getX() + 1][coord.getY()] == 1 && grid[coord.getX() + 1][coord.getY() - 1] == 1)
+                pass = true;
+            return pass;
+        }
 
+        private bool topLeftCheckForTopCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE TOP EDGE PERIMETER OF A SQUARE AREA
+            // Check top left corner, spaces represent square areas
+            //      11 10
+            //
+            //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+            //      11 11
+            bool pass = false;
+            if (grid[coord.getX() - 1][coord.getY()] == 1 && grid[coord.getX() - 1][coord.getY() - 1] == 1)
+                pass = true;
+            return pass;
+        }
+        private bool botRightCheckForBottomCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE BOTTOM EDGE PERIMETER OF A SQUARE AREA
+            // Check bottom right corner, spaces represent square areas
+            //      11 11
+            //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap between top and bottom dims
+            //      
+            //      01 11
+            bool pass = false;
+            if (grid[coord.getX() + 1][coord.getY()] == 1 && grid[coord.getX() + 1][coord.getY() + 1] == 1)
+                pass = true;
+            return pass;
+        }
+
+        private bool botLeftCheckForBottomCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE BOTTOM EDGE PERIMETER OF A SQUARE AREA
+            // Check bottom left corner, spaces represent square areas
+            //      11 11
+            //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap between top and bottom dims
+            //      
+            //      11 10
+            bool pass = false;
+            if (grid[coord.getX() - 1][coord.getY()] == 1 && grid[coord.getX() - 1][coord.getY() + 1] == 1)
+                pass = true;
+            return pass;
+        }
+
+        private bool botRightCheckForRightCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE RIGHT EDGE PERIMETER OF A SQUARE AREA
+            // Check bottom right corner, spaces represent square areas
+            //      11 00
+            //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+            //      
+            //      11 11
+            bool pass = false;
+            if (grid[coord.getX() - 1][coord.getY() - 1] == 1 && grid[coord.getX()][coord.getY() - 1] == 1)
+                pass = true;
+            return pass;
+        }
+
+        private bool topRightCheckForRightCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE RIGHT EDGE PERIMETER OF A SQUARE AREA
+            // Check top right corner, spaces represent square areas
+            //      11 11     
+            //
+            //      11 11       Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
+            //      11 00
+            bool pass = false;
+            if (grid[coord.getX() - 1][coord.getY() + 1] == 1 && grid[coord.getX()][coord.getY() + 1] == 1)
+                pass = true;
+            return pass;
+        }
+
+        private bool botLefftCheckForLeftCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE LEFT EDGE PERIMETER OF A SQUARE AREA
+            // Check bottom left corner, spaces represent square areas
+            //      00 11
+            //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+            //      
+            //      11 11
+            bool pass = false;
+            if (grid[coord.getX()][coord.getY() - 1] == 1 && grid[coord.getX() + 1][coord.getY() - 1] == 1)
+                pass = true;
+            return pass;
+        }
+
+        private bool topLeftCheckForLeftCheck(CoordsInt coord)
+        {
+            // FOR CHECKING THE LEFT EDGE PERIMETER OF A SQUARE AREA
+            // Check top left corner, spaces represent square areas
+            //      11 11
+            //
+            //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
+            //      00 11
+            bool pass = false;
+            if (grid[coord.getX()][coord.getY() + 1] == 1 && grid[coord.getX() + 1][coord.getY() + 1] == 1)
+                pass = true;
+            return pass;
+        }
 
         private bool checkForGaps(SquareArea newArea)
         {

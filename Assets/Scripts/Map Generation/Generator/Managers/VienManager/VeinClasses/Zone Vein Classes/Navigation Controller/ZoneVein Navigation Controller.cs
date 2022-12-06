@@ -575,7 +575,7 @@ namespace VeinManagerClasses
 
             foreach (var coords in reducedTileMapCoordsList)
             {
-                coords.print("\tCOORD: ");
+                coords.print("--------------------------\n\tCOORD: ");
                 CoordsInt checkSpaceCoords = allocatedTileMap.getElement(coords).getTileMapCoords();
                 DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
                 emptySpaceDimList.printMinMax("\t");
