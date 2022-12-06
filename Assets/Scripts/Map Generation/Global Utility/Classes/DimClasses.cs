@@ -241,13 +241,6 @@ namespace CommonlyUsedClasses
             //      Checks the next row/columns for touching square areas
             foreach (SquareArea square in squareArealist)
             {
-                bool isOneUnitWide = false;
-                bool isOneUnitTall = false;
-                if (CommonFunctions.calculateDifference(square.xMin(), square.xMax()) == 0f)
-                    isOneUnitWide = true;
-                if (CommonFunctions.calculateDifference(square.yMin(), square.yMax()) == 0f)
-                    isOneUnitTall = true;
-
                 CoordsInt tempCoord = new CoordsInt(0, 0);
 
                 int yMaxCount = 0;
@@ -302,15 +295,13 @@ namespace CommonlyUsedClasses
                         {
                             // Nothing
                         }
-                        
-
                         else if (topLeftCheckForTopCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
                         else
                         {
-                            Debug.Log("Rejected top perimeter. Width: " + yMaxCount);
+                            Debug.LogError("Rejected top perimeter. Width: " + yMaxCount);
                             dimensionListIsAcceptable = false;
                             break;
                         }
@@ -320,8 +311,6 @@ namespace CommonlyUsedClasses
                 // Check bot perimeter
                 if (checkingBotPerimeter == true)
                 {
-
-                Debug.Log("TEMP___0");
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
                         if (grid[x][yMinCheck] == 1)
@@ -335,29 +324,18 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMinCount && yMinCount < minTouchingWidth)
                     {
-                Debug.Log("TEMP___2");
-
-                        tempCoord.print("TEMP COORDS: ");
-                        Debug.Log("GRID DIMS: " + grid.Count + ", " + grid[0].Count);
+                        //tempCoord.print("TEMP COORDS: ");
+                        //Debug.Log("GRID DIMS: " + grid.Count + ", " + grid[0].Count);
                         
-                        if (botRightCheckForBottomCheck(tempCoord) == true)
+
+                        if (bottomPerimeterCheck(tempCoord, checkingRightPerimeter, checkingLeftPerimeter) == false)
                         {
-                            // Nothing
-                        }
-                        else if (botLeftCheckForBottomCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        else
-                        {
-                            Debug.Log("Rejected bottom perimeter");
+                            Debug.LogError("Rejected bottom perimeter");
                             dimensionListIsAcceptable = false;
                             break;
                         }
-                Debug.Log("TEMP___3");
                     }
                 }
-                Debug.Log("TEMP___4");
 
                 // Check right perimeter
                 if (checkingRightPerimeter == true)
@@ -388,7 +366,7 @@ namespace CommonlyUsedClasses
                         }
                         else
                         {
-                            Debug.Log("Rejected right perimeter");
+                            Debug.LogError("Rejected right perimeter");
                             dimensionListIsAcceptable = false;
                             break;
                         }
@@ -411,8 +389,8 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < xMinCount && xMinCount < minTouchingWidth)
                     {
-                        
-                        if (botLefftCheckForLeftCheck(tempCoord) == true)
+                        /*
+                        if (botLeftCheckForLeftCheck(tempCoord) == true)
                         {
                             // Nothing
                         }
@@ -421,9 +399,11 @@ namespace CommonlyUsedClasses
                         {
                             // Nothing
                         }
-                        else
+                        */
+                        if (leftPerimeterCheck(tempCoord, checkingTopPerimeter, checkingBotPerimeter) == false)
+                        //else
                         {
-                            Debug.Log("Rejected left perimeter");
+                            Debug.LogError("Rejected left perimeter");
                             dimensionListIsAcceptable = false;
                             break;
                         }
@@ -438,6 +418,25 @@ namespace CommonlyUsedClasses
 
             return dimensionListIsAcceptable;
         }
+
+        private bool topPerimeterCheck(CoordsInt coord, bool checkingRightPerimeter, bool checkingLeftPerimeter)
+        {
+            bool checkPass = false;
+
+            // If the square area is on the right most edge, then only check for top left corner
+            if (checkingRightPerimeter == false)
+            {
+                if (topLeftCheckForTopCheck(coord) == true)
+                    checkPass = true;
+            }
+            // If the square area is on the left most edge, then only check for top right corner
+            if (checkingLeftPerimeter == false && checkPass == false)
+            {
+                if (topRightCheckForTopCheck(coord) == true)
+                    checkPass = true;
+            }
+            return checkPass;
+        }
         private bool topRightCheckForTopCheck(CoordsInt coord)
         {
             // FOR CHECKING THE TOP EDGE PERIMETER OF A SQUARE AREA
@@ -451,7 +450,6 @@ namespace CommonlyUsedClasses
                 pass = true;
             return pass;
         }
-
         private bool topLeftCheckForTopCheck(CoordsInt coord)
         {
             // FOR CHECKING THE TOP EDGE PERIMETER OF A SQUARE AREA
@@ -464,6 +462,25 @@ namespace CommonlyUsedClasses
             if (grid[coord.getX() - 1][coord.getY()] == 1 && grid[coord.getX() - 1][coord.getY() - 1] == 1)
                 pass = true;
             return pass;
+        }
+
+        private bool bottomPerimeterCheck(CoordsInt coord, bool checkingRightPerimeter, bool checkingLeftPerimeter)
+        {
+            bool checkPass = false;
+
+            // If the square area is on the right most edge, then only check for bottom left corner
+            if (checkingRightPerimeter == false)
+            {
+                if (botLeftCheckForBottomCheck(coord) == true)
+                    checkPass = true;
+            }
+            // If the square area is on the left most edge, then only check for bottom right corner
+            if (checkingLeftPerimeter == false && checkPass == false)
+            {
+                if (botRightCheckForBottomCheck(coord) == true)
+                    checkPass = true;
+            }
+            return checkPass;
         }
         private bool botRightCheckForBottomCheck(CoordsInt coord)
         {
@@ -478,7 +495,6 @@ namespace CommonlyUsedClasses
                 pass = true;
             return pass;
         }
-
         private bool botLeftCheckForBottomCheck(CoordsInt coord)
         {
             // FOR CHECKING THE BOTTOM EDGE PERIMETER OF A SQUARE AREA
@@ -493,6 +509,24 @@ namespace CommonlyUsedClasses
             return pass;
         }
 
+        private bool rightPerimeterCheck(CoordsInt coord, bool checkingTopPerimeter, bool checkingBottomPerimeter)
+        {
+            bool checkPass = false;
+
+            // If the square area is on the top most edge, then only check for bottom right corner
+            if (checkingTopPerimeter == false)
+            {
+                if (botRightCheckForRightCheck(coord) == true)
+                    checkPass = true;
+            }
+            // If the square area is on the bottom most edge, then only check for top right corner
+            if (checkingBottomPerimeter == false && checkPass == false)
+            {
+                if (topRightCheckForRightCheck(coord) == true)
+                    checkPass = true;
+            }
+            return checkPass;
+        }
         private bool botRightCheckForRightCheck(CoordsInt coord)
         {
             // FOR CHECKING THE RIGHT EDGE PERIMETER OF A SQUARE AREA
@@ -506,7 +540,6 @@ namespace CommonlyUsedClasses
                 pass = true;
             return pass;
         }
-
         private bool topRightCheckForRightCheck(CoordsInt coord)
         {
             // FOR CHECKING THE RIGHT EDGE PERIMETER OF A SQUARE AREA
@@ -521,7 +554,25 @@ namespace CommonlyUsedClasses
             return pass;
         }
 
-        private bool botLefftCheckForLeftCheck(CoordsInt coord)
+        private bool leftPerimeterCheck(CoordsInt coord, bool checkingTopPerimeter, bool checkingBottomPerimeter)
+        {
+            bool checkPass = false;
+
+            // If the square area is on the top most edge, then only check for bottom left corner
+            if (checkingTopPerimeter == false)
+            {
+                if (botLeftCheckForLeftCheck(coord) == true)
+                    checkPass = true;
+            }
+            // If the square area is on the bottom most edge, then only check for top left corner
+            //if (checkingBottomPerimeter == false && checkPass == false)
+            //{
+                if (topLeftCheckForLeftCheck(coord) == true)
+                    checkPass = true;
+            //}
+            return checkPass;
+        }
+        private bool botLeftCheckForLeftCheck(CoordsInt coord)
         {
             // FOR CHECKING THE LEFT EDGE PERIMETER OF A SQUARE AREA
             // Check bottom left corner, spaces represent square areas
@@ -534,7 +585,6 @@ namespace CommonlyUsedClasses
                 pass = true;
             return pass;
         }
-
         private bool topLeftCheckForLeftCheck(CoordsInt coord)
         {
             // FOR CHECKING THE LEFT EDGE PERIMETER OF A SQUARE AREA
