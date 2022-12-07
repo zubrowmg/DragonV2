@@ -65,8 +65,9 @@ namespace CommonlyUsedClasses
             return this.startCoords;
         }
 
-        public void print()
+        public void print(string str)
         {
+            Debug.Log(str);
             minCoords.print("\tSQUARE AREA MIN: ");
             maxCoords.print("\tSQUARE AREA MAX: ");
         }
@@ -152,15 +153,6 @@ namespace CommonlyUsedClasses
             CoordsInt prevMin = minCoords.deepCopyInt();
             CoordsInt prevMax = maxCoords.deepCopyInt();
 
-
-            //if (newArea.xMin() == 600 && newArea.yMin() == 205 &&
-            //    newArea.xMax() == 600 && newArea.yMax() == 211)
-            //{
-            //    Debug.Log("FOUND IT");
-            //}
-
-
-
             if (newArea.xMin() < minCoords.getX())
                 minCoords.setX(newArea.xMin());
             if (newArea.yMin() < minCoords.getY())
@@ -202,25 +194,58 @@ namespace CommonlyUsedClasses
 
         public bool addDimensionWithOutExpandingDims(SquareArea newArea)
         {
+            bool dimensionRejected = false;
+
             Coords<int> newMin = new Coords<int>(newArea.xMin(), newArea.yMin());
             Coords<int> newMax = new Coords<int>(newArea.xMax(), newArea.yMax());
 
-            //Debug.Log("WITHOUT EXPANDING");
-            //newArea.print();
-
+            // If new min x coord is smaller than current grid x min, reduce min x to grid x min
             if (newArea.xMin() < minCoords.getX())
+            {
                 newMin.setX(minCoords.getX());
+
+                // If new min x value is greater than max x value, then it's out of range of the current grid
+                if (newMin.getX() > newArea.xMax())
+                    dimensionRejected = true;
+            }
+
+            // If new min y coord is smaller than current grid y min, reduce min y to grid y min
             if (newArea.yMin() < minCoords.getY())
+            {
                 newMin.setY(minCoords.getY());
 
+                // If new min y value is greater than max y value, then it's out of range of the current grid
+                if (newMin.getY() > newArea.yMax())
+                    dimensionRejected = true;
+            }
+
+            // If new max x coord is greater than current grid x max, reduce max x to grid x max
             if (newArea.xMax() > maxCoords.getX())
+            {
                 newMax.setX(maxCoords.getX());
+
+                // If new max x value is smaller than min x value, then it's out of range of the current grid
+                if (newMax.getX() < newArea.xMin())
+                    dimensionRejected = true;
+            }
+
+            // If new max y coord is greater than current grid y max, reduce max y to grid y max
             if (newArea.yMax() > maxCoords.getY())
+            {
                 newMax.setY(maxCoords.getY());
+
+                // If new max y value is smaller than min y value, then it's out of range of the current grid
+                if (newMax.getY() < newArea.yMin())
+                    dimensionRejected = true;
+            }
 
             SquareArea trimmedSquareArea = new SquareArea(newMin, newMax, newArea.getStartCoords());
 
-            return addDimension(trimmedSquareArea);
+
+            if (dimensionRejected == false)
+                return addDimension(trimmedSquareArea);
+            else
+                return dimensionRejected;
         }
 
         // THIS FUNCTION IS NEEDED
@@ -620,7 +645,7 @@ namespace CommonlyUsedClasses
                     }
                 }
             }
-            
+
             return gapsExist;
         }
 
@@ -760,6 +785,8 @@ namespace CommonlyUsedClasses
 
         public void printGrid(bool printCoords)
         {
+            printMinMax("\t");
+
             for (int y = grid[0].Count - 1; y >= 0; y--)
             {
                 string printStr = "\t[";
@@ -784,8 +811,8 @@ namespace CommonlyUsedClasses
 
         public void printMinMax(string str)
         {
-            minCoords.print(str + "DIM MIN: ");
-            maxCoords.print(str + "DIM MAX: ");
+            minCoords.print(str + "GRID DIM MIN: ");
+            maxCoords.print(str + "GRID DIM MAX: ");
         }
 
         public CoordsInt getStartCoords()
