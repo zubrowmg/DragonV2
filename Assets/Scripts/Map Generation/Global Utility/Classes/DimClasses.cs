@@ -234,8 +234,6 @@ namespace CommonlyUsedClasses
                 return dimensionListIsAcceptable;
 
             //Debug.Log("=========================================================");
-            minCoords.print("\tMIN COORDS: ");
-            maxCoords.print("\tMAX COORDS: ");
 
             // Checks all square areas to see if any are touching by a single unit, if they are then delete everything
             //      Checks the next row/columns for touching square areas
@@ -251,30 +249,30 @@ namespace CommonlyUsedClasses
                 // If any of these checks are negative that means that the current square area is on the edge
                 //      No need to check these 
                 int yMaxCheck = square.yMax() - minCoords.getY() + 1;
-                bool checkingTopPerimeter = false;
+                bool topPerimeterIsOnGridEdge = true;
                 if (yMaxCheck < grid[0].Count)
-                    checkingTopPerimeter = true;
+                    topPerimeterIsOnGridEdge = false;
 
                 int yMinCheck = square.yMin() - minCoords.getY() - 1;
-                bool checkingBotPerimeter = false;
+                bool botPerimeterIsOnGridEdge = true;
                 if (yMinCheck >= 0)
-                    checkingBotPerimeter = true;
+                    botPerimeterIsOnGridEdge = false;
 
                 int xMinCheck = square.xMin() - minCoords.getX() - 1;
-                bool checkingLeftPerimeter = false;
+                bool leftPerimeterIsOnGridEdge = true;
                 if (xMinCheck >= 0)
-                    checkingLeftPerimeter = true;
+                    leftPerimeterIsOnGridEdge = false;
 
                 int xMaxCheck = square.xMax() - minCoords.getX() + 1;
-                bool checkingRightPerimeter = false;
+                bool rightPerimeterIsOnGridEdge = true;
                 if (xMaxCheck < grid.Count)
-                    checkingRightPerimeter = true;
+                    rightPerimeterIsOnGridEdge = false;
 
                 //Debug.Log("CHECK MIN: " + xMinCheck + ", " + yMinCheck + "\nCHECK MAX:" + xMaxCheck + ", " + yMaxCheck);
-                Debug.Log("SQUARE MIN: " + square.xMin() + ", " + square.yMin() + "\nSQAURE MAX: " + square.xMax() + ", " + square.yMax());
+                //Debug.Log("SQUARE MIN: " + square.xMin() + ", " + square.yMin() + "\nSQAURE MAX: " + square.xMax() + ", " + square.yMax());
 
                 // Check top perimeter
-                if (checkingTopPerimeter == true)
+                if (topPerimeterIsOnGridEdge == false)
                 {
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
@@ -288,18 +286,10 @@ namespace CommonlyUsedClasses
                                 break;
                         }
                     }
+
                     if (0 < yMaxCount && yMaxCount < minTouchingWidth)
                     {
-                        
-                        if (topRightCheckForTopCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        else if (topLeftCheckForTopCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        else
+                        if (topPerimeterCheck(tempCoord, rightPerimeterIsOnGridEdge, leftPerimeterIsOnGridEdge) == false)
                         {
                             Debug.LogError("Rejected top perimeter. Width: " + yMaxCount);
                             dimensionListIsAcceptable = false;
@@ -309,7 +299,7 @@ namespace CommonlyUsedClasses
                 }
 
                 // Check bot perimeter
-                if (checkingBotPerimeter == true)
+                if (botPerimeterIsOnGridEdge == false)
                 {
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
@@ -324,11 +314,7 @@ namespace CommonlyUsedClasses
                     }
                     if (0 < yMinCount && yMinCount < minTouchingWidth)
                     {
-                        //tempCoord.print("TEMP COORDS: ");
-                        //Debug.Log("GRID DIMS: " + grid.Count + ", " + grid[0].Count);
-                        
-
-                        if (bottomPerimeterCheck(tempCoord, checkingRightPerimeter, checkingLeftPerimeter) == false)
+                        if (bottomPerimeterCheck(tempCoord, rightPerimeterIsOnGridEdge, leftPerimeterIsOnGridEdge) == false)
                         {
                             Debug.LogError("Rejected bottom perimeter");
                             dimensionListIsAcceptable = false;
@@ -338,7 +324,7 @@ namespace CommonlyUsedClasses
                 }
 
                 // Check right perimeter
-                if (checkingRightPerimeter == true)
+                if (rightPerimeterIsOnGridEdge == false)
                 {
                     for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
@@ -347,24 +333,14 @@ namespace CommonlyUsedClasses
                             xMaxCount++;
                             tempCoord = new CoordsInt(xMaxCheck, y);
 
-                            //Debug.Log(xMaxCheck + ", " + y);
-
                             if (xMaxCount >= minTouchingWidth)
                                 break;
                         }
                     }
+                    
                     if (0 < xMaxCount && xMaxCount < minTouchingWidth)
                     {
-                       
-                        if (botRightCheckForRightCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        else if (topRightCheckForRightCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        else
+                        if (rightPerimeterCheck(tempCoord, topPerimeterIsOnGridEdge, botPerimeterIsOnGridEdge) == false)
                         {
                             Debug.LogError("Rejected right perimeter");
                             dimensionListIsAcceptable = false;
@@ -374,7 +350,7 @@ namespace CommonlyUsedClasses
                 }
 
                 // Check left perimeter
-                if (checkingLeftPerimeter == true)
+                if (leftPerimeterIsOnGridEdge == false)
                 {
                     for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
@@ -387,21 +363,10 @@ namespace CommonlyUsedClasses
                                 break;
                         }
                     }
+
                     if (0 < xMinCount && xMinCount < minTouchingWidth)
                     {
-                        /*
-                        if (botLeftCheckForLeftCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        
-                        else if (topLeftCheckForLeftCheck(tempCoord) == true)
-                        {
-                            // Nothing
-                        }
-                        */
-                        if (leftPerimeterCheck(tempCoord, checkingTopPerimeter, checkingBotPerimeter) == false)
-                        //else
+                        if (leftPerimeterCheck(tempCoord, topPerimeterIsOnGridEdge, botPerimeterIsOnGridEdge) == false)
                         {
                             Debug.LogError("Rejected left perimeter");
                             dimensionListIsAcceptable = false;
@@ -419,22 +384,24 @@ namespace CommonlyUsedClasses
             return dimensionListIsAcceptable;
         }
 
-        private bool topPerimeterCheck(CoordsInt coord, bool checkingRightPerimeter, bool checkingLeftPerimeter)
+        private bool topPerimeterCheck(CoordsInt coord, bool rightPerimeterIsOnGridEdge, bool leftPerimeterIsOnGridEdge)
         {
             bool checkPass = false;
 
-            // If the square area is on the right most edge, then only check for top left corner
-            if (checkingRightPerimeter == false)
+            // If the square area is NOT on the right most edge, then check the top right corner
+            if (rightPerimeterIsOnGridEdge == false)
+            {
+                if (topRightCheckForTopCheck(coord) == true)
+                    checkPass = true; 
+            }
+
+            // If the square area is NOT on the left most edge, then check the top left corner
+            if (leftPerimeterIsOnGridEdge == false && checkPass == false)
             {
                 if (topLeftCheckForTopCheck(coord) == true)
                     checkPass = true;
             }
-            // If the square area is on the left most edge, then only check for top right corner
-            if (checkingLeftPerimeter == false && checkPass == false)
-            {
-                if (topRightCheckForTopCheck(coord) == true)
-                    checkPass = true;
-            }
+
             return checkPass;
         }
         private bool topRightCheckForTopCheck(CoordsInt coord)
@@ -464,20 +431,20 @@ namespace CommonlyUsedClasses
             return pass;
         }
 
-        private bool bottomPerimeterCheck(CoordsInt coord, bool checkingRightPerimeter, bool checkingLeftPerimeter)
+        private bool bottomPerimeterCheck(CoordsInt coord, bool rightPerimeterIsOnGridEdge, bool leftPerimeterIsOnGridEdge)
         {
             bool checkPass = false;
 
-            // If the square area is on the right most edge, then only check for bottom left corner
-            if (checkingRightPerimeter == false)
-            {
-                if (botLeftCheckForBottomCheck(coord) == true)
-                    checkPass = true;
-            }
-            // If the square area is on the left most edge, then only check for bottom right corner
-            if (checkingLeftPerimeter == false && checkPass == false)
+            // If the square area is NOT on the right most edge, then check the bottom right corner
+            if (rightPerimeterIsOnGridEdge == false)
             {
                 if (botRightCheckForBottomCheck(coord) == true)
+                    checkPass = true; 
+            }
+            // If the square area is NOT on the left most edge, then check the bottom left corner
+            if (leftPerimeterIsOnGridEdge == false && checkPass == false)
+            {
+                if (botLeftCheckForBottomCheck(coord) == true)
                     checkPass = true;
             }
             return checkPass;
@@ -509,20 +476,21 @@ namespace CommonlyUsedClasses
             return pass;
         }
 
-        private bool rightPerimeterCheck(CoordsInt coord, bool checkingTopPerimeter, bool checkingBottomPerimeter)
+        private bool rightPerimeterCheck(CoordsInt coord, bool topPerimeterIsOnGridEdge, bool botPerimeterIsOnGridEdge)
         {
             bool checkPass = false;
 
-            // If the square area is on the top most edge, then only check for bottom right corner
-            if (checkingTopPerimeter == false)
-            {
-                if (botRightCheckForRightCheck(coord) == true)
-                    checkPass = true;
-            }
-            // If the square area is on the bottom most edge, then only check for top right corner
-            if (checkingBottomPerimeter == false && checkPass == false)
+            // If the square area is NOT on the top most edge, then check the top right corner
+            if (topPerimeterIsOnGridEdge == false)
             {
                 if (topRightCheckForRightCheck(coord) == true)
+                    checkPass = true;
+                
+            }
+            // If the square area is NOT on the bottom most edge, then check the bottom right corner
+            if (botPerimeterIsOnGridEdge == false && checkPass == false)
+            {
+                if (botRightCheckForRightCheck(coord) == true)
                     checkPass = true;
             }
             return checkPass;
@@ -554,22 +522,23 @@ namespace CommonlyUsedClasses
             return pass;
         }
 
-        private bool leftPerimeterCheck(CoordsInt coord, bool checkingTopPerimeter, bool checkingBottomPerimeter)
+        private bool leftPerimeterCheck(CoordsInt coord, bool topPerimeterIsOnGridEdge, bool botPerimeterIsOnGridEdge)
         {
             bool checkPass = false;
 
-            // If the square area is on the top most edge, then only check for bottom left corner
-            if (checkingTopPerimeter == false)
+            // If the square area is NOT on the top most edge, then check the top left corner
+            if (topPerimeterIsOnGridEdge == false)
+            {
+                if (topLeftCheckForLeftCheck(coord) == true)
+                    checkPass = true;
+                
+            }
+            // If the square area is NOT on the bottom most edge, then check the bottom left corner
+            if (botPerimeterIsOnGridEdge == false && checkPass == false)
             {
                 if (botLeftCheckForLeftCheck(coord) == true)
                     checkPass = true;
             }
-            // If the square area is on the bottom most edge, then only check for top left corner
-            //if (checkingBottomPerimeter == false && checkPass == false)
-            //{
-                if (topLeftCheckForLeftCheck(coord) == true)
-                    checkPass = true;
-            //}
             return checkPass;
         }
         private bool botLeftCheckForLeftCheck(CoordsInt coord)
@@ -789,18 +758,28 @@ namespace CommonlyUsedClasses
             return this.grid[coords.getX()][coords.getY()];
         }
 
-        public void printGrid()
+        public void printGrid(bool printCoords)
         {
-            for (int x = 0; x < grid.Count; x++)
+            for (int y = grid[0].Count - 1; y >= 0; y--)
             {
-                for (int y = 0; y < grid[x].Count; y++)
+                string printStr = "\t[";
+                for (int x = 0; x < grid.Count; x++)
                 {
-                    if (grid[x][y] == 1)
+                    if (printCoords)
                     {
-                        Debug.Log((x + minCoords.getX()) + "," + (y + minCoords.getY()));
+                        if (grid[x][y] == 1)
+                            printStr = printStr + " " + x + "," + y;
+                        else
+                            printStr = printStr + " " + "---";
                     }
+                    else
+                        printStr = printStr + " " + grid[x][y];
                 }
+                printStr = printStr + " ]";
+                Debug.Log(printStr);
             }
+
+
         }
 
         public void printMinMax(string str)

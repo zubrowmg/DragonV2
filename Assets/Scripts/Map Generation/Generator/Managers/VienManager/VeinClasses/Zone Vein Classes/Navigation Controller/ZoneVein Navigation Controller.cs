@@ -575,8 +575,11 @@ namespace VeinManagerClasses
 
             foreach (var coords in reducedTileMapCoordsList)
             {
+                CoordsInt checkSpaceCoords = zoneVeinGenContainer.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
+                CoordsInt test = allocatedTileMap.getElement(coords).getTileMapCoords();
                 coords.print("--------------------------\n\tCOORD: ");
-                CoordsInt checkSpaceCoords = allocatedTileMap.getElement(coords).getTileMapCoords();
+                checkSpaceCoords.print("\tWORLD COORD: ");
+                test.print("\tTEST WORLD COORD: ");
                 DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
                 emptySpaceDimList.printMinMax("\t");
             }
