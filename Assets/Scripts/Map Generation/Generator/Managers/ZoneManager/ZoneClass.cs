@@ -25,6 +25,9 @@ public class Zone_New
     TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
     DirectionBias zoneGenerationDirection;
 
+    // Temporary Variables, meant to be deleted after debug is done
+    public List<List<CoordsInt>> freeSpaces = new List<List<CoordsInt>>();
+
 
     // Zones are created during vein zone generation
     public Zone_New(GameTiming timing, int id, ZoneAbilities ability, ZoneThemes theme, ZoneVeinGenType zoneVeinGenType, DirectionBias zoneGenerationDirection, ref DimensionList zoneDimList, ref TwoDList<Tile> tileMap)

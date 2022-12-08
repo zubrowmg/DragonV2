@@ -15,11 +15,11 @@ public class DimVeinZoneCreator : DimCreator
     bool defualtTopOffDimList = true;
 
     // Restricted Free Space Creator Variables
-    int restrictedSquareAreaFillMinSideLength = 4;
-    float restrictedIndividualSquareMax = 48;
+    int restrictedSquareAreaFillMinSideLength = 8;
+    float restrictedIndividualSquareMax = 100;
 
     //int restrictedMaxArea = 150;
-    bool restrictedTopOffDimList = true;
+    bool restrictedTopOffDimList = false;
 
     public DimVeinZoneCreator(ref GeneratorContainer contInst) : base(ref contInst)
     {

@@ -120,6 +120,8 @@ namespace CommonlyUsedClasses
 
         CoordsInt minCoords;
         CoordsInt maxCoords;
+        CoordsInt centerCoord;
+
         int squareCount;
 
         public int area;
@@ -140,6 +142,7 @@ namespace CommonlyUsedClasses
 
             this.minCoords = new CoordsInt(System.Int32.MaxValue, System.Int32.MaxValue);
             this.maxCoords = new CoordsInt(0, 0);
+            this.centerCoord = new CoordsInt(0, 0);
 
             this.area = 0;
 
@@ -247,6 +250,289 @@ namespace CommonlyUsedClasses
             else
                 return dimensionRejected;
         }
+
+        private bool checkForGaps(SquareArea newArea)
+        {
+            bool gapsExist = true;
+
+            for (int x = (newArea.xMin() - minCoords.getX()); x <= (newArea.xMax() - minCoords.getX()); x++)
+            {
+                int yMinCheck = newArea.yMin() - minCoords.getY() - 1;
+                int yMaxCheck = newArea.yMax() - minCoords.getY() + 1;
+
+                if (yMinCheck >= 0)
+                {
+                    if (grid[x][yMinCheck] == 1)
+                    {
+                        gapsExist = false;
+                        break;
+                    }
+                }
+                if (yMaxCheck < grid[0].Count)
+                {
+                    if (grid[x][yMaxCheck] == 1)
+                    {
+                        gapsExist = false;
+                        break;
+                    }
+                }
+            }
+
+            // Check left/right perimeter
+            if (gapsExist != false)
+            {
+                int xMinCheck = newArea.xMin() - minCoords.getX() - 1;
+                int xMaxCheck = newArea.xMax() - minCoords.getX() + 1;
+                for (int y = (newArea.yMin() - minCoords.getY()); y <= (newArea.yMax() - minCoords.getY()); y++)
+                {
+                    if (xMinCheck >= 0)
+                    {
+                        if (grid[xMinCheck][y] == 1)
+                        {
+                            gapsExist = false;
+                            break;
+                        }
+                    }
+                    if (xMaxCheck < grid.Count)
+                    {
+                        if (grid[xMaxCheck][y] == 1)
+                        {
+                            gapsExist = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return gapsExist;
+        }
+
+        private void updateGrid()
+        {
+            grid = new List<List<int>>();
+            List<int> temp = new List<int>();
+
+            // Create a blank grid
+            for (int x = 0; x < (maxCoords.getX() - minCoords.getX() + 1); x++)
+            {
+                temp = new List<int>();
+
+                for (int y = 0; y < (maxCoords.getY() - minCoords.getY() + 1); y++)
+                {
+                    temp.Add(0);
+                }
+
+                grid.Add(temp);
+            }
+
+            // Stamp all of the dimensions into the blank grid
+            for (int i = 0; i < squareArealist.Count; i++)
+            {
+                temp = new List<int>();
+                SquareArea currentSquare = squareArealist[i];
+                int xAccess = currentSquare.xMin() - minCoords.getX();
+                int yAccess = currentSquare.yMin() - minCoords.getY();
+
+                for (int x = 0; x < (currentSquare.xMax() - currentSquare.xMin() + 1); x++)
+                {
+                    yAccess = currentSquare.yMin() - minCoords.getY();
+                    for (int y = 0; y < (currentSquare.yMax() - currentSquare.yMin() + 1); y++)
+                    {
+                        //print(xAccess + "," + yAccess);
+
+                        grid[xAccess][yAccess] = 1;
+                        yAccess++;
+                    }
+                    xAccess++;
+                }
+            }
+
+            // Must update the area and center coord afterwards
+            updateArea();
+            updateCenterCoord();
+        }
+
+        private void updateCenterCoord()
+        {
+            int diffX = maxCoords.getX() - minCoords.getX();
+            int diffY = maxCoords.getY() - minCoords.getY();
+
+            int centerX = Mathf.FloorToInt(diffX / 2) + minCoords.getX();
+            int centerY = Mathf.FloorToInt(diffY / 2) + minCoords.getY();
+
+            this.centerCoord = new CoordsInt(centerX, centerY);
+        }
+
+        private void updateArea()
+        {
+            area = 0;
+            for (int x = 0; x < grid.Count; x++)
+            {
+                for (int y = 0; y < grid[0].Count; y++)
+                {
+                    if (grid[x][y] == 1)
+                    {
+                        area++;
+                    }
+                }
+            }
+
+        }
+
+        public bool pointTooCloseToPreviouslyAttemptedSquareCore(CoordsInt coords, int displacemntRange)
+        {
+            int x = coords.getX();
+            int y = coords.getY();
+            bool pointRejected = false;
+            int displacement = displacemntRange;
+
+            //Debug.Log("INPUT: " + x + "," + y);
+
+            for (int i = 0; i < listHistory.Count; i++)
+            {
+                //Debug.Log("POINT CHECK X: " + (listHistory[i].xStart - displacement) + "," + (listHistory[i].xStart + displacement));
+                //Debug.Log("POINT CHECK Y: " + (listHistory[i].yStart - displacement) + "," + (listHistory[i].yStart + displacement));
+
+                if (listHistory[i].xStart() - displacement <= x && x <= listHistory[i].xStart() + displacement &&
+                    listHistory[i].yStart() - displacement <= y && y <= listHistory[i].yStart() + displacement)
+                {
+                    pointRejected = true;
+                    break;
+                }
+            }
+
+            //if (pointRejected) Debug.Log("REJECTED: " + x + "," + y);
+            //if (!pointRejected) Debug.Log("ACCEPTED: " + x + "," + y);
+
+            return pointRejected;
+        }
+
+        public bool pointAlreadyAdded(CoordsInt coords)
+        {
+            int x = coords.getX();
+            int y = coords.getY();
+            bool pointUsed = false;
+
+            for (int i = 0; i < squareArealist.Count; i++)
+            {
+                if (squareArealist[i].xMin() <= x && x <= squareArealist[i].xMax() &&
+                    squareArealist[i].yMin() <= y && y <= squareArealist[i].yMax())
+                {
+                    pointUsed = true;
+                }
+            }
+
+            return pointUsed;
+        }
+
+        public bool startCoordsAreOutsideOfCurrentDimList(Coords<int> startCoords)
+        {
+            bool startCoordAreOutside = false;
+
+            if (minCoords.getX() > startCoords.getX() || startCoords.getX() > maxCoords.getX())
+                startCoordAreOutside = true;
+
+            if (minCoords.getY() > startCoords.getY() || startCoords.getY() > maxCoords.getY())
+                startCoordAreOutside = true;
+
+            return startCoordAreOutside;
+        }
+
+
+        // Takes another dim list as input and calculates the percentage of overlaping coords
+        //      Percentage is based on how many coords overlap to THIS dim list
+        public float checkOverlapPercent(DimensionList compareDimList)
+        {
+            bool bothDimsOverlap = false;
+            float overlapPercentage = 0f;
+
+            CoordsInt compareMinCoords = compareDimList.getMinCoords();
+            CoordsInt compareMaxCoords = compareDimList.getMaxCoords();
+
+            CoordsInt commonMinCoord = new CoordsInt(0, 0);
+            CoordsInt commonMaxCoord = new CoordsInt(0, 0);
+
+            bool xOverlap = false;
+            bool yOverlap = false;
+
+            // First start with a basic min/max coord check
+            //      Find a common min and max coord between the two
+
+            if (this.minCoords.getX() <= compareMinCoords.getX() && compareMinCoords.getX() <= this.maxCoords.getX())
+            {
+                xOverlap = true;
+                commonMinCoord.setX(compareMinCoords.getX());
+            }
+            else
+                commonMinCoord.setX(this.minCoords.getX());
+
+            if (this.minCoords.getX() <= compareMaxCoords.getX() && compareMaxCoords.getX() <= this.maxCoords.getX())
+            {
+                xOverlap = true;
+                commonMaxCoord.setX(compareMaxCoords.getX());
+            }
+            else
+                commonMaxCoord.setX(this.maxCoords.getX());
+
+            if (this.minCoords.getY() <= compareMinCoords.getY() && compareMinCoords.getY() <= this.maxCoords.getY())
+            {
+                yOverlap = true;
+                commonMinCoord.setY(compareMinCoords.getY());
+            }
+            else
+                commonMinCoord.setY(this.minCoords.getY());
+
+            if (this.minCoords.getY() <= compareMaxCoords.getY() && compareMaxCoords.getY() <= this.maxCoords.getY())
+            {
+                yOverlap = true;
+                commonMaxCoord.setY(compareMaxCoords.getY());
+            }
+            else
+                commonMaxCoord.setY(this.maxCoords.getY());
+
+            bothDimsOverlap = xOverlap && yOverlap;
+
+            //this.printMinMax("DIM 1: ");
+            //compareDimList.printMinMax("DIM 2: ");
+
+            //commonMinCoord.print("COMMON MIN COORDS: ");
+            //commonMaxCoord.print("COMMON MAX COORDS: ");
+
+            //Debug.Log("BOTH OVERLAP BOOL: " + bothDimsOverlap);
+
+            // Start a brute force compare if both dims can overlap
+            if (bothDimsOverlap == true)
+            {
+                int overlapCount = 0;
+                compareDimList.getGrid(out List<List<int>> compareGrid, out CoordsInt compareStartCoords);
+
+                for (int x = commonMinCoord.getX(); x < commonMaxCoord.getX(); x++)
+                {
+                    for (int y = commonMinCoord.getY(); y < commonMaxCoord.getY(); y++)
+                    {
+                        //Debug.Log("LOOP: " + x + ", " + y);
+                        int xAccess = x - this.minCoords.getX();
+                        int yAccess = y - this.minCoords.getY();
+
+                        int xCompareAccess = x - compareMinCoords.getX();
+                        int yCompareAccess = y - compareMinCoords.getY();
+
+
+                        if (this.grid[xAccess][yAccess] == 1 && compareGrid[xCompareAccess][yCompareAccess] == 1)
+                            overlapCount++;
+                    }
+                }
+                //Debug.Log("COUNT: " + overlapCount);
+                //Debug.Log("AREA: " + this.area);
+                overlapPercentage = (float)overlapCount / (float)this.area;
+            }
+
+            return overlapPercentage;
+        }
+
+        // =======================================================================
+        //                        Final Check Functions
+        // =======================================================================
 
         // THIS FUNCTION IS NEEDED
         //      Checks if there is a body of sqaure areas that are connected by a 2 wide Tile. This is not good enough to be considered "touching"
@@ -362,7 +648,7 @@ namespace CommonlyUsedClasses
                                 break;
                         }
                     }
-                    
+
                     if (0 < xMaxCount && xMaxCount < minTouchingWidth)
                     {
                         if (rightPerimeterCheck(tempCoord, topPerimeterIsOnGridEdge, botPerimeterIsOnGridEdge) == false)
@@ -417,7 +703,7 @@ namespace CommonlyUsedClasses
             if (rightPerimeterIsOnGridEdge == false)
             {
                 if (topRightCheckForTopCheck(coord) == true)
-                    checkPass = true; 
+                    checkPass = true;
             }
 
             // If the square area is NOT on the left most edge, then check the top left corner
@@ -464,7 +750,7 @@ namespace CommonlyUsedClasses
             if (rightPerimeterIsOnGridEdge == false)
             {
                 if (botRightCheckForBottomCheck(coord) == true)
-                    checkPass = true; 
+                    checkPass = true;
             }
             // If the square area is NOT on the left most edge, then check the bottom left corner
             if (leftPerimeterIsOnGridEdge == false && checkPass == false)
@@ -510,7 +796,7 @@ namespace CommonlyUsedClasses
             {
                 if (topRightCheckForRightCheck(coord) == true)
                     checkPass = true;
-                
+
             }
             // If the square area is NOT on the bottom most edge, then check the bottom right corner
             if (botPerimeterIsOnGridEdge == false && checkPass == false)
@@ -556,7 +842,7 @@ namespace CommonlyUsedClasses
             {
                 if (topLeftCheckForLeftCheck(coord) == true)
                     checkPass = true;
-                
+
             }
             // If the square area is NOT on the bottom most edge, then check the bottom left corner
             if (botPerimeterIsOnGridEdge == false && checkPass == false)
@@ -593,189 +879,30 @@ namespace CommonlyUsedClasses
             return pass;
         }
 
-        private bool checkForGaps(SquareArea newArea)
-        {
-            bool gapsExist = true;
-
-            for (int x = (newArea.xMin() - minCoords.getX()); x <= (newArea.xMax() - minCoords.getX()); x++)
-            {
-                int yMinCheck = newArea.yMin() - minCoords.getY() - 1;
-                int yMaxCheck = newArea.yMax() - minCoords.getY() + 1;
-
-                if (yMinCheck >= 0)
-                {
-                    if (grid[x][yMinCheck] == 1)
-                    {
-                        gapsExist = false;
-                        break;
-                    }
-                }
-                if (yMaxCheck < grid[0].Count)
-                {
-                    if (grid[x][yMaxCheck] == 1)
-                    {
-                        gapsExist = false;
-                        break;
-                    }
-                }
-            }
-
-            // Check left/right perimeter
-            if (gapsExist != false)
-            {
-                int xMinCheck = newArea.xMin() - minCoords.getX() - 1;
-                int xMaxCheck = newArea.xMax() - minCoords.getX() + 1;
-                for (int y = (newArea.yMin() - minCoords.getY()); y <= (newArea.yMax() - minCoords.getY()); y++)
-                {
-                    if (xMinCheck >= 0)
-                    {
-                        if (grid[xMinCheck][y] == 1)
-                        {
-                            gapsExist = false;
-                            break;
-                        }
-                    }
-                    if (xMaxCheck < grid.Count)
-                    {
-                        if (grid[xMaxCheck][y] == 1)
-                        {
-                            gapsExist = false;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return gapsExist;
-        }
-
-        private void updateGrid()
-        {
-            grid = new List<List<int>>();
-            List<int> temp = new List<int>();
-
-            // Create a blank grid
-            for (int x = 0; x < (maxCoords.getX() - minCoords.getX() + 1); x++)
-            {
-                temp = new List<int>();
-
-                for (int y = 0; y < (maxCoords.getY() - minCoords.getY() + 1); y++)
-                {
-                    temp.Add(0);
-                }
-
-                grid.Add(temp);
-            }
-
-            // Stamp all of the dimensions into the blank grid
-            for (int i = 0; i < squareArealist.Count; i++)
-            {
-                temp = new List<int>();
-                SquareArea currentSquare = squareArealist[i];
-                int xAccess = currentSquare.xMin() - minCoords.getX();
-                int yAccess = currentSquare.yMin() - minCoords.getY();
-
-                for (int x = 0; x < (currentSquare.xMax() - currentSquare.xMin() + 1); x++)
-                {
-                    yAccess = currentSquare.yMin() - minCoords.getY();
-                    for (int y = 0; y < (currentSquare.yMax() - currentSquare.yMin() + 1); y++)
-                    {
-                        //print(xAccess + "," + yAccess);
-
-                        grid[xAccess][yAccess] = 1;
-                        yAccess++;
-                    }
-                    xAccess++;
-                }
-            }
-
-            // Must update the area afterwards
-            updateArea();
-        }
-
-        private void updateArea()
-        {
-            area = 0;
-            for (int x = 0; x < grid.Count; x++)
-            {
-                for (int y = 0; y < grid[0].Count; y++)
-                {
-                    if (grid[x][y] == 1)
-                    {
-                        area++;
-                    }
-                }
-            }
-
-        }
-
-        public bool pointTooCloseToPreviouslyAttemptedSquareCore(CoordsInt coords, int displacemntRange)
-        {
-            int x = coords.getX();
-            int y = coords.getY();
-            bool pointRejected = false;
-            int displacement = displacemntRange;
-
-            //Debug.Log("INPUT: " + x + "," + y);
-
-            for (int i = 0; i < listHistory.Count; i++)
-            {
-                //Debug.Log("POINT CHECK X: " + (listHistory[i].xStart - displacement) + "," + (listHistory[i].xStart + displacement));
-                //Debug.Log("POINT CHECK Y: " + (listHistory[i].yStart - displacement) + "," + (listHistory[i].yStart + displacement));
-
-                if (listHistory[i].xStart() - displacement <= x && x <= listHistory[i].xStart() + displacement &&
-                    listHistory[i].yStart() - displacement <= y && y <= listHistory[i].yStart() + displacement)
-                {
-                    pointRejected = true;
-                    break;
-                }
-            }
-
-            //if (pointRejected) Debug.Log("REJECTED: " + x + "," + y);
-            //if (!pointRejected) Debug.Log("ACCEPTED: " + x + "," + y);
-
-            return pointRejected;
-        }
-
-        public bool pointAlreadyAdded(CoordsInt coords)
-        {
-            int x = coords.getX();
-            int y = coords.getY();
-            bool pointUsed = false;
-
-            for (int i = 0; i < squareArealist.Count; i++)
-            {
-                if (squareArealist[i].xMin() <= x && x <= squareArealist[i].xMax() &&
-                    squareArealist[i].yMin() <= y && y <= squareArealist[i].yMax())
-                {
-                    pointUsed = true;
-                }
-            }
-
-            return pointUsed;
-        }
-
-        public bool startCoordsAreOutsideOfCurrentDimList(Coords<int> startCoords)
-        {
-            bool startCoordAreOutside = false;
-
-            if (minCoords.getX() > startCoords.getX() || startCoords.getX() > maxCoords.getX())
-                startCoordAreOutside = true;
-
-            if (minCoords.getY() > startCoords.getY() || startCoords.getY() > maxCoords.getY())
-                startCoordAreOutside = true;
-
-            return startCoordAreOutside;
-        }
-
         // =======================================================================
         //                              Setter/Getters
         // =======================================================================
 
-        public void getGrid(out List<List<int>> grid, out Coords<int> startCoords)
+        public void getGrid(out List<List<int>> grid, out CoordsInt startCoords)
         {
             grid = this.grid;
             startCoords = this.minCoords;
+        }
+
+        public List<CoordsInt> getAllSelectedGridCoords()
+        {
+            List<CoordsInt> listOfCoords = new List<CoordsInt>();
+
+            for (int y = grid[0].Count - 1; y >= 0; y--)
+            {
+                for (int x = 0; x < grid.Count; x++)
+                {
+                    if (grid[x][y] == 1)
+                        listOfCoords.Add(new CoordsInt(x + minCoords.getX(), y + minCoords.getY()));
+                }
+            }
+
+            return listOfCoords;
         }
 
         public int getGridVal(Coords<int> coords)
@@ -811,8 +938,9 @@ namespace CommonlyUsedClasses
 
         public void printMinMax(string str)
         {
-            minCoords.print(str + "GRID DIM MIN: ");
-            maxCoords.print(str + "GRID DIM MAX: ");
+            Debug.Log(str);
+            minCoords.print("\tGRID DIM MIN: ");
+            maxCoords.print("\tGRID DIM MAX: ");
         }
 
         public CoordsInt getStartCoords()
@@ -823,6 +951,21 @@ namespace CommonlyUsedClasses
         public CoordsInt getMinCoords()
         {
             return this.minCoords;
+        }
+
+        public CoordsInt getMaxCoords()
+        {
+            return this.maxCoords;
+        }
+
+        public int getArea()
+        {
+            return area;
+        }
+
+        public CoordsInt getCenterCoord()
+        {
+            return this.centerCoord;
         }
     }
 }

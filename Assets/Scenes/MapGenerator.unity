@@ -6536,9 +6536,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: gridControllerScript, Assembly-CSharp
-        m_MethodName: showAdjacentRooms
+      - m_Target: {fileID: 971668956}
+        m_TargetAssemblyTypeName: DebugControllerManager, Assembly-CSharp
+        m_MethodName: tempButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -547,43 +547,88 @@ namespace VeinManagerClasses
         {
             // Uses dimVeinZoneCreator to find empty space in a restricted tile map dimension (The one that the zone is restricted to)
             //      Does not check all locations in the tile map, does a "lazy job". Coords checked are based on the size of allocated tile map for the zone
-            TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getTileMapRef();
-
             DirectionBias noDirectionBias = new DirectionBias(Direction.None, Direction.None);
+            float overlapThreshold = .6f;
 
+            // Get the restricted zone dimensions
+            TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getTileMapRef();
             CoordsInt tileMapMin = new CoordsInt(0, 0);
             CoordsInt tileMapMax = new CoordsInt(allocatedTileMap.getXCount() - 1, allocatedTileMap.getYCount() - 1);
-
             CoordsInt restrictedDimsMin = allocatedTileMap.getElement(tileMapMin).getTileMapCoords();
             CoordsInt restrictedDimsMax = allocatedTileMap.getElement(tileMapMax).getTileMapCoords();
             Dimensions restricedDims = new Dimensions(restrictedDimsMin, restrictedDimsMax);
 
-            restrictedDimsMin.print("MIN DIM: ");
-            restrictedDimsMax.print("MAX DIM: ");
+            //restrictedDimsMin.print("MIN DIM: ");
+            //restrictedDimsMax.print("MAX DIM: ");
 
+            // Get the "lazy" coords
             List<CoordsInt> reducedTileMapCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
 
-            // Restict the search area according to the amount of points
+            // Restict the search area according to the amount of search points
             int maxTotalSearchArea = Mathf.FloorToInt(restricedDims.getArea() / reducedTileMapCoordsList.Count);
+            int minTotalSearchArea = Mathf.FloorToInt((float)maxTotalSearchArea / 1.7f);
 
-            Debug.Log("RESTRICED AREA: " + restricedDims.getArea());
-            Debug.Log("SEARCH AREA: " + maxTotalSearchArea);
+            //Debug.Log("RESTRICED AREA: " + restricedDims.getArea());
+            //Debug.Log("SEARCH AREA: " + maxTotalSearchArea);
             //foreach (var coord in reducedCoordsList)
             //{
             //    coord.print("\tREDUCED: ");
             //}
 
+
+            // Once coords to check are calculated we search for free space
+            //      Valid zone free areas need to be above the minimum search area, aka don't think that a "small" vein free pocket should have a new edge inside it
+            //      Also don't want areas that overlap more than 60% to both be valid, as it will skew the random chances. Instead of 1:1:1 ratio chance it becomes 2:1 if 2 areas are overlapping
+            List<DimensionList> freeAreas = new List<DimensionList>();
             foreach (var coords in reducedTileMapCoordsList)
             {
                 CoordsInt checkSpaceCoords = zoneVeinGenContainer.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
-                coords.print("--------------------------\n\tCOORD: ");
-                checkSpaceCoords.print("\tWORLD COORD: ");
-                DimensionList emptySpaceDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
-                emptySpaceDimList.printMinMax("\t");
+                //coords.print("--------------------------\n\tCOORD: ");
+                //checkSpaceCoords.print("\tWORLD COORD: ");
+                DimensionList newEmptySpace = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
+                //newEmptySpace.printMinMax("\t");
+
+                if (freeAreas.Count == 0)
+                    freeAreas.Add(newEmptySpace);
+                else
+                {
+                    // Make sure min area threshold is met
+                    if (newEmptySpace.getArea() >= minTotalSearchArea)
+                    {
+                        //Debug.Log("MIN AREA: " + minTotalSearchArea + "\nNEW AREA: " + newEmptySpace.getArea());
+
+                        // Then make sure that it doesn't have a big overlap
+                        //      It's important that we are checking the new empty spaces overlap percentage
+                        //      AKA want newEmptySpace.checkOverlapPercent(area) and not area.checkOverlapPercent(newEmptySpace)
+                        //      These two are not the same
+                        bool newEmptySpaceOverlaps = false;
+                        foreach (var area in freeAreas)
+                        {
+                            float percentOverlap = newEmptySpace.checkOverlapPercent(area);
+                            if (percentOverlap > overlapThreshold)
+                            {
+                                newEmptySpaceOverlaps = true;
+                                break;
+                            }
+                        }
+                        if (newEmptySpaceOverlaps == false)
+                            freeAreas.Add(newEmptySpace);
+                    }
+                }
+                //if (coords.getX() == 5 && (coords.getY() == 0 || coords.getY() == 2))
+                //    emptySpaceDimList.printGrid(true);
             }
 
-            Debug.LogError("restrictedTopOffDimList IS SET TO TRUE!!!! ONCE YOU ARE DONE DEBUGGING TOP OFF LIST ERRORS SET THIS TO FALSE!!!!!");
-            Debug.LogError("Also re-evaluate restricted individual sqaure area max area, seems kinda small");
+            Debug.Log("POSSIBLE RANDOM FREE AREAS: " + freeAreas.Count);
+            Debug.LogError("CENTER COORD NEEDS TO BE DECIDED BY A ROUGH AVERAGE OF ALL 1 GRID TILES");
+
+            foreach (var area in freeAreas)
+            {
+                area.getCenterCoord().print("\tCENTER COORD: ");
+                zoneVeinGenContainer.currentZone.freeSpaces.Add(area.getAllSelectedGridCoords());
+            }
+
         }
+
     }
 }

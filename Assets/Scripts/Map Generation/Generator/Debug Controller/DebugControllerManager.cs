@@ -53,6 +53,49 @@ public class DebugControllerManager : MonoBehaviour
             zoneIndex = 0;
     }
 
+    int tempIndex = 0;
+    public void tempButton()
+    {
+        for (int zoneIdx = 0; zoneIdx < zoneListCount; zoneIdx++)
+        {
+            Zone_New zone = generatorInst.getZoneContainer().getZone(zoneIdx);
+
+            if (tempIndex < zone.freeSpaces.Count)
+            {
+                List<CoordsInt> freeSpaceCoords = zone.freeSpaces[tempIndex];
+
+                //Debug.Log("FREE SPACE COUNT: " + zone.freeSpaces.Count + "\nCOORDS IN SPACE: " + zone.freeSpaces[tempIndex].Count);
+                if (tempIndex != 0)
+                {
+                    List<CoordsInt> prevFreeSpaceCoords = zone.freeSpaces[tempIndex - 1];
+
+                    foreach (var coord in prevFreeSpaceCoords)
+                    {
+                        //coord.print("\tIDK: ");
+                        bool accessSuccesful = false;
+                        Tile currentTile = tileManagerRef.tileAccessor.getTile(coord, ref accessSuccesful);
+
+                        if (accessSuccesful == true)
+                            changeTileColor(ref currentTile, purple);
+                    }
+                }
+
+                foreach (var coord in freeSpaceCoords)
+                {
+                    //coord.print("\tIDK: ");
+                    bool accessSuccesful = false;
+                    Tile currentTile = tileManagerRef.tileAccessor.getTile(coord, ref accessSuccesful);
+
+                    if (accessSuccesful == true)
+                        changeTileColor(ref currentTile, black);
+                }
+
+                
+            }
+        }
+        tempIndex++;
+    }
+
     // ==============================================================================================
     //                                      Vein Debug
     // ==============================================================================================
@@ -114,9 +157,7 @@ public class DebugControllerManager : MonoBehaviour
     public void changeDimGridColor(ref Zone_New zone, Color color)
     {
         DimensionList zoneDimList = zone.getVeinZoneDimList();
-        List<List<int>> grid;
-        Coords<int> startCoords;
-        zoneDimList.getGrid(out grid, out startCoords);
+        zoneDimList.getGrid(out List<List<int>> grid, out CoordsInt startCoords);
 
         //Debug.Log(zone.getId());
         //zoneDimList.printMinMax();

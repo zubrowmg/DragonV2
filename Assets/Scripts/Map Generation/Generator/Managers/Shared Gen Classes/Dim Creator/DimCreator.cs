@@ -197,9 +197,7 @@ public abstract class DimCreator : TileAccessor
 
     void fillTileMap(DimensionList dimList)
     {
-        List<List<int>> grid;
-        Coords<int> startCoords;
-        dimList.getGrid(out grid, out startCoords);
+        dimList.getGrid(out List<List<int>> grid, out CoordsInt startCoords);
         for (int x = 0; x < grid.Count; x++)
         {
             for (int y = 0; y < grid[0].Count; y++)
@@ -441,9 +439,7 @@ public abstract class DimCreator : TileAccessor
 
     protected void markSelectedGridForDebug(DimensionList dimList)
     {
-        List<List<int>> grid;
-        Coords<int> startCoords;
-        dimList.getGrid(out grid, out startCoords);
+        dimList.getGrid(out List<List<int>> grid, out CoordsInt startCoords);
 
         for (int x = 0; x < grid.Count; x++)
         {
