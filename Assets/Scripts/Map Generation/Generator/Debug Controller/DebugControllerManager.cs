@@ -53,8 +53,12 @@ public class DebugControllerManager : MonoBehaviour
             zoneIndex = 0;
     }
 
+    // ==============================================================================================
+    //                                      Save Temp Buttons (SHOULD MOVE THIS TO ANOTHER DEBUG CONTROLLER FILE)
+    // ==============================================================================================
+
     int tempIndex = 0;
-    public void tempButton()
+    public void tempButtonPlotFreeSpaces()
     {
         for (int zoneIdx = 0; zoneIdx < zoneListCount; zoneIdx++)
         {
