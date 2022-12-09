@@ -251,6 +251,7 @@ namespace CommonlyUsedClasses
                 }
                 axisPointCount++;
             }
+            Debug.Log("DISPLACEMENT: " + displacement);
 
             return displacement;
         }

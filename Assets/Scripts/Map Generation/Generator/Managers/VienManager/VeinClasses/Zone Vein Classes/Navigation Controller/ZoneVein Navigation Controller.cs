@@ -625,7 +625,7 @@ namespace VeinManagerClasses
             foreach (var area in freeAreas)
             {
                 area.getCenterCoord().print("\tCENTER COORD: ");
-                zoneVeinGenContainer.currentZone.freeSpaces.Add(area.getAllSelectedGridCoords());
+                zoneVeinGenContainer.currentZone.freeSpaces.Add(area);
             }
 
         }

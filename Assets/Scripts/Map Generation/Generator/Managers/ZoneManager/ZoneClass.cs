@@ -26,7 +26,7 @@ public class Zone_New
     DirectionBias zoneGenerationDirection;
 
     // Temporary Variables, meant to be deleted after debug is done
-    public List<List<CoordsInt>> freeSpaces = new List<List<CoordsInt>>();
+    public List<DimensionList> freeSpaces = new List<DimensionList>();
 
 
     // Zones are created during vein zone generation

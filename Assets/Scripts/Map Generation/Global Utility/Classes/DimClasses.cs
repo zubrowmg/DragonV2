@@ -128,7 +128,6 @@ namespace CommonlyUsedClasses
 
         List<SquareArea> squareArealist;
         List<SquareArea> listHistory;
-        //List<List<int>> grid;
         TwoDList<int> grid;
 
         public DimensionList(CoordsInt startCoords)
@@ -332,7 +331,7 @@ namespace CommonlyUsedClasses
                     grid.addElement(newCoord, 0);
                 }
 
-                
+
                 //grid.Add(temp);
             }
 
@@ -365,15 +364,36 @@ namespace CommonlyUsedClasses
             updateCenterCoord();
         }
 
+        // Rough calculation, don't check all coords. Just a few
         private void updateCenterCoord()
         {
-            int diffX = maxCoords.getX() - minCoords.getX();
-            int diffY = maxCoords.getY() - minCoords.getY();
+            if (squareArealist.Count == 1)
+            {
+                int diffX = maxCoords.getX() - minCoords.getX();
+                int diffY = maxCoords.getY() - minCoords.getY();
 
-            int centerX = Mathf.FloorToInt(diffX / 2) + minCoords.getX();
-            int centerY = Mathf.FloorToInt(diffY / 2) + minCoords.getY();
+                int centerX = Mathf.FloorToInt(diffX / 2) + minCoords.getX();
+                int centerY = Mathf.FloorToInt(diffY / 2) + minCoords.getY();
 
-            this.centerCoord = new CoordsInt(centerX, centerY);
+                this.centerCoord = new CoordsInt(centerX + minCoords.getX(), centerY + minCoords.getY());
+            }
+            else
+            {
+                List<CoordsInt> reducedCoordsList = grid.getReducedCoordsList();
+                CoordsInt currentAverage = reducedCoordsList[0];
+                Debug.Log("updateCenterCoord() REDUCED COORDS LIST: " + reducedCoordsList.Count);
+                Debug.Log("\tX AXIS: " + grid.getXCount() + "\n\tY AXIS: " + grid.getYCount());
+
+                foreach (var coord in reducedCoordsList)
+                {
+                    if (grid.getElement(coord) == 1)
+                        currentAverage = CommonFunctions.calculateCoordsAverage(currentAverage, coord);
+                }
+                this.centerCoord = currentAverage;
+                this.centerCoord.incX(minCoords.getX());
+                this.centerCoord.incY(minCoords.getY());
+            }
+            
         }
 
         private void updateArea()
@@ -452,7 +472,6 @@ namespace CommonlyUsedClasses
 
             return startCoordAreOutside;
         }
-
 
         // Takes another dim list as input and calculates the percentage of overlaping coords
         //      Percentage is based on how many coords overlap to THIS dim list

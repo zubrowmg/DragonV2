@@ -33,6 +33,14 @@ namespace CommonlyUsedFunctions
             return Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
         }
 
+
+        public static CoordsInt calculateCoordsAverage(Coords<int> oneCoord, Coords<int> twoCoord)
+        {
+            int xAverage = Mathf.FloorToInt(((float)oneCoord.getX() + (float)twoCoord.getX()) / (float)2);
+            int yAverage = Mathf.FloorToInt(((float)oneCoord.getY() + (float)twoCoord.getY()) / (float)2);
+            return new CoordsInt(xAverage, yAverage);
+        }
+
         public static float calculateDifference(float numOne, float numTwo)
         {
             return (float)Mathf.Abs(numOne - numTwo);

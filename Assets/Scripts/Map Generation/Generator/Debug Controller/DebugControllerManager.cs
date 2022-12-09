@@ -66,12 +66,17 @@ public class DebugControllerManager : MonoBehaviour
 
             if (tempIndex < zone.freeSpaces.Count)
             {
-                List<CoordsInt> freeSpaceCoords = zone.freeSpaces[tempIndex];
+                DimensionList dimlist = zone.freeSpaces[tempIndex];
+                dimlist.getGrid(out TwoDList<int> grid, out CoordsInt startCoords);
+
+                List<CoordsInt> freeSpaceCoords = dimlist.getAllSelectedGridCoords();
+                dimlist.getCenterCoord().print("CENTER COORDS: ");
+                //Debug.Log("X AXIS: " + grid.getXCount() + "Y AXIS: " + grid.getYCount());
 
                 //Debug.Log("FREE SPACE COUNT: " + zone.freeSpaces.Count + "\nCOORDS IN SPACE: " + zone.freeSpaces[tempIndex].Count);
                 if (tempIndex != 0)
                 {
-                    List<CoordsInt> prevFreeSpaceCoords = zone.freeSpaces[tempIndex - 1];
+                    List<CoordsInt> prevFreeSpaceCoords = zone.freeSpaces[tempIndex - 1].getAllSelectedGridCoords();
 
                     foreach (var coord in prevFreeSpaceCoords)
                     {
