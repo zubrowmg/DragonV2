@@ -161,16 +161,16 @@ public class DebugControllerManager : MonoBehaviour
     public void changeDimGridColor(ref Zone_New zone, Color color)
     {
         DimensionList zoneDimList = zone.getVeinZoneDimList();
-        zoneDimList.getGrid(out List<List<int>> grid, out CoordsInt startCoords);
+        zoneDimList.getGrid(out TwoDList<int> grid, out CoordsInt startCoords);
 
         //Debug.Log(zone.getId());
         //zoneDimList.printMinMax();
 
-        for (int x = 0; x < grid.Count; x++)
+        for (int x = 0; x < grid.getXCount(); x++)
         {
-            for (int y = 0; y < grid[0].Count; y++)
+            for (int y = 0; y < grid.getYCount(); y++)
             {
-                if (grid[x][y] == 1)
+                if (grid.getElement(new CoordsInt(x, y)) == 1)
                 {
                     bool accessSuccesful = false;
                     CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());

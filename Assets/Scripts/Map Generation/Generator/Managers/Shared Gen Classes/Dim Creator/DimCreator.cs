@@ -158,7 +158,7 @@ public abstract class DimCreator : TileAccessor
             }
 
             // Break out conditions
-            if (dimensionList.area >= maxArea)
+            if (dimensionList.getArea() >= maxArea)
             {
                 // Top off dim list, this is used to make dim areas that are not rectangular into a rectangular shape
                 //      Ex: 
@@ -197,10 +197,10 @@ public abstract class DimCreator : TileAccessor
 
     void fillTileMap(DimensionList dimList)
     {
-        dimList.getGrid(out List<List<int>> grid, out CoordsInt startCoords);
-        for (int x = 0; x < grid.Count; x++)
+        dimList.getGrid(out TwoDList<int> grid, out CoordsInt startCoords);
+        for (int x = 0; x < grid.getXCount(); x++)
         {
-            for (int y = 0; y < grid[0].Count; y++)
+            for (int y = 0; y < grid.getYCount(); y++)
             {
                 bool accessSuccesful = false;
                 CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
@@ -439,11 +439,11 @@ public abstract class DimCreator : TileAccessor
 
     protected void markSelectedGridForDebug(DimensionList dimList)
     {
-        dimList.getGrid(out List<List<int>> grid, out CoordsInt startCoords);
+        dimList.getGrid(out TwoDList<int> grid, out CoordsInt startCoords);
 
-        for (int x = 0; x < grid.Count; x++)
+        for (int x = 0; x < grid.getXCount(); x++)
         {
-            for (int y = 0; y < grid[0].Count; y++)
+            for (int y = 0; y < grid.getYCount(); y++)
             {
                 bool accessSuccesful = false;
                 CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());

@@ -142,6 +142,10 @@ namespace CommonlyUsedClasses
                 array[index.getX()].Add(newItem);
         }
 
+        public void setElement(CoordsInt index, ref T item)
+        {
+            array[index.getX()][index.getY()].setTwo(item);
+        }
 
         public ref T getElement(CoordsInt index)
         {

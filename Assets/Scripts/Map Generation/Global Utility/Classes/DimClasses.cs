@@ -124,11 +124,12 @@ namespace CommonlyUsedClasses
 
         int squareCount;
 
-        public int area;
+        int area;
 
-        public List<SquareArea> squareArealist;
-        public List<SquareArea> listHistory;
-        public List<List<int>> grid;
+        List<SquareArea> squareArealist;
+        List<SquareArea> listHistory;
+        //List<List<int>> grid;
+        TwoDList<int> grid;
 
         public DimensionList(CoordsInt startCoords)
         {
@@ -148,7 +149,8 @@ namespace CommonlyUsedClasses
 
             this.squareArealist = new List<SquareArea>();
             this.listHistory = new List<SquareArea>();
-            this.grid = new List<List<int>>();
+            //this.grid = new List<List<int>>();
+            this.grid = new TwoDList<int>();
         }
 
         public bool addDimension(SquareArea newArea)
@@ -254,6 +256,7 @@ namespace CommonlyUsedClasses
         private bool checkForGaps(SquareArea newArea)
         {
             bool gapsExist = true;
+            CoordsInt checkCoords = new CoordsInt(0, 0);
 
             for (int x = (newArea.xMin() - minCoords.getX()); x <= (newArea.xMax() - minCoords.getX()); x++)
             {
@@ -262,15 +265,17 @@ namespace CommonlyUsedClasses
 
                 if (yMinCheck >= 0)
                 {
-                    if (grid[x][yMinCheck] == 1)
+                    checkCoords = new CoordsInt(x, yMinCheck);
+                    if (grid.getElement(checkCoords) == 1)
                     {
                         gapsExist = false;
                         break;
                     }
                 }
-                if (yMaxCheck < grid[0].Count)
+                if (yMaxCheck < grid.getYCount())
                 {
-                    if (grid[x][yMaxCheck] == 1)
+                    checkCoords = new CoordsInt(x, yMaxCheck);
+                    if (grid.getElement(checkCoords) == 1)
                     {
                         gapsExist = false;
                         break;
@@ -287,15 +292,17 @@ namespace CommonlyUsedClasses
                 {
                     if (xMinCheck >= 0)
                     {
-                        if (grid[xMinCheck][y] == 1)
+                        CoordsInt minCheckCoord = new CoordsInt(xMinCheck, y);
+                        if (grid.getElement(minCheckCoord) == 1)
                         {
                             gapsExist = false;
                             break;
                         }
                     }
-                    if (xMaxCheck < grid.Count)
+                    if (xMaxCheck < grid.getXCount())
                     {
-                        if (grid[xMaxCheck][y] == 1)
+                        CoordsInt maxCheckCoord = new CoordsInt(xMaxCheck, y);
+                        if (grid.getElement(maxCheckCoord) == 1)
                         {
                             gapsExist = false;
                             break;
@@ -309,26 +316,30 @@ namespace CommonlyUsedClasses
 
         private void updateGrid()
         {
-            grid = new List<List<int>>();
-            List<int> temp = new List<int>();
+            grid = new TwoDList<int>();
+            //List<int> temp = new List<int>();
+            CoordsInt newCoord = new CoordsInt(0, 0);
 
             // Create a blank grid
             for (int x = 0; x < (maxCoords.getX() - minCoords.getX() + 1); x++)
             {
-                temp = new List<int>();
+                //temp = new List<int>();
 
                 for (int y = 0; y < (maxCoords.getY() - minCoords.getY() + 1); y++)
                 {
-                    temp.Add(0);
+                    //temp.Add(0);
+                    newCoord = new CoordsInt(x, y);
+                    grid.addElement(newCoord, 0);
                 }
 
-                grid.Add(temp);
+                
+                //grid.Add(temp);
             }
 
-            // Stamp all of the dimensions into the blank grid
+            // Stamp all of the recorded dimensions into the blank grid
             for (int i = 0; i < squareArealist.Count; i++)
             {
-                temp = new List<int>();
+                //temp = new List<int>();
                 SquareArea currentSquare = squareArealist[i];
                 int xAccess = currentSquare.xMin() - minCoords.getX();
                 int yAccess = currentSquare.yMin() - minCoords.getY();
@@ -338,9 +349,11 @@ namespace CommonlyUsedClasses
                     yAccess = currentSquare.yMin() - minCoords.getY();
                     for (int y = 0; y < (currentSquare.yMax() - currentSquare.yMin() + 1); y++)
                     {
-                        //print(xAccess + "," + yAccess);
+                        CoordsInt editCoord = new CoordsInt(xAccess, yAccess);
+                        int one = 1;
+                        grid.setElement(editCoord, ref one);
 
-                        grid[xAccess][yAccess] = 1;
+                        //grid[xAccess][yAccess] = 1;
                         yAccess++;
                     }
                     xAccess++;
@@ -366,11 +379,13 @@ namespace CommonlyUsedClasses
         private void updateArea()
         {
             area = 0;
-            for (int x = 0; x < grid.Count; x++)
+            for (int x = 0; x < grid.getXCount(); x++)
             {
-                for (int y = 0; y < grid[0].Count; y++)
+                for (int y = 0; y < grid.getYCount(); y++)
                 {
-                    if (grid[x][y] == 1)
+                    CoordsInt checkCoord = new CoordsInt(x, y);
+
+                    if (grid.getElement(checkCoord) == 1)
                     {
                         area++;
                     }
@@ -504,7 +519,7 @@ namespace CommonlyUsedClasses
             if (bothDimsOverlap == true)
             {
                 int overlapCount = 0;
-                compareDimList.getGrid(out List<List<int>> compareGrid, out CoordsInt compareStartCoords);
+                compareDimList.getGrid(out TwoDList<int> compareGrid, out CoordsInt compareStartCoords);
 
                 for (int x = commonMinCoord.getX(); x < commonMaxCoord.getX(); x++)
                 {
@@ -517,8 +532,9 @@ namespace CommonlyUsedClasses
                         int xCompareAccess = x - compareMinCoords.getX();
                         int yCompareAccess = y - compareMinCoords.getY();
 
-
-                        if (this.grid[xAccess][yAccess] == 1 && compareGrid[xCompareAccess][yCompareAccess] == 1)
+                        CoordsInt checkCoord = new CoordsInt(xAccess, yAccess);
+                        CoordsInt compareCheckCoord = new CoordsInt(xCompareAccess, yCompareAccess);
+                        if (this.grid.getElement(checkCoord) == 1 && compareGrid.getElement(compareCheckCoord) == 1)
                             overlapCount++;
                     }
                 }
@@ -544,6 +560,8 @@ namespace CommonlyUsedClasses
             if (squareArealist.Count == 1)
                 return dimensionListIsAcceptable;
 
+            CoordsInt checkCoords = new CoordsInt(0, 0);
+
             //Debug.Log("=========================================================");
 
             // Checks all square areas to see if any are touching by a single unit, if they are then delete everything
@@ -561,7 +579,7 @@ namespace CommonlyUsedClasses
                 //      No need to check these 
                 int yMaxCheck = square.yMax() - minCoords.getY() + 1;
                 bool topPerimeterIsOnGridEdge = true;
-                if (yMaxCheck < grid[0].Count)
+                if (yMaxCheck < grid.getYCount())
                     topPerimeterIsOnGridEdge = false;
 
                 int yMinCheck = square.yMin() - minCoords.getY() - 1;
@@ -576,7 +594,7 @@ namespace CommonlyUsedClasses
 
                 int xMaxCheck = square.xMax() - minCoords.getX() + 1;
                 bool rightPerimeterIsOnGridEdge = true;
-                if (xMaxCheck < grid.Count)
+                if (xMaxCheck < grid.getXCount())
                     rightPerimeterIsOnGridEdge = false;
 
                 //Debug.Log("CHECK MIN: " + xMinCheck + ", " + yMinCheck + "\nCHECK MAX:" + xMaxCheck + ", " + yMaxCheck);
@@ -587,8 +605,9 @@ namespace CommonlyUsedClasses
                 {
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
+                        checkCoords = new CoordsInt(x, yMaxCheck);
                         // Top
-                        if (grid[x][yMaxCheck] == 1)
+                        if (grid.getElement(checkCoords) == 1)
                         {
                             yMaxCount++;
                             tempCoord = new CoordsInt(x, yMaxCheck);
@@ -614,7 +633,9 @@ namespace CommonlyUsedClasses
                 {
                     for (int x = (square.xMin() - minCoords.getX()); x <= (square.xMax() - minCoords.getX()); x++)
                     {
-                        if (grid[x][yMinCheck] == 1)
+                        checkCoords = new CoordsInt(x, yMinCheck);
+
+                        if (grid.getElement(checkCoords) == 1)
                         {
                             yMinCount++;
                             tempCoord = new CoordsInt(x, yMinCheck);
@@ -639,7 +660,8 @@ namespace CommonlyUsedClasses
                 {
                     for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
-                        if (grid[xMaxCheck][y] == 1)
+                        checkCoords = new CoordsInt(xMaxCheck, y);
+                        if (grid.getElement(checkCoords) == 1)
                         {
                             xMaxCount++;
                             tempCoord = new CoordsInt(xMaxCheck, y);
@@ -665,7 +687,8 @@ namespace CommonlyUsedClasses
                 {
                     for (int y = (square.yMin() - minCoords.getY()); y <= (square.yMax() - minCoords.getY()); y++)
                     {
-                        if (grid[xMinCheck][y] == 1)
+                        checkCoords = new CoordsInt(xMinCheck, y);
+                        if (grid.getElement(checkCoords) == 1)
                         {
                             xMinCount++;
                             tempCoord = new CoordsInt(xMinCheck, y);
@@ -717,6 +740,11 @@ namespace CommonlyUsedClasses
         }
         private bool topRightCheckForTopCheck(CoordsInt coord)
         {
+            CoordsInt rightCheck = coord.deepCopyInt();
+            rightCheck.incX();
+            CoordsInt rightDownCheck = rightCheck.deepCopyInt();
+            rightDownCheck.decY();
+
             // FOR CHECKING THE TOP EDGE PERIMETER OF A SQUARE AREA
             // Check top right corner, spaces represent square areas
             //      01 11
@@ -724,12 +752,17 @@ namespace CommonlyUsedClasses
             //      11 11      Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
             //      11 11
             bool pass = false;
-            if (grid[coord.getX() + 1][coord.getY()] == 1 && grid[coord.getX() + 1][coord.getY() - 1] == 1)
+            if (grid.getElement(rightCheck) == 1 && grid.getElement(rightDownCheck) == 1)
                 pass = true;
             return pass;
         }
         private bool topLeftCheckForTopCheck(CoordsInt coord)
         {
+            CoordsInt leftCheck = coord.deepCopyInt();
+            leftCheck.decX();
+            CoordsInt leftDownCheck = leftCheck.deepCopyInt();
+            leftDownCheck.decY();
+
             // FOR CHECKING THE TOP EDGE PERIMETER OF A SQUARE AREA
             // Check top left corner, spaces represent square areas
             //      11 10
@@ -737,7 +770,7 @@ namespace CommonlyUsedClasses
             //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
             //      11 11
             bool pass = false;
-            if (grid[coord.getX() - 1][coord.getY()] == 1 && grid[coord.getX() - 1][coord.getY() - 1] == 1)
+            if (grid.getElement(leftCheck) == 1 && grid.getElement(leftDownCheck) == 1)
                 pass = true;
             return pass;
         }
@@ -762,6 +795,11 @@ namespace CommonlyUsedClasses
         }
         private bool botRightCheckForBottomCheck(CoordsInt coord)
         {
+            CoordsInt rightCheck = coord.deepCopyInt();
+            rightCheck.incX();
+            CoordsInt rightUpCheck = rightCheck.deepCopyInt();
+            rightUpCheck.incY();
+
             // FOR CHECKING THE BOTTOM EDGE PERIMETER OF A SQUARE AREA
             // Check bottom right corner, spaces represent square areas
             //      11 11
@@ -769,12 +807,17 @@ namespace CommonlyUsedClasses
             //      
             //      01 11
             bool pass = false;
-            if (grid[coord.getX() + 1][coord.getY()] == 1 && grid[coord.getX() + 1][coord.getY() + 1] == 1)
+            if (grid.getElement(rightCheck) == 1 && grid.getElement(rightUpCheck) == 1)
                 pass = true;
             return pass;
         }
         private bool botLeftCheckForBottomCheck(CoordsInt coord)
         {
+            CoordsInt leftCheck = coord.deepCopyInt();
+            leftCheck.decX();
+            CoordsInt leftUpCheck = leftCheck.deepCopyInt();
+            leftUpCheck.incY();
+
             // FOR CHECKING THE BOTTOM EDGE PERIMETER OF A SQUARE AREA
             // Check bottom left corner, spaces represent square areas
             //      11 11
@@ -782,7 +825,7 @@ namespace CommonlyUsedClasses
             //      
             //      11 10
             bool pass = false;
-            if (grid[coord.getX() - 1][coord.getY()] == 1 && grid[coord.getX() - 1][coord.getY() + 1] == 1)
+            if (grid.getElement(leftCheck) == 1 && grid.getElement(leftUpCheck) == 1)
                 pass = true;
             return pass;
         }
@@ -808,6 +851,11 @@ namespace CommonlyUsedClasses
         }
         private bool botRightCheckForRightCheck(CoordsInt coord)
         {
+            CoordsInt downCheck = coord.deepCopyInt();
+            downCheck.decY();
+            CoordsInt downLeftCheck = downCheck.deepCopyInt();
+            downLeftCheck.decX();
+            
             // FOR CHECKING THE RIGHT EDGE PERIMETER OF A SQUARE AREA
             // Check bottom right corner, spaces represent square areas
             //      11 00
@@ -815,12 +863,17 @@ namespace CommonlyUsedClasses
             //      
             //      11 11
             bool pass = false;
-            if (grid[coord.getX() - 1][coord.getY() - 1] == 1 && grid[coord.getX()][coord.getY() - 1] == 1)
+            if (grid.getElement(downCheck) == 1 && grid.getElement(downLeftCheck) == 1)
                 pass = true;
             return pass;
         }
         private bool topRightCheckForRightCheck(CoordsInt coord)
         {
+            CoordsInt upCheck = coord.deepCopyInt();
+            upCheck.incY();
+            CoordsInt upLeftCheck = upCheck.deepCopyInt();
+            upLeftCheck.decX();
+            
             // FOR CHECKING THE RIGHT EDGE PERIMETER OF A SQUARE AREA
             // Check top right corner, spaces represent square areas
             //      11 11     
@@ -828,7 +881,7 @@ namespace CommonlyUsedClasses
             //      11 11       Second 1 in this row will reject the entire dim, even though there is a 2 wide gap
             //      11 00
             bool pass = false;
-            if (grid[coord.getX() - 1][coord.getY() + 1] == 1 && grid[coord.getX()][coord.getY() + 1] == 1)
+            if (grid.getElement(upCheck) == 1 && grid.getElement(upLeftCheck) == 1)
                 pass = true;
             return pass;
         }
@@ -854,6 +907,11 @@ namespace CommonlyUsedClasses
         }
         private bool botLeftCheckForLeftCheck(CoordsInt coord)
         {
+            CoordsInt downCheck = coord.deepCopyInt();
+            downCheck.decY();
+            CoordsInt downRightCheck = downCheck.deepCopyInt();
+            downRightCheck.incX();
+            
             // FOR CHECKING THE LEFT EDGE PERIMETER OF A SQUARE AREA
             // Check bottom left corner, spaces represent square areas
             //      00 11
@@ -861,12 +919,17 @@ namespace CommonlyUsedClasses
             //      
             //      11 11
             bool pass = false;
-            if (grid[coord.getX()][coord.getY() - 1] == 1 && grid[coord.getX() + 1][coord.getY() - 1] == 1)
+            if (grid.getElement(downCheck) == 1 && grid.getElement(downRightCheck) == 1)
                 pass = true;
             return pass;
         }
         private bool topLeftCheckForLeftCheck(CoordsInt coord)
         {
+            CoordsInt upCheck = coord.deepCopyInt();
+            upCheck.incY();
+            CoordsInt upRightCheck = upCheck.deepCopyInt();
+            upRightCheck.incX();
+            
             // FOR CHECKING THE LEFT EDGE PERIMETER OF A SQUARE AREA
             // Check top left corner, spaces represent square areas
             //      11 11
@@ -874,7 +937,7 @@ namespace CommonlyUsedClasses
             //      11 11      Third 1 in this row will reject the entire dim, even though there is a 2 wide gap
             //      00 11
             bool pass = false;
-            if (grid[coord.getX()][coord.getY() + 1] == 1 && grid[coord.getX() + 1][coord.getY() + 1] == 1)
+            if (grid.getElement(upCheck) == 1 && grid.getElement(upRightCheck) == 1)
                 pass = true;
             return pass;
         }
@@ -883,7 +946,7 @@ namespace CommonlyUsedClasses
         //                              Setter/Getters
         // =======================================================================
 
-        public void getGrid(out List<List<int>> grid, out CoordsInt startCoords)
+        public void getGrid(out TwoDList<int> grid, out CoordsInt startCoords)
         {
             grid = this.grid;
             startCoords = this.minCoords;
@@ -893,11 +956,12 @@ namespace CommonlyUsedClasses
         {
             List<CoordsInt> listOfCoords = new List<CoordsInt>();
 
-            for (int y = grid[0].Count - 1; y >= 0; y--)
+            for (int y = grid.getYCount() - 1; y >= 0; y--)
             {
-                for (int x = 0; x < grid.Count; x++)
+                for (int x = 0; x < grid.getXCount(); x++)
                 {
-                    if (grid[x][y] == 1)
+                    CoordsInt accessCoord = new CoordsInt(x, y);
+                    if (grid.getElement(accessCoord) == 1)
                         listOfCoords.Add(new CoordsInt(x + minCoords.getX(), y + minCoords.getY()));
                 }
             }
@@ -905,29 +969,30 @@ namespace CommonlyUsedClasses
             return listOfCoords;
         }
 
-        public int getGridVal(Coords<int> coords)
+        public int getGridVal(CoordsInt coords)
         {
-            return this.grid[coords.getX()][coords.getY()];
+            return this.grid.getElement(coords);
         }
 
         public void printGrid(bool printCoords)
         {
             printMinMax("\t");
 
-            for (int y = grid[0].Count - 1; y >= 0; y--)
+            for (int y = grid.getYCount() - 1; y >= 0; y--)
             {
                 string printStr = "\t[";
-                for (int x = 0; x < grid.Count; x++)
+                for (int x = 0; x < grid.getXCount(); x++)
                 {
+                    CoordsInt accessCoords = new CoordsInt(x, y);
                     if (printCoords)
                     {
-                        if (grid[x][y] == 1)
+                        if (grid.getElement(accessCoords) == 1)
                             printStr = printStr + " " + x + "," + y;
                         else
                             printStr = printStr + " " + "---";
                     }
                     else
-                        printStr = printStr + " " + grid[x][y];
+                        printStr = printStr + " " + grid.getElement(accessCoords);
                 }
                 printStr = printStr + " ]";
                 Debug.Log(printStr);
