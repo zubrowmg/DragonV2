@@ -365,9 +365,19 @@ namespace CommonlyUsedClasses
         }
 
         // Rough calculation, don't check all coords. Just a few
-        private void updateCenterCoord()
+        public void updateCenterCoord()
         {
-            if (squareArealist.Count == 1)
+            int diffX = maxCoords.getX() - minCoords.getX();
+            int diffY = maxCoords.getY() - minCoords.getY();
+
+            int centerX = Mathf.FloorToInt(diffX / 2) + minCoords.getX();
+            int centerY = Mathf.FloorToInt(diffY / 2) + minCoords.getY();
+
+            this.centerCoord = new CoordsInt(centerX, centerY);
+
+
+            // This function couldn't handle outliars and wasn't accurate
+            /*if (squareArealist.Count == 1)
             {
                 int diffX = maxCoords.getX() - minCoords.getX();
                 int diffY = maxCoords.getY() - minCoords.getY();
@@ -380,20 +390,39 @@ namespace CommonlyUsedClasses
             else
             {
                 List<CoordsInt> reducedCoordsList = grid.getReducedCoordsList();
-                CoordsInt currentAverage = reducedCoordsList[0];
-                Debug.Log("updateCenterCoord() REDUCED COORDS LIST: " + reducedCoordsList.Count);
+                CoordsInt currentAverage = null;
+                bool firstCalc = true;
                 Debug.Log("\tX AXIS: " + grid.getXCount() + "\n\tY AXIS: " + grid.getYCount());
 
-                foreach (var coord in reducedCoordsList)
+                //for (int x = 0; x < grid.getXCount(); x = x + 3)
+
+                foreach (var coordCheck in reducedCoordsList)
                 {
-                    if (grid.getElement(coord) == 1)
-                        currentAverage = CommonFunctions.calculateCoordsAverage(currentAverage, coord);
+                    //for (int y = 0; y < grid.getYCount(); y = y + 3)
+                    //{
+                        //CoordsInt coordCheck = new CoordsInt(x, y);
+                        coordCheck.print("\t\tCOORD CHECK: ");
+                        if (grid.getElement(coordCheck) == 1)
+                        {
+                            if (firstCalc)
+                            {
+                                currentAverage = coordCheck;
+                                firstCalc = false;
+                            }
+                            else
+                                currentAverage = CommonFunctions.calculateCoordsAverage(currentAverage, coordCheck);
+                            currentAverage.print("\t\tAVERAGE: ");
+
+                        }
+                    //}
                 }
                 this.centerCoord = currentAverage;
                 this.centerCoord.incX(minCoords.getX());
                 this.centerCoord.incY(minCoords.getY());
+                this.centerCoord.print("\t\tFINAL AVERAGE: ");
+
             }
-            
+            */
         }
 
         private void updateArea()
@@ -1005,10 +1034,23 @@ namespace CommonlyUsedClasses
                     CoordsInt accessCoords = new CoordsInt(x, y);
                     if (printCoords)
                     {
-                        if (grid.getElement(accessCoords) == 1)
-                            printStr = printStr + " " + x + "," + y;
+                        string xStr = "";
+                        string yStr = "";
+
+                        if (x < 10)
+                            xStr = "0" + x.ToString();
                         else
-                            printStr = printStr + " " + "---";
+                            xStr = x.ToString();
+
+                        if (y < 10)
+                            yStr = "0" + y.ToString();
+                        else
+                            yStr = y.ToString();
+
+                        if (grid.getElement(accessCoords) == 1)
+                            printStr = printStr + " " + xStr + "," + yStr;
+                        else
+                            printStr = printStr + " " + "-----";
                     }
                     else
                         printStr = printStr + " " + grid.getElement(accessCoords);

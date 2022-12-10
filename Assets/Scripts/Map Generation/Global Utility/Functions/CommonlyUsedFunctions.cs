@@ -41,6 +41,22 @@ namespace CommonlyUsedFunctions
             return new CoordsInt(xAverage, yAverage);
         }
 
+        public static CoordsInt calculateCoordsAverage(List<CoordsInt> coordList)
+        {
+            int xSum = 0;
+            int ySum = 0;
+
+            foreach (var coords in coordList)
+            {
+                xSum = xSum + coords.getX();
+                ySum = ySum + coords.getY();
+            }
+            
+            int xAverage = Mathf.FloorToInt(((float)xSum) / (float)coordList.Count);
+            int yAverage = Mathf.FloorToInt(((float)ySum) / (float)coordList.Count);
+            return new CoordsInt(xAverage, yAverage);
+        }
+
         public static float calculateDifference(float numOne, float numTwo)
         {
             return (float)Mathf.Abs(numOne - numTwo);

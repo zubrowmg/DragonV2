@@ -70,7 +70,11 @@ public class DebugControllerManager : MonoBehaviour
                 dimlist.getGrid(out TwoDList<int> grid, out CoordsInt startCoords);
 
                 List<CoordsInt> freeSpaceCoords = dimlist.getAllSelectedGridCoords();
+                Debug.Log("===============================================================================");
                 dimlist.getCenterCoord().print("CENTER COORDS: ");
+                dimlist.printMinMax("");
+                //dimlist.printGrid(true);
+                dimlist.updateCenterCoord();
                 //Debug.Log("X AXIS: " + grid.getXCount() + "Y AXIS: " + grid.getYCount());
 
                 //Debug.Log("FREE SPACE COUNT: " + zone.freeSpaces.Count + "\nCOORDS IN SPACE: " + zone.freeSpaces[tempIndex].Count);
