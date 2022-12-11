@@ -33,6 +33,7 @@ public class Main : MonoBehaviour
         stopWatch.Stop();
         Debug.Log("Generation Time:  " + (stopWatch.ElapsedMilliseconds * .001) + "s");
         Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nWHENEVER YOU ARE DONE WITH A FEATURE CHECK THE ENHANCEMENT TAB IN BINDER\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        Debug.LogError("CENTER COORD IN DIM LIST CLASS NEEDS TO BE DECIDED BY A ROUGH MEDIAN (X MEDIAN, Y MEDIAN) OF ALL 1 GRID TILES");
 
 
         // Give the debug manager access to generation manager

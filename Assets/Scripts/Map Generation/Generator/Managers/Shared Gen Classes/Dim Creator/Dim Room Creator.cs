@@ -9,18 +9,23 @@ using CommonlyUsedDefinesAndEnums;
 public class DimRoomCreator : DimCreator
 {
     float notVeinPercentage = .50f;
-
     float squareAreaMaxArea = 120;
+    int roomMaxDistanceFromCenter = System.Int32.MaxValue;
 
+    bool topOffDimList = false;
+
+    // ===============================================
     // Room Creator Variables
+    // ===============================================
     int roomMinSideLength = 5;
     int roomMaxArea = 160;
 
+    // ===============================================
     // Room Fill Creator Variables
+    // ===============================================
     int roomFillMinSideLength = 3;
     int roomFillMaxArea = 250;
 
-    bool topOffDimList = false;
 
 
     public DimRoomCreator(ref GeneratorContainer contInst) : base(ref contInst)
@@ -265,7 +270,7 @@ public class DimRoomCreator : DimCreator
     {
         DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
-        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList, getTileMapDims());
+        setDimensionVariables(roomMinSideLength, roomMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList, getTileMapDims(), roomMaxDistanceFromCenter);
         return getDimensions(startCoords);
     }
 
@@ -273,7 +278,7 @@ public class DimRoomCreator : DimCreator
     {
         DirectionBias directionBias = new DirectionBias(Direction.None, Direction.None);
 
-        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList, getTileMapDims());
+        setDimensionVariables(roomFillMinSideLength, roomFillMaxArea, squareAreaMaxArea, directionBias, this.topOffDimList, getTileMapDims(), roomMaxDistanceFromCenter);
         return getDimensions(startCoords);
     }
 

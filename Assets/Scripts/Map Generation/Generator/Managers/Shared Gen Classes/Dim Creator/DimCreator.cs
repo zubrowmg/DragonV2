@@ -12,6 +12,8 @@ public abstract class DimCreator : TileAccessor
 {
     // Class is meant to be used for capturing a collection of square areas
 
+    DimensionList dimensionList;
+
     // Top off dim list is a way to fill in gaps in the dim list, without further expanding the dim list
     //      Pretty much only used for zone vein generation
     bool topOffDimList = false;
@@ -39,8 +41,9 @@ public abstract class DimCreator : TileAccessor
     int recentlyAddedCoordsQueueSize = 40;
     protected int historyWiggleDisplacementRange;
 
-    // Allocated tile map dims
+    // Allocated tile map dims and distance control
     protected Dimensions allocatedTileMapDims;
+    protected int maxDistanceFromCenter = System.Int32.MaxValue;
 
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
@@ -93,7 +96,7 @@ public abstract class DimCreator : TileAccessor
         int topOffMax = 10;
 
         this.tileMapRef = new TwoDList<Tile>();
-        DimensionList dimensionList = new DimensionList(startCoords);
+        this.dimensionList = new DimensionList(startCoords);
         bool dimensionRejected = false;
 
         CoordsInt minCoords = startCoords.deepCopyInt();
@@ -347,7 +350,7 @@ public abstract class DimCreator : TileAccessor
         //        The dimension list will reject the square gaps, but 
         if (wiggleConditions(wiggledCoords) == true)
         {
-            if (coordAreInsideAllocatedBounds(wiggledCoords) == false)
+            if (coordAreInsideAllocatedBounds(wiggledCoords) == false || coordDistanceToCenterCheck(wiggledCoords) == false)
                 foundNewPoint = false;
             if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords, wiggleDisplacementRange) == true)
             {
@@ -468,11 +471,23 @@ public abstract class DimCreator : TileAccessor
         return isInsideBounds;
     }
 
+    protected bool coordDistanceToCenterCheck(CoordsInt coords)
+    {
+        bool isInsideRadius  = false;
+
+        // If the dim list is empty then the dim list hasn't defined a center yet
+        if (this.dimensionList.getDimCount() == 0)
+            isInsideRadius = true;
+        else if (CommonFunctions.calculateCoordsDistance(this.dimensionList.getCenterCoord(), coords) < (float)maxDistanceFromCenter)
+            isInsideRadius = true;
+        return isInsideRadius;
+    }
+
     // =======================================================================================
     //                                  Setters/Getters
     // =======================================================================================
 
-    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias, bool topOffDimList, Dimensions allocatedTileMapDims)
+    protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias, bool topOffDimList, Dimensions allocatedTileMapDims, int maxDistanceFromCenter)
     {
         this.minSideLength = minSideLength;
         this.maxSqaureAreaArea = individualMaxSquareArea;
@@ -481,5 +496,6 @@ public abstract class DimCreator : TileAccessor
 
         this.topOffDimList = topOffDimList;
         this.allocatedTileMapDims = allocatedTileMapDims;
+        this.maxDistanceFromCenter = maxDistanceFromCenter;
     }
 }

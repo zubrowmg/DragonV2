@@ -11,6 +11,13 @@ namespace CommonlyUsedFunctions
     public static class CommonFunctions
     {
 
+        public static T randomlySelectInList<T>(ref List<T> list)
+        {
+            int rand = Random.Range(0, list.Count);
+            T selectedItem = list[rand];
+            return selectedItem;
+        } 
+
         public static List<T> Shuffle<T>(ref List<T> list)
         {
             List<T> shuffledList = new List<T>();

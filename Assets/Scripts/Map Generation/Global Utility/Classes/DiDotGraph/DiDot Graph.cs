@@ -22,8 +22,11 @@ namespace DiDotGraphClasses
         List<DiDotEdge<T>> listOfNonCircularEdges = new List<DiDotEdge<T>>();
         List<DiDotCircularEdge<T>> listOfCircularEdges = new List<DiDotCircularEdge<T>>();
 
+        // Id counters
         int currentEdgeId = 0;
         int currentCircularEdgeId = 0;
+
+        
 
         public DiDotGraph()
         {
@@ -254,6 +257,9 @@ namespace DiDotGraphClasses
         // =====================================================================================
         //                            Recursive Search Functions
         // =====================================================================================
+        // Recursive functions that search through each di graph node
+        // ===================================
+
 
         // Will get a list of nodes aka an edge, starting from a specified node
         List<DiDotEdge<T>> getEdgesStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)
@@ -330,7 +336,34 @@ namespace DiDotGraphClasses
             currentPath.Remove(currentNode);
         }
 
+
+        // ===================================
+        // Recursive function that search through each di graph edge
+        // ===================================
         // Will get a list of nodes aka an edge, starting from a specified node
+
+        void getCurrentEndNodeConnections(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out List<DiDotEdge<T>> edgeConnections, out DiDotNode<T> nextEdgeBaseNode)
+        {
+            if (currentEdgeNode.Equals(currentEdge.getNodeOne()) == true)
+            {
+                edgeConnections = currentEdge.getNodeOneEdgeConnections();
+                nextEdgeBaseNode = currentEdge.getNodeOne();
+            }
+            else
+            {
+                edgeConnections = currentEdge.getNodeTwoEdgeConnections();
+                nextEdgeBaseNode = currentEdge.getNodeTwo();
+            }
+        }
+
+        void getOppositeEndNode(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out DiDotNode<T> oppositeEdgeBaseNode)
+        {
+            if (currentEdge.getNodeOne().Equals(currentEdgeNode) == true)
+                oppositeEdgeBaseNode = currentEdge.getNodeTwo();
+            else
+                oppositeEdgeBaseNode = currentEdge.getNodeOne();
+        }
+
         List<List<DiDotEdge<T>>> getCircularEdgesStart(DiDotEdge<T> startEdge)
         {
             List<List<DiDotEdge<T>>> listOfCircularEdges = new List<List<DiDotEdge<T>>>();
@@ -354,18 +387,7 @@ namespace DiDotGraphClasses
             CommonFunctions.addIfItemDoesntExist(ref doNotTravelList, currentEdge);
 
             // Determine which edge connections to iterate through
-            List<DiDotEdge<T>> edgeConnections;
-            DiDotNode<T> nextEdgeBaseNode;
-            if (currentEdgeNode.Equals(currentEdge.getNodeOne()) == true)
-            {
-                edgeConnections = currentEdge.getNodeOneEdgeConnections();
-                nextEdgeBaseNode = currentEdge.getNodeOne();
-            }
-            else
-            {
-                edgeConnections = currentEdge.getNodeTwoEdgeConnections();
-                nextEdgeBaseNode = currentEdge.getNodeTwo();
-            }
+            getCurrentEndNodeConnections(currentEdge, currentEdgeNode, out List<DiDotEdge<T>> edgeConnections, out DiDotNode<T> nextEdgeBaseNode);
 
             // Go through each connection in the current edge
             foreach (var nextEdge in edgeConnections)
@@ -414,11 +436,7 @@ namespace DiDotGraphClasses
                     else
                     {
                         // Need to get the next edge node, should be opposite of the base node
-                        DiDotNode<T> nextEdgeNode;
-                        if (nextEdge.getNodeOne().Equals(nextEdgeBaseNode) == true)
-                            nextEdgeNode = nextEdge.getNodeTwo();
-                        else
-                            nextEdgeNode = nextEdge.getNodeOne();
+                        getOppositeEndNode(nextEdge, nextEdgeBaseNode, out DiDotNode<T> nextEdgeNode);
 
                         getCircularEdges(startEdge, startEdgeNode, nextEdge, nextEdgeNode, ref currentPath, ref doNotTravelList, ref listOfCircularEdges);
                     }
@@ -434,6 +452,8 @@ namespace DiDotGraphClasses
             doNotTravelList.Remove(currentEdge);
         }
 
+        
+        
         // =====================================================================================
         //                              Getters and Setters
         // =====================================================================================
@@ -464,6 +484,16 @@ namespace DiDotGraphClasses
         public int getNumOfNonCircularEdges()
         {
             return this.listOfNonCircularEdges.Count;
+        }
+
+        public List<DiDotNode<T>> allNodesInGraph()
+        {
+            List<DiDotNode<T>> nodeList = new List<DiDotNode<T>>();
+            foreach (var edge in listOfEdges)
+            {
+                nodeList.AddRange(edge.getNodeList());
+            }
+            return nodeList;
         }
     }
 }

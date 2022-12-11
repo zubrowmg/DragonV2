@@ -140,12 +140,30 @@ namespace VeinManagerClasses
 
         void configureNewEdge()
         {
+            // Basic configuration for now, expecting something more deliberate in the future
             // 1. Scan the allocated tile map connection for an empty space
             // 2. Determine a close point in the di graph controller
             // 3. Get the direction from the point to the empty space
-            // Basic configuration for now, expecting something more deliberate in the future
 
-            zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpace();
+            CoordsInt destinationCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace);
+
+            if (foundEmptySpace == false)
+                Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
+            else
+            {
+                CoordsInt startCoord = getStartCoord(destinationCoord);
+            }
+        }
+
+        // Gets the start coord for a new edge based on the inputed destination coord
+        //      Needs to adhear to controller rules
+        //      1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
+        CoordsInt getStartCoord(CoordsInt destinationCoords)
+        {
+            CoordsInt startCoords = new CoordsInt(0, 0);
+            List<DiDotEdge<CoordsInt>> listOfEdge = this.diGraph.getListOfEdges();
+
+            return startCoords;
         }
 
         void configureCicularNewEdge()

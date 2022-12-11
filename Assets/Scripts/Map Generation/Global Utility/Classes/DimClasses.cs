@@ -994,6 +994,11 @@ namespace CommonlyUsedClasses
         //                              Setter/Getters
         // =======================================================================
 
+        public int getDimCount()
+        {
+            return this.squareArealist.Count;
+        }
+
         public void getGrid(out TwoDList<int> grid, out CoordsInt startCoords)
         {
             grid = this.grid;

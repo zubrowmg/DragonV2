@@ -543,7 +543,7 @@ namespace VeinManagerClasses
 
         
 
-        public void findEmptySpace()
+        public CoordsInt findEmptySpaceCoord(out bool foundFreeSpace)
         {
             // Uses dimVeinZoneCreator to find empty space in a restricted tile map dimension (The one that the zone is restricted to)
             //      Does not check all locations in the tile map, does a "lazy job". Coords checked are based on the size of allocated tile map for the zone
@@ -620,13 +620,19 @@ namespace VeinManagerClasses
             }
 
             Debug.Log("POSSIBLE RANDOM FREE AREAS: " + freeAreas.Count);
-            Debug.LogError("CENTER COORD NEEDS TO BE DECIDED BY A ROUGH AVERAGE OF ALL 1 GRID TILES");
 
-            foreach (var area in freeAreas)
-            {
-                area.getCenterCoord().print("\tCENTER COORD: ");
-                zoneVeinGenContainer.currentZone.freeSpaces.Add(area);
-            }
+            // Randomly select one of the free areas
+            DimensionList choosenFreeArea = null;
+            foundFreeSpace = true;
+            if (freeAreas.Count == 0)
+                foundFreeSpace = false;
+            else
+                choosenFreeArea = CommonFunctions.randomlySelectInList(ref freeAreas);
+
+            choosenFreeArea.getCenterCoord().print("\tCENTER COORD: ");
+            zoneVeinGenContainer.currentZone.freeSpaces.Add(choosenFreeArea);
+
+            return choosenFreeArea.getCenterCoord();
 
         }
 
