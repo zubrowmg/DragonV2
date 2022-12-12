@@ -7,7 +7,7 @@ using CommonlyUsedFunctions;
 
 namespace DiDotGraphClasses
 {
-    public class DiDotGraph<T>
+    public class DiDotGraph<T> : DiDotGraphNavigation<T>
     {
         // This class is probably going to be the main way to create a digraph
         //      Just a connection of nodes, instead of edges and nodes since it's too much effort to add edges during the digraph creation
@@ -28,7 +28,7 @@ namespace DiDotGraphClasses
 
         
 
-        public DiDotGraph()
+        public DiDotGraph() : base()
         {
         }
 
@@ -144,7 +144,7 @@ namespace DiDotGraphClasses
 
                 // If the edge is already a part of a circular edge, then don't search for it
                 if (alreadyCheckedEdges.Contains(edge) == false)
-                    listOfCircularEdges = getCircularEdgesStart(edge);
+                    listOfCircularEdges =  getCircularEdgesStart(edge);
 
                 if (listOfCircularEdges.Count == 1)
                 {
@@ -261,6 +261,10 @@ namespace DiDotGraphClasses
         // ===================================
 
 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // getEdgesStartingFromNodeStart() and getEdgeStartingFromNode() need to be templated into DiDotGraphNavigation class
+        //      Just like edge recursion was done
+
         // Will get a list of nodes aka an edge, starting from a specified node
         List<DiDotEdge<T>> getEdgesStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)
         {
@@ -271,7 +275,6 @@ namespace DiDotGraphClasses
             getEdgeStartingFromNode(startNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref prevEdge);
             return listOfEdges;
         }
-
 
         void getEdgeStartingFromNode(DiDotNode<T> currentNode, ref List<DiDotNode<T>> currentPath, ref List<DiDotNode<T>> doNotTravelList, 
                                     ref List<DiDotEdge<T>> listOfEdges, ref DiDotEdge<T> prevEdge)
@@ -336,124 +339,8 @@ namespace DiDotGraphClasses
             currentPath.Remove(currentNode);
         }
 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        // ===================================
-        // Recursive function that search through each di graph edge
-        // ===================================
-        // Will get a list of nodes aka an edge, starting from a specified node
-
-        void getCurrentEndNodeConnections(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out List<DiDotEdge<T>> edgeConnections, out DiDotNode<T> nextEdgeBaseNode)
-        {
-            if (currentEdgeNode.Equals(currentEdge.getNodeOne()) == true)
-            {
-                edgeConnections = currentEdge.getNodeOneEdgeConnections();
-                nextEdgeBaseNode = currentEdge.getNodeOne();
-            }
-            else
-            {
-                edgeConnections = currentEdge.getNodeTwoEdgeConnections();
-                nextEdgeBaseNode = currentEdge.getNodeTwo();
-            }
-        }
-
-        void getOppositeEndNode(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out DiDotNode<T> oppositeEdgeBaseNode)
-        {
-            if (currentEdge.getNodeOne().Equals(currentEdgeNode) == true)
-                oppositeEdgeBaseNode = currentEdge.getNodeTwo();
-            else
-                oppositeEdgeBaseNode = currentEdge.getNodeOne();
-        }
-
-        List<List<DiDotEdge<T>>> getCircularEdgesStart(DiDotEdge<T> startEdge)
-        {
-            List<List<DiDotEdge<T>>> listOfCircularEdges = new List<List<DiDotEdge<T>>>();
-            List<DiDotEdge<T>> doNotTravelList = new List<DiDotEdge<T>>();
-            List<DiDotEdge<T>> currentPath = new List<DiDotEdge<T>>();
-            DiDotNode<T> startEdgeNode = startEdge.getNodeOne();
-
-            // If any node is a dead end, then it's impossible for it to be a circular edge
-            if (startEdge.nodeOneIsDeadEnd() == true || startEdge.nodeTwoIsDeadEnd() == true)
-                return listOfCircularEdges;
-
-            getCircularEdges(startEdge, startEdgeNode, startEdge, startEdgeNode, ref currentPath, ref doNotTravelList, ref listOfCircularEdges);
-            return listOfCircularEdges;
-        }
-
-
-        void getCircularEdges(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode, DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode,
-                            ref List<DiDotEdge<T>> currentPath, ref List<DiDotEdge<T>> doNotTravelList, ref List<List<DiDotEdge<T>>> listOfCircularEdges)
-        {
-            currentPath.Add(currentEdge);
-            CommonFunctions.addIfItemDoesntExist(ref doNotTravelList, currentEdge);
-
-            // Determine which edge connections to iterate through
-            getCurrentEndNodeConnections(currentEdge, currentEdgeNode, out List<DiDotEdge<T>> edgeConnections, out DiDotNode<T> nextEdgeBaseNode);
-
-            // Go through each connection in the current edge
-            foreach (var nextEdge in edgeConnections)
-            {
-                bool edgeCanBeTraveledTo = !doNotTravelList.Contains(nextEdge);
-
-                // If this edge hasn't been traveled to or is not on the doNotTravelList then proceed
-                if (edgeCanBeTraveledTo == true)
-                {
-                    // Figure out which node in the current edge connects to the next edge
-                    bool nodeOneConnects = currentEdge.nodeOneConnectsToGivenEdge(nextEdge);
-                    bool deadEnd = false;
-                    if (nodeOneConnects == true)
-                        deadEnd = nextEdge.nodeTwoIsDeadEnd();
-                    else
-                        deadEnd = nextEdge.nodeOneIsDeadEnd();
-
-                    // If we make it back to the starting edge it can mean two things
-                    if (nextEdge.Equals(startEdge) == true)
-                    {
-                        // If we hit the starting node of the starting edge, then we have a clean circular edge
-                        //      Else we hit the other end of the starting edge, meaning that the graph probably has another circular edge
-                        //      Ex. x is the starting node
-                        //            x---o---o
-                        //                |   |
-                        //                o---o
-                        DiDotNode<T> connectingNode = currentEdge.getNodeThatConnectsToGivenEdge(nextEdge);
-
-                        // Record the clean edge
-                        if (connectingNode.Equals(startEdgeNode) == true)
-                        {
-                            // Need to create a new edge list for memory reasons
-                            List<DiDotEdge<T>> tempPath = new List<DiDotEdge<T>>(currentPath);
-                            tempPath.Add(nextEdge);
-
-                            // Connect to previous edge, if prev edge is null then that means this is the first edge found
-                            listOfCircularEdges.Add(tempPath);
-                        }
-                    }
-                    // If we hit a dead end stop here
-                    else if (deadEnd == true)
-                    {
-
-                    }
-                    // Else continue searching
-                    else
-                    {
-                        // Need to get the next edge node, should be opposite of the base node
-                        getOppositeEndNode(nextEdge, nextEdgeBaseNode, out DiDotNode<T> nextEdgeNode);
-
-                        getCircularEdges(startEdge, startEdgeNode, nextEdge, nextEdgeNode, ref currentPath, ref doNotTravelList, ref listOfCircularEdges);
-                    }
-                        
-
-                }
-            }
-
-            // I think C# is retaining currentPath values across the recursion
-            //     I have no idea WHY and nothing is useful online 
-            //     So once you exit this function delete the current node
-            currentPath.Remove(currentEdge);
-            doNotTravelList.Remove(currentEdge);
-        }
-
-        
-        
         // =====================================================================================
         //                              Getters and Setters
         // =====================================================================================

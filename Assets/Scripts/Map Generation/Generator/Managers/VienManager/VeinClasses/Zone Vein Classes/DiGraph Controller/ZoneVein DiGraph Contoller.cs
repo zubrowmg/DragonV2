@@ -142,7 +142,7 @@ namespace VeinManagerClasses
         {
             // Basic configuration for now, expecting something more deliberate in the future
             // 1. Scan the allocated tile map connection for an empty space
-            // 2. Determine a close point in the di graph controller
+            // 2. Determine the closest point in the di graph controller to that empty space
             // 3. Get the direction from the point to the empty space
 
             CoordsInt destinationCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace);
