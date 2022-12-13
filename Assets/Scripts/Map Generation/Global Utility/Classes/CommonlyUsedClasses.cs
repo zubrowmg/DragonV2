@@ -494,7 +494,7 @@ namespace CommonlyUsedClasses
 
     public abstract class OrderValuesBase<T1, T2>
     {
-        // First value is the priority
+        // First value is the int/float, second is object
         //      If using Min first value is the smallest
         //      If using Max first value is the largest
         protected LinkedList<KeyValuePair<T1, T2>> queue;

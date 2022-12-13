@@ -4,6 +4,7 @@ using UnityEngine;
 
 using DiDotGraphClasses;
 using CommonlyUsedClasses;
+using CommonlyUsedFunctions;
 using VeinEnums;
 
 namespace VeinManagerClasses
@@ -145,23 +146,61 @@ namespace VeinManagerClasses
             // 2. Determine the closest point in the di graph controller to that empty space
             // 3. Get the direction from the point to the empty space
 
-            CoordsInt destinationCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace);
+            CoordsInt destinationWorldCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace);
 
             if (foundEmptySpace == false)
                 Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
             else
             {
-                CoordsInt startCoord = getStartCoord(destinationCoord);
+                bool adhearToMinEdgeLength = true;
+                CoordsInt startNodeCoord = findClosestNode(destinationWorldCoord, adhearToMinEdgeLength);
+                CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startNodeCoord);
+                //startNodeCoord.print("CLOSEST COORD TO FREE SPACE: ");
+                //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
+
+                // Calculate the direction
+
+                // Then you need to check to make sure that you can move a tile in either direction from the startNodeCoord
+                //      There are cases where you can't, search adjacent coords until you get a coord that can
+
             }
         }
 
-        // Gets the start coord for a new edge based on the inputed destination coord
+
+        // Finds the closest node coord (TileMapConnection coord) based on the inputed destination world coord
         //      Needs to adhear to controller rules
         //      1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
-        CoordsInt getStartCoord(CoordsInt destinationCoords)
+        CoordsInt findClosestNode(CoordsInt destinationWorldCoord, bool adhearToMinEdgeLength)
         {
-            CoordsInt startCoords = new CoordsInt(0, 0);
-            List<DiDotEdge<CoordsInt>> listOfEdge = this.diGraph.getListOfEdges();
+            List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
+            MinValue<float, CoordsInt> minDistanceList = new MinValue<float, CoordsInt>(1);
+            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue));
+
+            Dimensions restricedDims = zoneVeinGenContainer.currentZone.getAllocatedTileMapDims();
+
+            foreach (var edge in listOfEdges)
+            {
+
+                List<DiDotNode<CoordsInt>> listOfNodes = null; 
+                if (adhearToMinEdgeLength == true)
+                    listOfNodes = edge.getNodeListExcludingEdgeNodes(this.newlyAddedMinEdgeLength);
+                else
+                    listOfNodes = edge.getNodeList();
+
+                foreach (var node in listOfNodes)
+                {
+                    CoordsInt allocatedTileMapCoords = node.getObject();
+                    CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(allocatedTileMapCoords);
+
+                    //allocatedTileMapCoords.print("\t\t\tCOORD: ");
+                    //worldSpaceCoords.print("\t\t\tWORLD COORD: ");
+
+                    float distance = CommonFunctions.calculateCoordsDistance(worldSpaceCoords, destinationWorldCoord);
+                    minDistanceList.addValueToQueue(distance, node.getObject());
+                }
+            }
+
+            CoordsInt startCoords = minDistanceList.getMinVal().Value;
 
             return startCoords;
         }

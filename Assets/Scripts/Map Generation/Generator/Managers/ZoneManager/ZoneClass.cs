@@ -21,7 +21,9 @@ public class Zone_New
     GameTiming gameTiming = GameTiming.Early;
     ZoneVeinGenType zoneVeinGenType = ZoneVeinGenType.Default;
     DimensionList associatedVeinZoneDim;
-    TwoDList<Tile> associatedTileMap = new TwoDList<Tile>();
+    TwoDList<Tile> allocatedTileMap = new TwoDList<Tile>();
+    Dimensions allocatedTileMapDims;
+
     TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
     DirectionBias zoneGenerationDirection;
 
@@ -38,18 +40,27 @@ public class Zone_New
         this.zoneTheme = theme;
         this.zoneVeinGenType = zoneVeinGenType;
 
-        this.associatedTileMap = tileMap;
+        this.allocatedTileMap = tileMap;
         this.associatedVeinZoneDim = zoneDimList;
         this.zoneGenerationDirection = zoneGenerationDirection;
+        calculateAllocatedTileMapDims();
     }
 
 
     public Zone_New deepCopy()
     {
-        // associatedVeinZoneDim and associatedTileMap has to be passed by reference, this might cause issues for a deep copy
-        return new Zone_New(this.gameTiming, this.id, this.zoneAbility, this.zoneTheme, this.zoneVeinGenType, this.zoneGenerationDirection, ref this.associatedVeinZoneDim, ref this.associatedTileMap);
+        // associatedVeinZoneDim and allocatedTileMap has to be passed by reference, this might cause issues for a deep copy
+        return new Zone_New(this.gameTiming, this.id, this.zoneAbility, this.zoneTheme, this.zoneVeinGenType, this.zoneGenerationDirection, ref this.associatedVeinZoneDim, ref this.allocatedTileMap);
     }
 
+    private void calculateAllocatedTileMapDims()
+    {
+        CoordsInt tileMapMin = new CoordsInt(0, 0);
+        CoordsInt tileMapMax = new CoordsInt(this.allocatedTileMap.getXCount() - 1, this.allocatedTileMap.getYCount() - 1);
+        CoordsInt restrictedDimsMin = this.allocatedTileMap.getElement(tileMapMin).getTileMapCoords();
+        CoordsInt restrictedDimsMax = this.allocatedTileMap.getElement(tileMapMax).getTileMapCoords();
+        this.allocatedTileMapDims = new Dimensions(restrictedDimsMin, restrictedDimsMax);
+    }
 
     // ==============================================================
     //                       Setters/Getters
@@ -64,9 +75,14 @@ public class Zone_New
         return ref this.associatedVeinZoneDim;
     }
 
-    public ref TwoDList<Tile> getTileMapRef()
+    public ref TwoDList<Tile> getAllocatedTileMapRef()
     {
-        return ref this.associatedTileMap;
+        return ref this.allocatedTileMap;
+    }
+
+    public Dimensions getAllocatedTileMapDims()
+    {
+        return this.allocatedTileMapDims;
     }
 
     public void setVeinZoneConnectionList(ref TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections)

@@ -110,6 +110,25 @@ namespace DiDotGraphClasses
             return ref this.orderedNodeList;
         }
 
+        public List<DiDotNode<T>> getNodeListExcludingEdgeNodes(int edgeNodeCount)
+        {
+            List<DiDotNode<T>> nonEdgeNodeList = new List<DiDotNode<T>>();
+            int nodeMin = edgeNodeCount;
+            int nodeMax = this.orderedNodeList.Count - edgeNodeCount;
+
+            if (nodeMin > nodeMax)
+                Debug.LogWarning("DiDotEdge Class - getNodeListExcludingEdgeNodes(): This edge isn't big enough to have " + edgeNodeCount + "free nodes on each end");
+            else
+            {
+                for (int i = nodeMin; i < nodeMax; i++)
+                {
+                    nonEdgeNodeList.Add(this.orderedNodeList[i]);
+                }
+            }
+
+            return nonEdgeNodeList;
+        }
+
         public ref List<DiDotEdge<T>> getNodeOneEdgeConnections()
         {
             return ref this.nodeOneEdges;

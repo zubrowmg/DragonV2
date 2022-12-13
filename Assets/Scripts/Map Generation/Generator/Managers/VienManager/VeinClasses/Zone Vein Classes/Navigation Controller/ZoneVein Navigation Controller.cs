@@ -120,7 +120,7 @@ namespace VeinManagerClasses
             bool trunkFinished = false;
 
             //this.currentCoords.print("Start Coords: ");
-            this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
+            this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
             this.stateHistory.addState(this.currentState.deepCopy());
 
             while (trunkFinished == false)
@@ -137,7 +137,7 @@ namespace VeinManagerClasses
                 travelOneUnit(this.currentState.getCurrentDir());
 
                 // Record the point
-                this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getTileMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
+                this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
 
                 // Handle momentum
                 if (this.currentState.getCurrentDir() == this.currentState.getPrevDir() && this.currentState.getCurrentMomentum() < this.maxMomentum)
@@ -551,15 +551,10 @@ namespace VeinManagerClasses
             float overlapThreshold = .6f;
 
             // Get the restricted zone dimensions
-            TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getTileMapRef();
-            CoordsInt tileMapMin = new CoordsInt(0, 0);
-            CoordsInt tileMapMax = new CoordsInt(allocatedTileMap.getXCount() - 1, allocatedTileMap.getYCount() - 1);
-            CoordsInt restrictedDimsMin = allocatedTileMap.getElement(tileMapMin).getTileMapCoords();
-            CoordsInt restrictedDimsMax = allocatedTileMap.getElement(tileMapMax).getTileMapCoords();
-            Dimensions restricedDims = new Dimensions(restrictedDimsMin, restrictedDimsMax);
+            Dimensions restricedDims = zoneVeinGenContainer.currentZone.getAllocatedTileMapDims();
 
-            //restrictedDimsMin.print("MIN DIM: ");
-            //restrictedDimsMax.print("MAX DIM: ");
+            //restricedDims.print("\t\tMIN DIM: ");
+            //restricedDims.print("\t\tMAX DIM: ");
 
             // Get the "lazy" coords
             List<CoordsInt> reducedTileMapCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
@@ -582,7 +577,7 @@ namespace VeinManagerClasses
             List<DimensionList> freeAreas = new List<DimensionList>();
             foreach (var coords in reducedTileMapCoordsList)
             {
-                CoordsInt checkSpaceCoords = zoneVeinGenContainer.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
+                CoordsInt checkSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(coords);
                 //coords.print("--------------------------\n\tCOORD: ");
                 //checkSpaceCoords.print("\tWORLD COORD: ");
                 DimensionList newEmptySpace = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
@@ -619,7 +614,7 @@ namespace VeinManagerClasses
                 //    emptySpaceDimList.printGrid(true);
             }
 
-            Debug.Log("POSSIBLE RANDOM FREE AREAS: " + freeAreas.Count);
+            //Debug.Log("POSSIBLE RANDOM FREE AREAS: " + freeAreas.Count);
 
             // Randomly select one of the free areas
             DimensionList choosenFreeArea = null;
@@ -629,8 +624,10 @@ namespace VeinManagerClasses
             else
                 choosenFreeArea = CommonFunctions.randomlySelectInList(ref freeAreas);
 
+            // !!!!!!!!!!!!
             choosenFreeArea.getCenterCoord().print("\tCENTER COORD: ");
-            zoneVeinGenContainer.currentZone.freeSpaces.Add(choosenFreeArea);
+            zoneVeinGenContainer.currentZone.freeSpaces.Add(choosenFreeArea); // Debuging only, remove when done
+            // !!!!!!!!!!!!
 
             return choosenFreeArea.getCenterCoord();
 

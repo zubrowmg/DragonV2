@@ -43,6 +43,13 @@ namespace DiDotGraphClasses
         }
     }
 
+    public class TestEdgeVariables<T>
+    {
+        public TestEdgeVariables(T blah)
+        {
+        }
+    }
+
     public class GetCircularEdgeVariables<T>
     {
         public DiDotEdge<T> startEdge;
@@ -56,14 +63,6 @@ namespace DiDotGraphClasses
             this.listOfCircularEdges = new List<List<DiDotEdge<T>>>();
         }
     }
-
-    public class TestEdgeVariables<T>
-    {
-        public TestEdgeVariables(T blah)
-        {
-        }
-    }
-
 
 
 }

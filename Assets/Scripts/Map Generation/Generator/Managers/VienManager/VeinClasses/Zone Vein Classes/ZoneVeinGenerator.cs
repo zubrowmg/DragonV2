@@ -77,7 +77,7 @@ public class ZoneVeinGenerator : ContainerAccessor
     // Don't want the Zone to generate one Tile at a time, need to setup Tile nodes that need to be the only destination points
     public CoordsInt setupZoneConnectionNodes()
     {
-        TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getTileMapRef(); // Entire allocated dimensions
+        TwoDList<Tile> allocatedTileMap = zoneVeinGenContainer.currentZone.getAllocatedTileMapRef(); // Entire allocated dimensions
         DimensionList allocatedDimList = zoneVeinGenContainer.currentZone.getVeinZoneDimList(); // Entire allocated dimensions list (0s and 1s)
 
         CoordsInt newCoords = new CoordsInt(0, 0);
