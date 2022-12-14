@@ -33,6 +33,8 @@ namespace VeinManagerClasses
 
         int newlyAddedMinEdgeLength = 3; // 3 nodes
 
+        int maxNodeConnections = 4;
+
        
 
         public ZoneVeinDiGraphContoller(ref ZoneVeinGeneratorContainer zoneVeinGenContainerInst, ref GeneratorContainer contInst) : base(ref contInst)
@@ -86,6 +88,14 @@ namespace VeinManagerClasses
             if (this.diGraph.getNumOfCircularEdges() < this.targetCircularEdgeCount)
                 conditionMet = false;
             return conditionMet;
+        }
+
+        bool adhearsToNodeMaxCondition(DiDotNode<CoordsInt> node)
+        {
+            bool adhearsToNodeMax = true;
+            if (node.numOfConnections() >= maxNodeConnections)
+                adhearsToNodeMax = false;
+            return adhearsToNodeMax;
         }
 
         // =====================================================================================
@@ -162,7 +172,7 @@ namespace VeinManagerClasses
 
                 // Then you need to check to make sure that you can move a tile in either direction from the startNodeCoord
                 //      There are cases where you can't, search adjacent coords until you get a coord that can
-
+                
             }
         }
 
@@ -170,13 +180,16 @@ namespace VeinManagerClasses
         // Finds the closest node coord (TileMapConnection coord) based on the inputed destination world coord
         //      Needs to adhear to controller rules
         //      1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
-        CoordsInt findClosestNode(CoordsInt destinationWorldCoord, bool adhearToMinEdgeLength)
+        //      2. Node can't have more than 4 connections
+        CoordsInt findClosestNode(CoordsInt destinationWorldCoords, bool adhearToMinEdgeLength)
         {
             List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
-            MinValue<float, CoordsInt> minDistanceList = new MinValue<float, CoordsInt>(1);
-            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue));
 
-            Dimensions restricedDims = zoneVeinGenContainer.currentZone.getAllocatedTileMapDims();
+            //    Distance, Not World Coord, World Coords
+            MinValue<float, Double<CoordsInt, CoordsInt>> minDistanceList = new MinValue<float, Double<CoordsInt, CoordsInt>>(1);
+            Double<CoordsInt, CoordsInt> doubleVal = new Double<CoordsInt, CoordsInt>(new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue), 
+                                                                                      new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue));
+            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, doubleVal);
 
             foreach (var edge in listOfEdges)
             {
@@ -195,15 +208,26 @@ namespace VeinManagerClasses
                     //allocatedTileMapCoords.print("\t\t\tCOORD: ");
                     //worldSpaceCoords.print("\t\t\tWORLD COORD: ");
 
-                    float distance = CommonFunctions.calculateCoordsDistance(worldSpaceCoords, destinationWorldCoord);
-                    minDistanceList.addValueToQueue(distance, node.getObject());
+                    if (adhearsToNodeMaxCondition(node) == true)
+                    {
+                        float distance = CommonFunctions.calculateCoordsDistance(worldSpaceCoords, destinationWorldCoords);
+                        doubleVal.setOne(allocatedTileMapCoords);
+                        doubleVal.setOne(worldSpaceCoords);
+                        minDistanceList.addValueToQueue(distance, doubleVal);
+                    }
                 }
             }
 
-            CoordsInt startCoords = minDistanceList.getMinVal().Value;
+            CoordsInt startCoords = minDistanceList.getMinVal().Value.getOne();
+            CoordsInt startWorldCoords = minDistanceList.getMinVal().Value.getOne();
+            DirectionBias newDirBias = CommonFunctions.calculatePrimaryDirectionWithWorldCoords(startWorldCoords, destinationWorldCoords);
+
+            // Test if the start coords can actually travel in the new direction bias
 
             return startCoords;
         }
+
+
 
         void configureCicularNewEdge()
         {

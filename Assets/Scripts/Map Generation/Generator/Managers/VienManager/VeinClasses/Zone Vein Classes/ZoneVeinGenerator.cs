@@ -70,7 +70,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         zoneVeinGenContainer.currentVeinPass = 0;
 
-        zoneVeinGenContainer.zoneVeinNavigationController.init();
+        zoneVeinGenContainer.zoneVeinNavigationController.initDefault();
         zoneVeinGenContainer.zoneVeinDiGraphController.init();
     }
 

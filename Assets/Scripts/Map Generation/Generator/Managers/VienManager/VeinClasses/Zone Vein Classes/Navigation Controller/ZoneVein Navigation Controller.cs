@@ -26,6 +26,8 @@ namespace VeinManagerClasses
         int maxMomentum = 3;
         float primaryDirectionPercentage = .65f;
         List<float> momentumPercentTable = new List<float> { .85f, .60f, .25f, .05f };
+
+        DirectionBias currentDirectionBias;
         List<Direction> primaryDir;
         List<Direction> secondaryDir;
 
@@ -45,7 +47,14 @@ namespace VeinManagerClasses
         //                                    Init Functions
         // =====================================================================================
 
-        public void init()
+        public void initDefault()
+        {
+            // Typically the first edge created is the trunk, so just use the current zones dir bias as the defualt
+            init(zoneVeinGenContainer.currentZone.getDirBias());
+        }
+
+        // Must be ran whenever a new edge is going to be ran
+        void init(DirectionBias dirBias)
         {
             this.stateHistory.init();
             this.currentState.setCurrentCoords(new CoordsInt(0, 0));
@@ -57,13 +66,15 @@ namespace VeinManagerClasses
 
             this.newVein = new SetCoordsVein(ref getContainerInst(), 0, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, this.veinWidth);
 
+            this.currentDirectionBias = dirBias;
             setPrimaryAndSecondaryDir();
         }
 
-        public void determineStartDirection()
+
+        void determineEdgeStartDirection()
         {
             // Randomly choose vertical or horizontal direction to start
-            DirectionBias zoneDirBias = zoneVeinGenContainer.currentZone.getDirBias();
+            DirectionBias zoneDirBias = this.currentDirectionBias;
             int rand = Random.Range(0, 2);
 
             if (rand == 0)
@@ -84,15 +95,16 @@ namespace VeinManagerClasses
                 Debug.LogError("ZoneVeinGenerator - determinStartDirection(): Start Direction has no direction to start in");
         }
 
-        public void setPrimaryAndSecondaryDir()
+        // Based on the current zones primary and secondary directions
+        void setPrimaryAndSecondaryDir()
         {
             primaryDir = new List<Direction>();
             secondaryDir = new List<Direction>();
 
-            if (zoneVeinGenContainer.currentZone.getDirBias().getHorizontalDir() != Direction.None)
-                primaryDir.Add(zoneVeinGenContainer.currentZone.getDirBias().getHorizontalDir());
-            if (zoneVeinGenContainer.currentZone.getDirBias().getVerticalDir() != Direction.None)
-                primaryDir.Add(zoneVeinGenContainer.currentZone.getDirBias().getVerticalDir());
+            if (this.currentDirectionBias.getHorizontalDir() != Direction.None)
+                primaryDir.Add(this.currentDirectionBias.getHorizontalDir());
+            if (this.currentDirectionBias.getVerticalDir() != Direction.None)
+                primaryDir.Add(this.currentDirectionBias.getVerticalDir());
 
 
             foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
@@ -107,7 +119,7 @@ namespace VeinManagerClasses
         }
 
         // =====================================================================================
-        //                              Create Zone Vein Functions
+        //                              Create Zone Vein Functions (Edge only)
         // =====================================================================================
 
         // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
@@ -115,7 +127,7 @@ namespace VeinManagerClasses
         {
             this.currentState.setCurrentCoords(startCoords.deepCopyInt());
 
-            determineStartDirection();
+            determineEdgeStartDirection();
 
             bool trunkFinished = false;
 
@@ -176,7 +188,7 @@ namespace VeinManagerClasses
             zoneVeinGenContainer.currentVeinZone.addAssociatedTiles(ref newVeinTiles);
         }
 
-        public void travelOneUnit(Direction dir)
+        void travelOneUnit(Direction dir)
         {
             //bool directionRejected = 
             goDir(dir);
@@ -185,7 +197,7 @@ namespace VeinManagerClasses
             //    Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction rejected, what to do?");
         }
 
-        public void goDir(Direction dir)
+        void goDir(Direction dir)
         {
             CoordsInt currentCoordsCopy = this.currentState.getCurrentCoords();
             CoordsInt attemptedTileMapCoords = currentCoordsCopy.deepCopyInt();
@@ -490,7 +502,7 @@ namespace VeinManagerClasses
             return accepted;
         }
 
-        public void rollBackState()
+        void rollBackState()
         {
             // Go to a previous state
             this.currentState = stateHistory.rollBackState(out bool rollBackedTooFar);
@@ -553,23 +565,12 @@ namespace VeinManagerClasses
             // Get the restricted zone dimensions
             Dimensions restricedDims = zoneVeinGenContainer.currentZone.getAllocatedTileMapDims();
 
-            //restricedDims.print("\t\tMIN DIM: ");
-            //restricedDims.print("\t\tMAX DIM: ");
-
             // Get the "lazy" coords
             List<CoordsInt> reducedTileMapCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
 
             // Restict the search area according to the amount of search points
             int maxTotalSearchArea = Mathf.FloorToInt(restricedDims.getArea() / reducedTileMapCoordsList.Count);
             int minTotalSearchArea = Mathf.FloorToInt((float)maxTotalSearchArea / 1.7f);
-
-            //Debug.Log("RESTRICED AREA: " + restricedDims.getArea());
-            //Debug.Log("SEARCH AREA: " + maxTotalSearchArea);
-            //foreach (var coord in reducedCoordsList)
-            //{
-            //    coord.print("\tREDUCED: ");
-            //}
-
 
             // Once coords to check are calculated we search for free space
             //      Valid zone free areas need to be above the minimum search area, aka don't think that a "small" vein free pocket should have a new edge inside it
@@ -578,10 +579,7 @@ namespace VeinManagerClasses
             foreach (var coords in reducedTileMapCoordsList)
             {
                 CoordsInt checkSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(coords);
-                //coords.print("--------------------------\n\tCOORD: ");
-                //checkSpaceCoords.print("\tWORLD COORD: ");
                 DimensionList newEmptySpace = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
-                //newEmptySpace.printMinMax("\t");
 
                 if (freeAreas.Count == 0)
                     freeAreas.Add(newEmptySpace);
@@ -590,8 +588,6 @@ namespace VeinManagerClasses
                     // Make sure min area threshold is met
                     if (newEmptySpace.getArea() >= minTotalSearchArea)
                     {
-                        //Debug.Log("MIN AREA: " + minTotalSearchArea + "\nNEW AREA: " + newEmptySpace.getArea());
-
                         // Then make sure that it doesn't have a big overlap
                         //      It's important that we are checking the new empty spaces overlap percentage
                         //      AKA want newEmptySpace.checkOverlapPercent(area) and not area.checkOverlapPercent(newEmptySpace)
@@ -610,11 +606,7 @@ namespace VeinManagerClasses
                             freeAreas.Add(newEmptySpace);
                     }
                 }
-                //if (coords.getX() == 5 && (coords.getY() == 0 || coords.getY() == 2))
-                //    emptySpaceDimList.printGrid(true);
             }
-
-            //Debug.Log("POSSIBLE RANDOM FREE AREAS: " + freeAreas.Count);
 
             // Randomly select one of the free areas
             DimensionList choosenFreeArea = null;

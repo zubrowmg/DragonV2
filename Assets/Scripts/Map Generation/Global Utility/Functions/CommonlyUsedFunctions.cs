@@ -133,6 +133,29 @@ namespace CommonlyUsedFunctions
             int area = (xDiff + 1) * (yDiff + 1);
             return area;
         }
+
+        public static DirectionBias calculatePrimaryDirectionWithWorldCoords(CoordsInt startCoords, CoordsInt endCoords)
+        {
+            int displacementNeeded = 10;
+            int xDiff = endCoords.getX() - startCoords.getX();
+            int yDiff = endCoords.getY() - startCoords.getY();
+
+            Direction primaryHorizontalDir = Direction.None;
+            Direction primaryVerticalDir = Direction.None;
+
+            if (xDiff >= displacementNeeded)
+                primaryHorizontalDir = Direction.East;
+            else if (xDiff <= displacementNeeded)
+                primaryHorizontalDir = Direction.West;
+
+            if (yDiff >= displacementNeeded)
+                primaryVerticalDir = Direction.None;
+            else if (yDiff <= displacementNeeded)
+                primaryVerticalDir = Direction.South;
+
+            DirectionBias newDirectionBias = new DirectionBias(primaryHorizontalDir, primaryVerticalDir);
+            return newDirectionBias;
+        }
     }
 }
 
