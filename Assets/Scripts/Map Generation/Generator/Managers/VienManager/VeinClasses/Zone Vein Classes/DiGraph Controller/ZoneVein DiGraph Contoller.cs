@@ -163,8 +163,9 @@ namespace VeinManagerClasses
             else
             {
                 bool adhearToMinEdgeLength = true;
-                CoordsInt startNodeCoord = findClosestNode(destinationWorldCoord, adhearToMinEdgeLength);
+                CoordsInt startNodeCoord = findClosestNode(destinationWorldCoord, adhearToMinEdgeLength); // <========== NOT DONE !!!!!!!!!!!!!!!!!!!!
                 CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startNodeCoord);
+
                 //startNodeCoord.print("CLOSEST COORD TO FREE SPACE: ");
                 //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
@@ -212,14 +213,14 @@ namespace VeinManagerClasses
                     {
                         float distance = CommonFunctions.calculateCoordsDistance(worldSpaceCoords, destinationWorldCoords);
                         doubleVal.setOne(allocatedTileMapCoords);
-                        doubleVal.setOne(worldSpaceCoords);
+                        doubleVal.setTwo(worldSpaceCoords);
                         minDistanceList.addValueToQueue(distance, doubleVal);
                     }
                 }
             }
 
             CoordsInt startCoords = minDistanceList.getMinVal().Value.getOne();
-            CoordsInt startWorldCoords = minDistanceList.getMinVal().Value.getOne();
+            CoordsInt startWorldCoords = minDistanceList.getMinVal().Value.getTwo();
             DirectionBias newDirBias = CommonFunctions.calculatePrimaryDirectionWithWorldCoords(startWorldCoords, destinationWorldCoords);
 
             // Test if the start coords can actually travel in the new direction bias

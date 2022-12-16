@@ -52,7 +52,8 @@ public class ZoneVeinGeneratorContainer
 
     public CoordsInt getWorldMapCoordsFromTileMapConns(CoordsInt coords)
     {
-        return this.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
+        CoordsInt temp = this.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
+        return temp;
     }
 
 
