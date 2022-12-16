@@ -174,6 +174,11 @@ namespace CommonlyUsedClasses
             return array[index].Count;
         }
 
+        public int getAreaCount()
+        {
+            return this.getXCount() * this.getYCount();
+        }
+
         public T getZeroZero()
         {
             return this.array[0][0].getTwo();
@@ -222,6 +227,39 @@ namespace CommonlyUsedClasses
             return reducedCoordsList;
         }
 
+        // Returns a reduced list of coords based on the size
+        public TwoDList<T> getReducedTwoDList()
+        {
+            int minAxisPoints = 3;
+            int minDisplacementLength = 3;
+            int maxDisplacementLength = 6;
+
+            TwoDList<T> reducedCoordsTwoDList = new TwoDList<T>();
+
+            // Compute the x and y displacement amount
+            int xDisplacement = calculateAxisDisplacment(minAxisPoints, minDisplacementLength, maxDisplacementLength, getXCount());
+            int yDisplacement = calculateAxisDisplacment(minAxisPoints, minDisplacementLength, maxDisplacementLength, getYCount());
+
+            int xNoChange = 0;
+
+            for (int x = 0; x < getXCount(); x += xDisplacement)
+            {
+                int yNoChange = 0;
+                for (int y = 0; y < getYCount(); y += yDisplacement)
+                {
+                    CoordsInt selectedCoord = new CoordsInt(x, y);
+                    T item = this.getElement(selectedCoord);
+
+                    CoordsInt newTwoDListCoord = new CoordsInt(xNoChange, yNoChange);
+                    reducedCoordsTwoDList.addRefElement(newTwoDListCoord, ref item);
+                    yNoChange++;
+                }
+                xNoChange++;
+            }
+
+            return reducedCoordsTwoDList;
+        }
+
         int calculateAxisDisplacment(int minAxisPoints, int minDisplacementLength, int maxDisplacementLength, int axisLength)
         {
             bool displacementCalculated = false;
@@ -251,7 +289,7 @@ namespace CommonlyUsedClasses
                 }
                 axisPointCount++;
             }
-            Debug.Log("DISPLACEMENT: " + displacement);
+            //Debug.Log("DISPLACEMENT: " + displacement);
 
             return displacement;
         }

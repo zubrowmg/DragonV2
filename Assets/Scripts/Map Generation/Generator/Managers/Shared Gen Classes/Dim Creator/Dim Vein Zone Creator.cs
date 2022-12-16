@@ -237,10 +237,34 @@ public class DimVeinZoneCreator : DimCreator
         return newDimList;
     }
 
+    // Will return a dimlist within a restricted dimension
+    //      Originally meant to be used for finding free space (non vein space) for zone vein generation
     public DimensionList getDimensionsInRestrictedTileArea(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims, int maxTotalArea)
     {
         init(restrictedIndividualSquareMax, restrictedSquareAreaFillMinSideLength);
         setDimensionVariables(restrictedSquareAreaFillMinSideLength, maxTotalArea, restrictedIndividualSquareMax, directionBias, this.restrictedTopOffDimList, restrictedDims, restrictedMaxDistanceFromCenter);
+
+        //directionBias.print();
+
+        DimensionList newDimList = getDimensions(startCoords);
+
+        if (debugMode)
+            markSelectedGridForDebug(newDimList);
+
+        return newDimList;
+    }
+
+    // New free space finder
+    public DimensionList getDimensionsUsingAlternateTileMap(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims, int maxTotalArea, ref TwoDList<Tile> refTileMap)
+    {
+        int individualSquareMax = 4;
+        int minSideLength = 4;
+        int tempMaxTotalArea = 4;
+        int maxDistanceFromCenter = 10;
+
+        init(individualSquareMax, minSideLength);
+        setDimensionVariables(minSideLength, tempMaxTotalArea, individualSquareMax, directionBias, this.restrictedTopOffDimList, restrictedDims, maxDistanceFromCenter);
+        setAlternateTileMap(ref refTileMap);
 
         //directionBias.print();
 

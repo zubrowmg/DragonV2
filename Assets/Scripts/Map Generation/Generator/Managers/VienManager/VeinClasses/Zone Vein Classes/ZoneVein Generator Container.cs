@@ -20,6 +20,7 @@ public class ZoneVeinGeneratorContainer
     // Tile Map Connections
     //              Double<         CanTravelTo, Tile >
     public TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
+    public TwoDList<Tile> tileMapConnectionsJustTiles = new TwoDList<Tile>();
 
     // Vein passes (Trunk = pass0, branches are pass1, 2, 3, etc)
     public int currentVeinPass = 0;

@@ -106,6 +106,7 @@ public class ZoneVeinGenerator : ContainerAccessor
                     Tile tileRef = allocatedTileMap.getElement(currentCoords);
                     Double<TileTraveledToMarker, Tile> newElement = new Double<TileTraveledToMarker, Tile>(travelToMarker, tileRef);
                     zoneVeinGenContainer.tileMapConnections.addRefElement(newCoords, ref newElement);
+                    zoneVeinGenContainer.tileMapConnectionsJustTiles.addRefElement(newCoords, ref tileRef);
 
                     // Get the point that is the closest to the zone start coords
                     CoordsInt adjustedCoords = allocatedDimList.getMinCoords().deepCopyInt();

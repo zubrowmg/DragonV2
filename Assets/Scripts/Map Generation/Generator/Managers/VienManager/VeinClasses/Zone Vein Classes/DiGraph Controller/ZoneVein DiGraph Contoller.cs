@@ -158,6 +158,7 @@ namespace VeinManagerClasses
 
             CoordsInt destinationWorldCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace);
 
+            /*
             if (foundEmptySpace == false)
                 Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
             else
@@ -175,6 +176,7 @@ namespace VeinManagerClasses
                 //      There are cases where you can't, search adjacent coords until you get a coord that can
                 
             }
+            */
         }
 
 

@@ -565,52 +565,75 @@ namespace VeinManagerClasses
             // Get the restricted zone dimensions
             Dimensions restricedDims = zoneVeinGenContainer.currentZone.getAllocatedTileMapDims();
 
+
+
             // Get the "lazy" coords
-            List<CoordsInt> reducedTileMapCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
+            TwoDList<Double<TileTraveledToMarker, Tile>> reducedTileMapTwoDList = zoneVeinGenContainer.tileMapConnections.getReducedTwoDList();
+            TwoDList<Tile> reducedTileMapTwoDList_JustTile = new TwoDList<Tile>();
+            for (int x = 0; x < reducedTileMapTwoDList.getXCount(); x++)
+            {
+                for (int y = 0; y < reducedTileMapTwoDList.getYCount(); y++)
+                {
+                    CoordsInt accessCoord = new CoordsInt(x, y);
+                    reducedTileMapTwoDList_JustTile.addRefElement(accessCoord, ref reducedTileMapTwoDList.getElement(accessCoord).getTwo());
+                }
+            }
 
             // Restict the search area according to the amount of search points
-            int maxTotalSearchArea = Mathf.FloorToInt(restricedDims.getArea() / reducedTileMapCoordsList.Count);
+            int maxTotalSearchArea = Mathf.FloorToInt(restricedDims.getArea() / reducedTileMapTwoDList_JustTile.getAreaCount());
             int minTotalSearchArea = Mathf.FloorToInt((float)maxTotalSearchArea / 1.7f);
 
             // Once coords to check are calculated we search for free space
             //      Valid zone free areas need to be above the minimum search area, aka don't think that a "small" vein free pocket should have a new edge inside it
             //      Also don't want areas that overlap more than 60% to both be valid, as it will skew the random chances. Instead of 1:1:1 ratio chance it becomes 2:1 if 2 areas are overlapping
             List<DimensionList> freeAreas = new List<DimensionList>();
-            foreach (var coords in reducedTileMapCoordsList)
+            //foreach (var coords in reducedTileMapCoordsList)
+            //{
+            for (int x = 0; x < reducedTileMapTwoDList_JustTile.getXCount(); x++)
             {
-                CoordsInt checkSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(coords);
-                DimensionList newEmptySpace = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
-
-                if (freeAreas.Count == 0)
-                    freeAreas.Add(newEmptySpace);
-                else
+                for (int y = 0; y < reducedTileMapTwoDList_JustTile.getYCount(); y++)
                 {
-                    // Make sure min area threshold is met
-                    if (newEmptySpace.getArea() >= minTotalSearchArea)
+                    //CoordsInt checkSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(coords);
+                    //DimensionList newEmptySpace = this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsInRestrictedTileArea(checkSpaceCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea);
+
+                    CoordsInt reducedStartCoords = new CoordsInt(x, y);
+                    DimensionList newEmptySpace = 
+                        this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsUsingAlternateTileMap(reducedStartCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea, ref reducedTileMapTwoDList_JustTile);
+
+                    /*
+                    if (freeAreas.Count == 0)
+                        freeAreas.Add(newEmptySpace);
+                    else
                     {
-                        // Then make sure that it doesn't have a big overlap
-                        //      It's important that we are checking the new empty spaces overlap percentage
-                        //      AKA want newEmptySpace.checkOverlapPercent(area) and not area.checkOverlapPercent(newEmptySpace)
-                        //      These two are not the same
-                        bool newEmptySpaceOverlaps = false;
-                        foreach (var area in freeAreas)
+                        // Make sure min area threshold is met
+                        if (newEmptySpace.getArea() >= minTotalSearchArea)
                         {
-                            float percentOverlap = newEmptySpace.checkOverlapPercent(area);
-                            if (percentOverlap > overlapThreshold)
+                            // Then make sure that it doesn't have a big overlap
+                            //      It's important that we are checking the new empty spaces overlap percentage
+                            //      AKA want newEmptySpace.checkOverlapPercent(area) and not area.checkOverlapPercent(newEmptySpace)
+                            //      These two are not the same
+                            bool newEmptySpaceOverlaps = false;
+                            foreach (var area in freeAreas)
                             {
-                                newEmptySpaceOverlaps = true;
-                                break;
+                                float percentOverlap = newEmptySpace.checkOverlapPercent(area);
+                                if (percentOverlap > overlapThreshold)
+                                {
+                                    newEmptySpaceOverlaps = true;
+                                    break;
+                                }
                             }
+                            if (newEmptySpaceOverlaps == false)
+                                freeAreas.Add(newEmptySpace);
                         }
-                        if (newEmptySpaceOverlaps == false)
-                            freeAreas.Add(newEmptySpace);
                     }
+
+                    */
                 }
             }
 
             // Randomly select one of the free areas
             DimensionList choosenFreeArea = null;
-            foundFreeSpace = true;
+            /*foundFreeSpace = true;
             if (freeAreas.Count == 0)
                 foundFreeSpace = false;
             else
@@ -620,9 +643,14 @@ namespace VeinManagerClasses
             choosenFreeArea.getCenterCoord().print("\tCENTER COORD: ");
             zoneVeinGenContainer.currentZone.freeSpaces.Add(choosenFreeArea); // Debuging only, remove when done
             // !!!!!!!!!!!!
-
+            
             return choosenFreeArea.getCenterCoord();
 
+            */
+
+            foundFreeSpace = false; // DELETE AFTER ENABLING ABOVE
+
+            return null;
         }
 
     }

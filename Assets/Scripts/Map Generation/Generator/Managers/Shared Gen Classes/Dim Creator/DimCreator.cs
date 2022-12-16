@@ -45,6 +45,11 @@ public abstract class DimCreator : TileAccessor
     protected Dimensions allocatedTileMapDims;
     protected int maxDistanceFromCenter = System.Int32.MaxValue;
 
+    // Alternate coords system
+    //      Needs a 2d list of Tiles
+    TwoDList<Tile> alternateTileMap = new TwoDList<Tile>();
+    bool alternateTileMapIsUsed = false;
+
     public DimCreator(ref GeneratorContainer contInst) : base (ref contInst)
     {
         this.recentlyAddedCoordsToCheck = new QueueWrapper<CoordsInt>(recentlyAddedCoordsQueueSize);
@@ -59,10 +64,9 @@ public abstract class DimCreator : TileAccessor
     protected bool tileIsOccupiedByRoom(CoordsInt coords)
     {
         bool tileContainsRoom = false;
-        bool accessSuccessful = false;
-        Tile selectedTile = getTile(coords, ref accessSuccessful);
+        Tile selectedTile = getTileTranslated(coords);
 
-        if (accessSuccessful)
+        if (selectedTile != null)
             tileContainsRoom = selectedTile.getIsOccupiedByRoom();
 
         return tileContainsRoom;
@@ -71,10 +75,9 @@ public abstract class DimCreator : TileAccessor
     protected bool tileIsVein(CoordsInt coords)
     {
         bool tileIsVein = false;
-        bool accessSuccessful = false;
-        Tile selectedTile = getTile(coords, ref accessSuccessful);
+        Tile selectedTile = getTileTranslated(coords);
 
-        if (accessSuccessful)
+        if (selectedTile != null)
             tileIsVein = selectedTile.getIsVein();
 
         return tileIsVein;
@@ -83,6 +86,16 @@ public abstract class DimCreator : TileAccessor
     protected abstract void expandAroundPoint(ref CoordsInt minCoords, ref CoordsInt maxCoords);
 
     protected abstract bool wiggleConditions(CoordsInt wiggledCoords);
+
+    protected void setAlternateTileMap(ref TwoDList<Tile> altTileMap)
+    {
+        this.alternateTileMapIsUsed = true;
+        this.alternateTileMap = altTileMap;
+
+        CoordsInt minCoords = new CoordsInt(0, 0);
+        CoordsInt maxCoords = new CoordsInt(altTileMap.getXCount() - 1, altTileMap.getYCount() - 1);
+        this.allocatedTileMapDims = new Dimensions(minCoords, maxCoords);
+    }
 
 
     // =======================================================================================
@@ -205,17 +218,21 @@ public abstract class DimCreator : TileAccessor
         {
             for (int y = 0; y < grid.getYCount(); y++)
             {
-                bool accessSuccesful = false;
-                CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
-                Tile currentTile = getTile(tileCoords, ref accessSuccesful);
-
                 CoordsInt tileRefCoords = new CoordsInt(x, y);
 
-                if (accessSuccesful == true)
+                CoordsInt tileCoords = null; 
+                if (this.alternateTileMapIsUsed == false)
+                    tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
+                else
+                    tileCoords = new CoordsInt(x, y);
+
+                Tile currentTile = getTileTranslated(tileCoords);
+
+                if (currentTile != null)
                 {
-                    //currentTile.instantiateTileGameObject();
                     this.tileMapRef.addRefElement(tileRefCoords, ref currentTile);
                 }
+                
             }
         }
 
@@ -448,11 +465,15 @@ public abstract class DimCreator : TileAccessor
         {
             for (int y = 0; y < grid.getYCount(); y++)
             {
-                bool accessSuccesful = false;
-                CoordsInt tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
-                Tile currentTile = getTile(tileCoords, ref accessSuccesful);
+                CoordsInt tileCoords = null; // new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
+                if (this.alternateTileMapIsUsed == false)
+                    tileCoords = new CoordsInt(x + startCoords.getX(), y + startCoords.getY());
+                else
+                    tileCoords = new CoordsInt(x, y);
 
-                if (accessSuccesful == true)
+                Tile currentTile = getTileTranslated(tileCoords);
+                
+                if (tileCoords != null)
                 {
                     currentTile.instantiateTileGameObject();
                 }
@@ -481,6 +502,28 @@ public abstract class DimCreator : TileAccessor
         else if (CommonFunctions.calculateCoordsDistance(this.dimensionList.getCenterCoord(), coords) < (float)maxDistanceFromCenter)
             isInsideRadius = true;
         return isInsideRadius;
+    }
+
+    protected Tile getTileTranslated(CoordsInt coords)
+    {
+        // Use this function when grabbing any tile inside of this DimCreator class
+        //      Use default will use the coords as they are aka maps directly to world coords
+        //      Non default means that you supplied a two d list and the coords provided map to that two d list
+        //          Therefore you need to translate the coords before grabbing them
+        Tile currentTile = null;
+
+        if (this.alternateTileMapIsUsed == false)
+        {
+            bool accessSuccesful = false;
+            CoordsInt tileCoords = new CoordsInt(coords.getX(), coords.getY());
+            currentTile = getTile(tileCoords, ref accessSuccesful);
+        }
+        else
+        {
+            currentTile = this.alternateTileMap.getElement(coords);
+        }
+
+        return currentTile;
     }
 
     // =======================================================================================
