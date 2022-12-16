@@ -540,5 +540,7 @@ public abstract class DimCreator : TileAccessor
         this.topOffDimList = topOffDimList;
         this.allocatedTileMapDims = allocatedTileMapDims;
         this.maxDistanceFromCenter = maxDistanceFromCenter;
+
+        this.alternateTileMapIsUsed = false;
     }
 }
