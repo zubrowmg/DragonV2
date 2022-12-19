@@ -8,6 +8,7 @@ using TileManagerClasses;
 using CommonlyUsedFunctions;
 using CommonlyUsedDefinesAndEnums;
 using VeinManagerClasses;
+using DimCreatorClasses;
 
 public class ZoneVeinGenerator : ContainerAccessor
 {

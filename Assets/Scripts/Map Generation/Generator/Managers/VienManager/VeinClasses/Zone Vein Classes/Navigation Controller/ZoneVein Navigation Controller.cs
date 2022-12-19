@@ -591,6 +591,7 @@ namespace VeinManagerClasses
             //{
             for (int x = 0; x < reducedTileMapTwoDList_JustTile.getXCount(); x++)
             {
+                    break;
                 for (int y = 0; y < reducedTileMapTwoDList_JustTile.getYCount(); y++)
                 {
                     //CoordsInt checkSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(coords);
@@ -600,10 +601,13 @@ namespace VeinManagerClasses
                     DimensionList newEmptySpace = 
                         this.zoneVeinGenContainer.dimVeinZoneCreator.getDimensionsUsingAlternateTileMap(reducedStartCoords, this.zoneVeinGenContainer.debugMode, noDirectionBias, restricedDims, maxTotalSearchArea, ref reducedTileMapTwoDList_JustTile);
 
-                    /*
-                    if (freeAreas.Count == 0)
-                        freeAreas.Add(newEmptySpace);
-                    else
+                    break;
+                    newEmptySpace.printMinMax("NEW SPACE");
+                    newEmptySpace.printGrid(false);
+
+                    //if (freeAreas.Count == 0)
+                    freeAreas.Add(newEmptySpace);
+                    /*else
                     {
                         // Make sure min area threshold is met
                         if (newEmptySpace.getArea() >= minTotalSearchArea)
@@ -630,6 +634,8 @@ namespace VeinManagerClasses
                     */
                 }
             }
+
+            Debug.Log("NEW SPACE COUNT: " + freeAreas.Count);
 
             // Randomly select one of the free areas
             DimensionList choosenFreeArea = null;

@@ -5,7 +5,7 @@ using UnityEngine;
 using CommonlyUsedClasses;
 using TileManagerClasses;
 using VeinManagerClasses;
-
+using DimCreatorClasses;
 public class ZoneVeinGeneratorContainer
 {
     public bool debugMode = false;

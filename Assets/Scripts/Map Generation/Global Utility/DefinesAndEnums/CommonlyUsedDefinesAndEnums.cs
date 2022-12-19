@@ -34,6 +34,7 @@ namespace CommonlyUsedDefinesAndEnums
     public enum HorizontalDisplacement { Far_Left, Left, Center, Right, Far_Right };
 
     // Tile Room Type
-    public enum TileRoomType { None_Set, Zone, Vein, GreatTunnel }
+    public enum TileRoomType { Zone, Vein, GreatTunnel, None_Set }
 
+    public enum Axis { x_Axis, y_Axis, None}
 }
