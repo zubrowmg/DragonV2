@@ -134,10 +134,12 @@ namespace DimCreatorClasses
             bool done = false;
             bool getDimsToTopOffDimList = false;
 
-            startCoords.print("===========================================\nSTART COORDS: ");
+            //startCoords.print("===========================================\nSTART COORDS: ");
 
             while (done == false)
             {
+                //Debug.Log("TOP___WHILE");
+
                 if (coordsToCheck.Count == 0)
                 {
                     break;
@@ -152,12 +154,12 @@ namespace DimCreatorClasses
                 maxCoords = currentCoords.deepCopyInt();
                 center = currentCoords.deepCopyInt();
 
-                currentCoords.print("CURRRENT COORDS: ");
+                //currentCoords.print("CURRRENT COORDS: ");
 
                 expandAroundPoint(ref minCoords, ref maxCoords);
 
-                minCoords.print("MIN COORDS: ");
-                maxCoords.print("MAX COORDS: ");
+                //minCoords.print("MIN COORDS: ");
+                //maxCoords.print("MAX COORDS: ");
 
                 // If any of the sides a shorter than min length then reject the square
                 if (sideIsShorterThanMinLength(Axis.x_Axis, minCoords, maxCoords) || sideIsShorterThanMinLength(Axis.y_Axis, minCoords, maxCoords))
@@ -296,13 +298,12 @@ namespace DimCreatorClasses
 
                 while (!foundNewPoint)
                 {
-
                     CoordsInt wiggledCoords = new CoordsInt(x, y);
+
                     foundNewPoint = checkDisplacentAndWiggle(out bool tooCloseToPreviouslyAttemptedSquareCore,
                                         dimensionList, ref coordsToCheck, wiggledCoords, startCoords, getDimsToTopOffDimList);
                     if (tooCloseToPreviouslyAttemptedSquareCore)
                         break;
-
 
 
                     // If not change the displacement so that it's closer to the original point
@@ -375,9 +376,12 @@ namespace DimCreatorClasses
             // If the grid is a vein and is not occupied and the point is not already added then add the point
             //    pointAlreadyChecked() is needed to avoid an infinite loop when 2 "gaps" between squares is deemed addable
             //        The dimension list will reject the square gaps, but 
-            if (wiggleConditions(wiggledCoords) == true)
+
+            if (coordAreInsideAllocatedBounds(wiggledCoords) == false)
+                foundNewPoint = false;
+            else if (wiggleConditions(wiggledCoords) == true)
             {
-                if (coordAreInsideAllocatedBounds(wiggledCoords) == false || coordDistanceToCenterCheck(wiggledCoords) == false)
+                if (coordDistanceToCenterCheck(wiggledCoords) == false)
                     foundNewPoint = false;
                 if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords, wiggleDisplacementRange) == true)
                 {

@@ -211,6 +211,7 @@ namespace DimCreatorClasses
         protected override bool wiggleConditions(CoordsInt wiggledCoords)
         {
             // For Dim Vein Zone Creator we check if the tile is not a vein
+
             bool isNotVein = tileIsVein(wiggledCoords) == false;
             return isNotVein;
         }
@@ -270,13 +271,12 @@ namespace DimCreatorClasses
         // New free space finder
         public DimensionList getDimensionsUsingAlternateTileMap(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims, int maxTotalArea, ref TwoDList<Tile> refTileMap)
         {
-            int individualSquareMax = 4;
-            int minSideLength = 4;
-            int tempMaxTotalArea = 4;
+            int individualSquareMax = 6;
+            int individualSquareMinSideLength = 2;
             int maxDistanceFromCenter = 10;
 
-            init(individualSquareMax, minSideLength);
-            setDimensionVariables(minSideLength, tempMaxTotalArea, individualSquareMax, directionBias, this.restrictedTopOffDimList, restrictedDims, maxDistanceFromCenter);
+            init(individualSquareMax, individualSquareMinSideLength);
+            setDimensionVariables(individualSquareMinSideLength, maxTotalArea, individualSquareMax, directionBias, this.restrictedTopOffDimList, restrictedDims, maxDistanceFromCenter);
             setAlternateTileMap(ref refTileMap);
 
             //directionBias.print();
