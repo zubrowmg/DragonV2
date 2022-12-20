@@ -40,8 +40,20 @@ namespace DimCreatorClasses
 
         void init(float squareAreaMaxArea, int squareAreaFillMinSideLength)
         {
+            resetDimCreator();
             this.wiggleDisplacementRange = (int)Mathf.Sqrt(squareAreaMaxArea) - 3;
             this.maxAdjacentSearchDisplacement = squareAreaFillMinSideLength + 3;
+        }
+
+        void floodedInit()
+        {
+            resetDimCreator();
+
+            //  Flooded case right now deals with tight spaces, similiar to room creator
+            //      THESE ARE VERY TIGHT CONTROLS, DON'T MODIFY
+            this.wiggleDisplacementRange = 1;
+            this.historyWiggleDisplacementRange = this.wiggleDisplacementRange;
+            this.maxAdjacentSearchDisplacement = 2;
         }
 
         protected override bool tileCheck(CoordsInt coords)
@@ -269,19 +281,48 @@ namespace DimCreatorClasses
         }
 
         // New free space finder
-        public DimensionList getDimensionsUsingAlternateTileMap(CoordsInt startCoords, bool debugMode, DirectionBias directionBias, Dimensions restrictedDims, int maxTotalArea, ref TwoDList<Tile> refTileMap)
+        public DimensionList getDimensionsUsingAlternateTileMap(CoordsInt startCoords, bool debugMode, int maxTotalArea, ref TwoDList<Tile> refTileMap)
         {
-            int individualSquareMax = 6;
+            int individualSquareMaxArea = 6;
             int individualSquareMinSideLength = 2;
             int maxDistanceFromCenter = 10;
 
-            init(individualSquareMax, individualSquareMinSideLength);
-            setDimensionVariables(individualSquareMinSideLength, maxTotalArea, individualSquareMax, directionBias, this.restrictedTopOffDimList, restrictedDims, maxDistanceFromCenter);
+            Dimensions noRestrictedDims = getTileMapDims();
+            DirectionBias noDirectionBias = new DirectionBias(Direction.None, Direction.None);
+
+            init(individualSquareMaxArea, individualSquareMinSideLength);
+            setDimensionVariables(individualSquareMinSideLength, maxTotalArea, individualSquareMaxArea, noDirectionBias, this.restrictedTopOffDimList, noRestrictedDims, maxDistanceFromCenter);
             setAlternateTileMap(ref refTileMap);
 
             //directionBias.print();
 
             DimensionList newDimList = getDimensions(startCoords);
+
+            if (debugMode)
+                markSelectedGridForDebug(newDimList);
+
+            return newDimList;
+        }
+
+        public DimensionList getFloodedDimensionsUsingAlternateTileMap(CoordsInt startCoords, bool debugMode, int maxTotalArea, ref TwoDList<Tile> refTileMap)
+        {
+            // TIGHT CONTROLS, DON'T CHANGE WILLY NILLY
+            int individualSquareMaxArea = 4;
+            int individualSquareMinSideLength = 1;
+            int maxDistanceFromCenter = 99;
+
+            Dimensions noRestrictedDims = getTileMapDims();
+            DirectionBias noDirectionBias = new DirectionBias(Direction.None, Direction.None);
+
+            floodedInit();
+            setDimensionVariables(individualSquareMinSideLength, maxTotalArea, individualSquareMaxArea, noDirectionBias, this.restrictedTopOffDimList, noRestrictedDims, maxDistanceFromCenter);
+            setAlternateTileMap(ref refTileMap);
+
+            //directionBias.print();
+
+            this.debuging = true;
+            DimensionList newDimList = getDimensions(startCoords);
+            this.debuging = false;
 
             if (debugMode)
                 markSelectedGridForDebug(newDimList);

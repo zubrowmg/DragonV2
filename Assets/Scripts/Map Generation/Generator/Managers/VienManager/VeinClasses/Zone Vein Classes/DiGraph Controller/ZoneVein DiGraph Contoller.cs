@@ -6,6 +6,7 @@ using DiDotGraphClasses;
 using CommonlyUsedClasses;
 using CommonlyUsedFunctions;
 using VeinEnums;
+using TileManagerClasses;
 
 namespace VeinManagerClasses
 {
@@ -156,47 +157,45 @@ namespace VeinManagerClasses
             // 2. Determine the closest point in the di graph controller to that empty space
             // 3. Get the direction from the point to the empty space
 
-            CoordsInt destinationWorldCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace);
+            CoordsInt destinationMapConnCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace, out TwoDList<Tile> tileMapConnections_JustTile);
 
-            /*
+            
             if (foundEmptySpace == false)
                 Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
             else
             {
                 bool adhearToMinEdgeLength = true;
-                CoordsInt startNodeCoord = findClosestNode(destinationWorldCoord, adhearToMinEdgeLength); // <========== NOT DONE !!!!!!!!!!!!!!!!!!!!
+                CoordsInt startNodeCoord = findClosestNode(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile); // <========== NOT DONE !!!!!!!!!!!!!!!!!!!!
                 CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startNodeCoord);
 
-                //startNodeCoord.print("CLOSEST COORD TO FREE SPACE: ");
-                //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
+                startNodeCoord.print("CLOSEST COORD TO FREE SPACE: ");
+                worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
-                // Calculate the direction
 
                 // Then you need to check to make sure that you can move a tile in either direction from the startNodeCoord
                 //      There are cases where you can't, search adjacent coords until you get a coord that can
+                //  Take the
                 
             }
-            */
+            
         }
 
 
         // Finds the closest node coord (TileMapConnection coord) based on the inputed destination world coord
         //      Needs to adhear to controller rules
-        //      1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
-        //      2. Node can't have more than 4 connections
-        CoordsInt findClosestNode(CoordsInt destinationWorldCoords, bool adhearToMinEdgeLength)
+        //          1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
+        //          2. Node can't have more than 4 connections
+        //      Needs to also make sure that the closest node cords can be traveled to
+        CoordsInt findClosestNode(CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile)
         {
             List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
 
             //    Distance, Not World Coord, World Coords
-            MinValue<float, Double<CoordsInt, CoordsInt>> minDistanceList = new MinValue<float, Double<CoordsInt, CoordsInt>>(1);
-            Double<CoordsInt, CoordsInt> doubleVal = new Double<CoordsInt, CoordsInt>(new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue), 
-                                                                                      new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue));
-            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, doubleVal);
+            MinValue<float, CoordsInt> minDistanceList = new MinValue<float, CoordsInt>(1);
+            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, new CoordsInt(System.UInt16.MaxValue, System.UInt16.MaxValue));
 
             foreach (var edge in listOfEdges)
             {
-
                 List<DiDotNode<CoordsInt>> listOfNodes = null; 
                 if (adhearToMinEdgeLength == true)
                     listOfNodes = edge.getNodeListExcludingEdgeNodes(this.newlyAddedMinEdgeLength);
@@ -206,26 +205,32 @@ namespace VeinManagerClasses
                 foreach (var node in listOfNodes)
                 {
                     CoordsInt allocatedTileMapCoords = node.getObject();
-                    CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(allocatedTileMapCoords);
+                    //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(allocatedTileMapCoords);
 
                     //allocatedTileMapCoords.print("\t\t\tCOORD: ");
                     //worldSpaceCoords.print("\t\t\tWORLD COORD: ");
 
                     if (adhearsToNodeMaxCondition(node) == true)
                     {
-                        float distance = CommonFunctions.calculateCoordsDistance(worldSpaceCoords, destinationWorldCoords);
-                        doubleVal.setOne(allocatedTileMapCoords);
-                        doubleVal.setTwo(worldSpaceCoords);
-                        minDistanceList.addValueToQueue(distance, doubleVal);
+                        float distance = CommonFunctions.calculateCoordsDistance(allocatedTileMapCoords, destinationTileMapConnCoord);
+                        minDistanceList.addValueToQueue(distance, allocatedTileMapCoords);
                     }
                 }
             }
 
-            CoordsInt startCoords = minDistanceList.getMinVal().Value.getOne();
-            CoordsInt startWorldCoords = minDistanceList.getMinVal().Value.getTwo();
-            DirectionBias newDirBias = CommonFunctions.calculatePrimaryDirectionWithWorldCoords(startWorldCoords, destinationWorldCoords);
+            // Calculate the direction
+            CoordsInt startCoords = minDistanceList.getMinVal().Value;
+            DirectionBias newDirBias = CommonFunctions.calculatePrimaryDirection(startCoords, destinationTileMapConnCoord);
+            int maxFloodedArea = 100;
 
             // Test if the start coords can actually travel in the new direction bias
+            //      1. Take the two d tile list and flood the dim list based on the destination coord
+            //      2. Check if the start coord touches the flooded dim list, by going 1 unit in the new dir bias
+            DimensionList floodedDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getFloodedDimensionsUsingAlternateTileMap(destinationTileMapConnCoord, this.zoneVeinGenContainer.debugMode, maxFloodedArea, ref tileMapConnections_JustTile);
+
+            Debug.Log("FLOODED DIMS: ");
+            floodedDimList.printGrid(false);
+
 
             return startCoords;
         }

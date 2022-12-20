@@ -12,8 +12,9 @@ namespace DimCreatorClasses
 {
     public abstract class DimCreator : TileAccessor
     {
-        // Class is meant to be used for capturing a collection of square areas
+        protected bool debuging = false; // Temporary, eventually to be removed
 
+        // Class is meant to be used for capturing a collection of square areas
         DimensionList dimensionList;
 
         // Top off dim list is a way to fill in gaps in the dim list, without further expanding the dim list
@@ -52,14 +53,31 @@ namespace DimCreatorClasses
         TwoDList<Tile> alternateTileMap = new TwoDList<Tile>();
         bool alternateTileMapIsUsed = false;
 
+        // Granularity just means that individual square areas can only be touching by a 1 wide section
+        //      Not meant to be overly used, meant for small search areas 20x20. Else it will take a while
+        bool isGranular = false;
+
         public DimCreator(ref GeneratorContainer contInst) : base(ref contInst)
         {
-            this.recentlyAddedCoordsToCheck = new QueueWrapper<CoordsInt>(recentlyAddedCoordsQueueSize);
+            resetDimCreator();   
         }
 
         // =======================================================================================
         //                                  Abstract Functions
         // =======================================================================================
+
+        protected void resetDimCreator()
+        {
+            this.tileMapRef = new TwoDList<Tile>();
+            this.directionBias = new DirectionBias(Direction.None, Direction.None);
+            this.recentlyAddedCoordsToCheck = new QueueWrapper<CoordsInt>(recentlyAddedCoordsQueueSize);
+
+            this.maxDistanceFromCenter = System.Int32.MaxValue;
+
+            this.alternateTileMap = new TwoDList<Tile>();
+            this.alternateTileMapIsUsed = false;
+            this.isGranular = false;
+        }
 
         protected abstract bool tileCheck(CoordsInt coords);
 
@@ -154,12 +172,17 @@ namespace DimCreatorClasses
                 maxCoords = currentCoords.deepCopyInt();
                 center = currentCoords.deepCopyInt();
 
-                //currentCoords.print("CURRRENT COORDS: ");
+                //if (debuging)
+                //    currentCoords.print("==================================================\nCURRRENT COORDS: ");
 
                 expandAroundPoint(ref minCoords, ref maxCoords);
 
-                //minCoords.print("MIN COORDS: ");
-                //maxCoords.print("MAX COORDS: ");
+                //if (debuging)
+                //{
+                //    minCoords.print("MIN COORDS: ");
+                //    maxCoords.print("MAX COORDS: ");
+                //    center.print("CENTER COORDS: ");
+                //}
 
                 // If any of the sides a shorter than min length then reject the square
                 if (sideIsShorterThanMinLength(Axis.x_Axis, minCoords, maxCoords) || sideIsShorterThanMinLength(Axis.y_Axis, minCoords, maxCoords))
@@ -171,6 +194,8 @@ namespace DimCreatorClasses
                     if (getDimsToTopOffDimList == false)
                     {
                         dimensionRejected = dimensionList.addDimension(new SquareArea(minCoords, maxCoords, center));
+                        //if (debuging && dimensionRejected)
+                        //    Debug.Log("DIM REJECTED");
                     }
                     else
                     {
@@ -215,8 +240,12 @@ namespace DimCreatorClasses
                 }
             }
 
-            // Need to do a final check to make sure that there aren't any square areas in the dim list that are touching by a 2 wide unit
-            bool dimensionListIsAcceptable = dimensionList.finalCheck();
+            // Need to do a final check to make sure that there aren't any square areas in the dim list that are NOT touching by a 2 wide unit
+            //      Does not apply to granular (1 wide obviously), there should be no gaps as addDimension() checks for that
+            bool dimensionListIsAcceptable = true;
+            if (isGranular == false)
+                dimensionListIsAcceptable = dimensionList.finalCheck();
+
             if (dimensionListIsAcceptable == true)
                 fillTileMap(dimensionList);
 
@@ -267,6 +296,8 @@ namespace DimCreatorClasses
                 foundNewPoint = false;
                 int displacement = startDisplacement;
 
+                //if (debuging)
+                //    Debug.Log("======== DIRECTION: " + dir + " ========");
 
                 if (dir == Direction.North)
                 {
@@ -295,45 +326,74 @@ namespace DimCreatorClasses
                 if (directionCheck(startCoords, dir) == false)
                     continue;
 
-
+                int extraGranularJiggleCount = -1;
                 while (!foundNewPoint)
                 {
+                    // If not change the displacement so that it's closer to the original point
+                    if (foundNewPoint == false)
+                    {
+                        // Need to do some additional coord jiggling for very granular reads
+                        if (this.isGranular == true)
+                        {
+                            extraGranularJiggleCount++;
+                            if (extraGranularJiggleCount >= 3)
+                            {
+                                extraGranularJiggleCount = 0;
+                                displacement--;
+                            }
+
+                            if (dir == Direction.East || dir == Direction.West)
+                            {
+                                if (extraGranularJiggleCount == 0)
+                                    y = center.getY();
+                                else if(extraGranularJiggleCount == 1)
+                                    y = center.getY() + 1;
+                                else if (extraGranularJiggleCount == 2)
+                                    y = center.getY() - 1;
+                            }
+                            else if (dir == Direction.North || dir == Direction.South)
+                            {
+                                if (extraGranularJiggleCount == 0)
+                                    x = center.getX();
+                                else if(extraGranularJiggleCount == 1)
+                                    x = center.getX() + 1;
+                                else if (extraGranularJiggleCount == 2)
+                                    x = center.getX() - 1;
+                            }
+
+                            //if (debuging)
+                            //    Debug.Log("JIGGLE COUNT: " + extraGranularJiggleCount);
+
+                            
+                        }
+                        else
+                            displacement--;
+
+                        // Don't get too close or else it's just the same square
+                        if (displacement <= 6 && this.isGranular == false)
+                            break;
+                        else if (displacement <= 1 && this.isGranular == true)
+                            break;
+
+                        if (dir == Direction.East)
+                            x = center.getX() + displacement;
+                        else if (dir == Direction.West)
+                            x = center.getX() - displacement;
+                        else if (dir == Direction.North)
+                            y = center.getY() + displacement;
+                        else if (dir == Direction.South)
+                            y = center.getY() - displacement;
+
+                        
+
+                    }
+
                     CoordsInt wiggledCoords = new CoordsInt(x, y);
 
                     foundNewPoint = checkDisplacentAndWiggle(out bool tooCloseToPreviouslyAttemptedSquareCore,
                                         dimensionList, ref coordsToCheck, wiggledCoords, startCoords, getDimsToTopOffDimList);
                     if (tooCloseToPreviouslyAttemptedSquareCore)
                         break;
-
-
-                    // If not change the displacement so that it's closer to the original point
-                    if (foundNewPoint == false)
-                    {
-                        displacement--;
-
-                        if (dir == Direction.East)
-                        {
-                            x = center.getX() + displacement;
-                        }
-                        else if (dir == Direction.West)
-                        {
-                            x = center.getX() - displacement;
-                        }
-                        else if (dir == Direction.North)
-                        {
-                            y = center.getY() + displacement;
-                        }
-                        else if (dir == Direction.South)
-                        {
-                            y = center.getY() - displacement;
-                        }
-
-                        if (displacement <= 6)
-                        {
-                            // Don't get too close or else it's just the same square
-                            break;
-                        }
-                    }
                 }
             }
 
@@ -373,6 +433,9 @@ namespace DimCreatorClasses
             tooCloseToPreviouslyAttemptedSquareCore = false;
             bool foundNewPoint = false;
 
+            //if (debuging)
+            //    wiggledCoords.print("WIGGLED COORDS: ");
+
             // If the grid is a vein and is not occupied and the point is not already added then add the point
             //    pointAlreadyChecked() is needed to avoid an infinite loop when 2 "gaps" between squares is deemed addable
             //        The dimension list will reject the square gaps, but 
@@ -385,10 +448,14 @@ namespace DimCreatorClasses
                     foundNewPoint = false;
                 if (dimensionList.pointTooCloseToPreviouslyAttemptedSquareCore(wiggledCoords, wiggleDisplacementRange) == true)
                 {
+                    //if (debuging)
+                    //    Debug.Log("REJECT__0");
                     tooCloseToPreviouslyAttemptedSquareCore = true;
                 }
                 else if (coordsTooCloseToListHistoryBuffer(wiggledCoords) == true)
                 {
+                    //if (debuging)
+                    //    Debug.Log("REJECT__1");
                     tooCloseToPreviouslyAttemptedSquareCore = true;
                 }
                 else
@@ -401,6 +468,8 @@ namespace DimCreatorClasses
                     }
                     else
                     {
+                        //if (debuging)
+                        //    Debug.Log("\tADDED");
                         addCoordsToList(ref coordsToCheck, wiggledCoords, startCoords);
                         foundNewPoint = true;
                     }
@@ -418,6 +487,9 @@ namespace DimCreatorClasses
             for (int i = 0; i < recentlyAddedCoordsToCheck.getCount(); i++)
             {
                 CoordsInt currentCoords = recentlyAddedCoordsToCheck.getElement(i);
+
+                //if (debuging)
+                //    currentCoords.print("\tALREADY ADDED COORD: ");
 
                 if (currentCoords.getX() - historyWiggleDisplacementRange <= wiggledCoords.getX() && wiggledCoords.getX() <= currentCoords.getX() + historyWiggleDisplacementRange &&
                     currentCoords.getY() - historyWiggleDisplacementRange <= wiggledCoords.getY() && wiggledCoords.getY() <= currentCoords.getY() + historyWiggleDisplacementRange)
@@ -570,6 +642,10 @@ namespace DimCreatorClasses
         protected void setDimensionVariables(int minSideLength, int maxArea, float individualMaxSquareArea, DirectionBias directionBias, bool topOffDimList, Dimensions allocatedTileMapDims, int maxDistanceFromCenter)
         {
             this.minSideLength = minSideLength;
+
+            if (this.minSideLength == 1)
+                this.isGranular = true;
+
             this.maxSqaureAreaArea = individualMaxSquareArea;
             this.maxArea = maxArea;
             this.directionBias = directionBias;

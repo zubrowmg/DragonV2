@@ -134,7 +134,7 @@ namespace CommonlyUsedFunctions
             return area;
         }
 
-        public static DirectionBias calculatePrimaryDirectionWithWorldCoords(CoordsInt startCoords, CoordsInt endCoords)
+        public static DirectionBias calculatePrimaryDirection(CoordsInt startCoords, CoordsInt endCoords)
         {
             int displacementNeeded = 10;
             int xDiff = endCoords.getX() - startCoords.getX();
