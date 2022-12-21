@@ -134,9 +134,8 @@ namespace CommonlyUsedFunctions
             return area;
         }
 
-        public static DirectionBias calculatePrimaryDirection(CoordsInt startCoords, CoordsInt endCoords)
+        public static DirectionBias calculatePrimaryDirection(CoordsInt startCoords, CoordsInt endCoords, int displacementNeeded)
         {
-            int displacementNeeded = 10;
             int xDiff = endCoords.getX() - startCoords.getX();
             int yDiff = endCoords.getY() - startCoords.getY();
 
@@ -145,12 +144,12 @@ namespace CommonlyUsedFunctions
 
             if (xDiff >= displacementNeeded)
                 primaryHorizontalDir = Direction.East;
-            else if (xDiff <= displacementNeeded)
+            else if (xDiff <= (displacementNeeded * -1))
                 primaryHorizontalDir = Direction.West;
 
             if (yDiff >= displacementNeeded)
                 primaryVerticalDir = Direction.None;
-            else if (yDiff <= displacementNeeded)
+            else if (yDiff <= (displacementNeeded * -1))
                 primaryVerticalDir = Direction.South;
 
             DirectionBias newDirectionBias = new DirectionBias(primaryHorizontalDir, primaryVerticalDir);

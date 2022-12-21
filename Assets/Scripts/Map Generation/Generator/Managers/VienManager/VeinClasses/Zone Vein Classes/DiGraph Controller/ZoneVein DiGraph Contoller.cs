@@ -12,7 +12,7 @@ using TileManagerClasses;
 namespace VeinManagerClasses
 {
 
-    public class ZoneVeinDiGraphContoller : ContainerAccessor
+    public partial class ZoneVeinDiGraphContoller : ContainerAccessor
     {
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         //  Future enhancement idea, for zones that need to have more of an identy refer to enhacements section in binder
@@ -166,207 +166,23 @@ namespace VeinManagerClasses
             else
             {
                 bool adhearToMinEdgeLength = true;
-                CoordsInt startNodeCoord = findClosestNodeInEdge(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out DirectionBias newDirBias); // <========== NOT DONE !!!!!!!!!!!!!!!!!!!!
+                CoordsInt startNodeCoord = findClosestNodeInEdge(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile); // <========== NOT DONE !!!!!!!!!!!!!!!!!!!!
                 CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startNodeCoord);
 
                 startNodeCoord.print("CLOSEST COORD TO FREE SPACE: ");
                 worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
-
-                // Then you need to check to make sure that you can move a tile in either direction from the startNodeCoord
-                //      There are cases where you can't, search adjacent coords until you get a coord that can
-                //  Take the
-                
-            }
-            
-        }
-
-
-        // Finds the closest node coord (TileMapConnection coord) based on the inputed destination world coord
-        //      Needs to adhear to controller rules
-        //          1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
-        //          2. Node can't have more than 4 connections
-        //      Needs to also make sure that the closest node cords can be traveled to
-        CoordsInt findClosestNodeInEdge(CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile, out DirectionBias newDirBias)
-        {
-            CoordsInt startCoords = new CoordsInt(-1, -1);
-            List<DiDotEdge<CoordsInt>> allDiGraphEdges = this.diGraph.getListOfEdges();
-            bool startCoordIsValid = false;
-
-            bool exhuastedAllNodesInEdge = false;
-            List<DiDotEdge<CoordsInt>> rejectedEdges = new List<DiDotEdge<CoordsInt>>();
-            //while (exhuastedAllNodesInEdge == false)
-            //{
-            //  exhuastedAllNodesInEdge = false;
-            //
-
-                // Finds closest node to the destination coords, doesn't care if it's valid or not
-                findClosestNodeInEdgeRaw(out DiDotNode<CoordsInt> startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge, allDiGraphEdges, rejectedEdges, destinationTileMapConnCoord, adhearToMinEdgeLength);
-
-                if (allDiGraphEdges.Count == rejectedEdges.Count)
-                {
-                    Debug.Log("EXHAUSTED ALL EDGES IN ZONE");
-                    //break;
-                }
-
-
                 // Calculate the direction
-                newDirBias = CommonFunctions.calculatePrimaryDirection(startNode.getObject(), destinationTileMapConnCoord);
-                int maxFloodedArea = 100;
+                //int displacementNeeded = 1;
+                //newDirBias = CommonFunctions.calculatePrimaryDirection(startNode.getObject(), destinationTileMapConnCoord, displacementNeeded);
 
-                // Test if the start coords can actually travel in the new direction bias
-                //      1. Take the two d tile list and flood the dim list based on the destination coord
-                //      2. Check if the start coord touches the flooded dim list, by going 1 unit in the new dir bias
-                DimensionList floodedDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getFloodedDimensionsUsingAlternateTileMap(destinationTileMapConnCoord, this.zoneVeinGenContainer.debugMode, maxFloodedArea, ref tileMapConnections_JustTile);
 
-            
-                Debug.Log("FLOODED DIMS: ");
-                floodedDimList.printGrid(false);
-                newDirBias.print();
-
-                // Get the list of nodes that is acceptable
-                List<DiDotNode<CoordsInt>> listOfNodes = null;
-                if (adhearToMinEdgeLength == true)
-                    listOfNodes = startEdge.getNodeListExcludingEdgeNodes(this.newlyAddedMinEdgeLength);
-                else
-                    listOfNodes = startEdge.getNodeList();
-
-                // If the start coord has no adjecent flood coords, then try other edge coords
-                List<DiDotNode<CoordsInt>> rejectedStartNodes = new List<DiDotNode<CoordsInt>>();
-                while (startCoordIsValid == false)
-                {
-                    startCoords = startNode.getObject();
-                    startCoords.print("NEW EDGE START: ");
-
-                    // First check adjacent coords to see if they are floods
-                    for (int i = 0; i < 2; i++)
-                    {
-                        CoordsInt checkFloodedIsNextToStart = startCoords.deepCopyInt();
-                        Direction dir = Direction.None;
-
-                        if (i == 0)
-                            dir = newDirBias.getHorizontalDir();
-                        else
-                            dir = newDirBias.getVerticalDir();
-
-                        switch (dir)
-                        {
-                            case Direction.None:
-                                continue;
-
-                            case Direction.North:
-                                checkFloodedIsNextToStart.incY();
-                                break;
-
-                            case Direction.East:
-                                checkFloodedIsNextToStart.incX();
-                                break;
-
-                            case Direction.South:
-                                checkFloodedIsNextToStart.decY();
-                                break;
-
-                            case Direction.West:
-                                checkFloodedIsNextToStart.decX();
-                                break;
-                        }
-
-                        if (floodedDimList.coordIsMarked(checkFloodedIsNextToStart) == true)
-                        {
-                            startCoordIsValid = true;
-                            break;
-                        }
-                    }
-
-                    // If the adjacent coords are not a part of the flood coords, then seach along the edge for a new node/start coord
-                    if (startCoordIsValid == false)
-                    {
-                        Debug.Log("REJECTED NEW EDGE START");
-                        rejectedStartNodes.Add(startNode);
-
-                        bool foundNewStartNode = false;
-                        while (foundNewStartNode == false)
-                        {
-                            List<DiDotNode<CoordsInt>> startNodeConnections = startNode.getRawListOfConnections();
-
-                            // Check the start nodes adjacent connected nodes
-                            foreach (var nodeConn in startNodeConnections)
-                            {
-                                if (listOfNodes.Contains(nodeConn) == true && rejectedStartNodes.Contains(nodeConn) == false)
-                                {
-                                    startNode = nodeConn;
-                                    foundNewStartNode = true;
-                                    break;
-                                }
-                            }
-
-                            // It's possible that the orignal start node was in the middle of the edge
-                            //      This while loop can head up/down the edge looking for nodes, but it will check one direction first
-                            //      Once we traveled all the way in one direction, assign the start node to the original start node so that we can search in the other directions
-                            if (foundNewStartNode == false)
-                            {
-                                startNode = originalStartNode;
-
-                                // Exhuasted all edge nodes once list of nodes count and rejected start nodes count is the same it means all nodes have been checked
-                                if (listOfNodes.Count == rejectedStartNodes.Count)
-                                    exhuastedAllNodesInEdge = true;
-                            }
-                        }
-                    }
-                }
-
-                if (exhuastedAllNodesInEdge == true)
-                {
-                    rejectedEdges.Add(startEdge);
-                    Debug.Log("EXHAUSTED ALL NODES IN THE EDGE");
-                }
-
-            //}
-
-            return startCoords;
-        }
-
-        // Finds closest node to the destination coords, may or may not be what is needed (hence why it's Raw)
-        void findClosestNodeInEdgeRaw(out DiDotNode<CoordsInt> startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge,
-                                      List<DiDotEdge<CoordsInt>> allDiGraphEdges, List<DiDotEdge<CoordsInt>> rejectedEdges, CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength)
-        {
-            //    Distance,                        Node, Edge
-            MinValue<float, Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>> minDistanceList = new MinValue<float, Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>>(1);
-            Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>> doubleEntry = new Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>(new DiDotNode<CoordsInt>(), new DiDotEdge<CoordsInt>());
-            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, doubleEntry);
-
-            List<DiDotNode<CoordsInt>> listOfNodes = null;
-            foreach (var edge in allDiGraphEdges)
-            {
-                if (rejectedEdges.Contains(edge) == true)
-                    continue;
-
-                if (adhearToMinEdgeLength == true)
-                    listOfNodes = edge.getNodeListExcludingEdgeNodes(this.newlyAddedMinEdgeLength);
-                else
-                    listOfNodes = edge.getNodeList();
-
-                foreach (var node in listOfNodes)
-                {
-                    CoordsInt allocatedTileMapCoords = node.getObject();
-                    //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(allocatedTileMapCoords);
-
-                    //allocatedTileMapCoords.print("\t\t\tCOORD: ");
-                    //worldSpaceCoords.print("\t\t\tWORLD COORD: ");
-
-                    if (adhearsToNodeMaxCondition(node) == true)
-                    {
-                        float distance = CommonFunctions.calculateCoordsDistance(allocatedTileMapCoords, destinationTileMapConnCoord);
-                        doubleEntry = new Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>(node, edge);
-                        minDistanceList.addValueToQueue(distance, doubleEntry);
-                    }
-                }
             }
 
-            startNode = minDistanceList.getMinVal().Value.getOne();
-            originalStartNode = minDistanceList.getMinVal().Value.getOne();
-            startEdge = minDistanceList.getMinVal().Value.getTwo();
         }
+
+
+        
 
         void configureCicularNewEdge()
         {
@@ -419,6 +235,204 @@ namespace VeinManagerClasses
               
                 Debug.Log(strOutput);
             }
+        }
+    }
+
+
+    // ===========================================
+    // Find closest node in edge functions
+    // ===========================================
+    public partial class ZoneVeinDiGraphContoller : ContainerAccessor
+    {
+        // Finds the closest node coord (TileMapConnection coord) based on the inputed destination world coord
+        //      Needs to adhear to controller rules
+        //          1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
+        //          2. Node can't have more than 4 connections
+        //      Needs to also make sure that the closest node cords can be traveled to
+        CoordsInt findClosestNodeInEdge(CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile)
+        {
+            CoordsInt startCoords = new CoordsInt(-1, -1);
+            List<DiDotEdge<CoordsInt>> allDiGraphEdges = this.diGraph.getListOfEdges();
+            bool startCoordIsValid = false;
+
+            int maxFloodedArea = 100;
+            DimensionList floodedDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getFloodedDimensionsUsingAlternateTileMap(destinationTileMapConnCoord, this.zoneVeinGenContainer.debugMode, maxFloodedArea, ref tileMapConnections_JustTile);
+
+            bool exhuastedAllNodesInEdge = false;
+            List<DiDotEdge<CoordsInt>> rejectedEdges = new List<DiDotEdge<CoordsInt>>();
+            while (startCoordIsValid == false)
+            {
+                exhuastedAllNodesInEdge = false;
+
+                // Finds closest node to the destination coords, doesn't care if it's valid or not
+                findClosestNodeInEdgeRaw(out DiDotNode<CoordsInt> startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge, allDiGraphEdges, rejectedEdges, destinationTileMapConnCoord, adhearToMinEdgeLength);
+
+                if (allDiGraphEdges.Count == rejectedEdges.Count)
+                {
+                    Debug.LogError("EXHAUSTED ALL EDGES IN ZONE DIGRAPH");
+                    break;
+                }
+
+                // Get the list of nodes that is acceptable
+                List<DiDotNode<CoordsInt>> listOfEdgeNodes = null;
+                if (adhearToMinEdgeLength == true)
+                    listOfEdgeNodes = startEdge.getNodeListExcludingEdgeNodes(this.newlyAddedMinEdgeLength);
+                else
+                    listOfEdgeNodes = startEdge.getNodeList();
+
+                // Check if the start coord is valid
+                startCoordIsValid = isStartCoordValid(ref startCoords, ref startNode, ref floodedDimList, ref listOfEdgeNodes, ref originalStartNode, ref exhuastedAllNodesInEdge);
+
+                if (exhuastedAllNodesInEdge == true)
+                {
+                    rejectedEdges.Add(startEdge);
+                    Debug.LogError("EXHAUSTED ALL NODES IN THE EDGE");
+                }
+            }
+
+            return startCoords;
+        }
+
+        bool isStartCoordValid(ref CoordsInt startCoords, ref DiDotNode<CoordsInt> startNode, ref DimensionList floodedDimList, ref List<DiDotNode<CoordsInt>> listOfEdgeNodes, ref DiDotNode<CoordsInt> originalStartNode, ref bool exhuastedAllNodesInEdge)
+        {
+            bool startCoordIsValid = false;
+
+            // Test if the start coords can actually travel in the new direction bias
+            //      1. Take the two d tile list and flood the dim list based on the destination coord
+            //      2. Check if the start coord touches the flooded dim list, by going 1 unit in the new dir bias
+            List<DiDotNode<CoordsInt>> rejectedStartNodes = new List<DiDotNode<CoordsInt>>();
+            while (startCoordIsValid == false)
+            {
+                startCoords = startNode.getObject();
+                //startCoords.print("NEW EDGE START: ");
+
+                // First check all adjacent coords to see if they are a part of the flooded dim list
+                startCoordIsValid = adjacentDirectionsAreFlooded(ref startCoords, ref floodedDimList);
+
+                // If the adjacent coords are not a part of the flood coords, then seach along the edge for a new node/start coord
+                if (startCoordIsValid == false)
+                {
+                    //Debug.Log("REJECTED NEW EDGE START");
+                    findNextClosestNodeInEdge(ref rejectedStartNodes, ref listOfEdgeNodes, ref startNode, ref originalStartNode, ref exhuastedAllNodesInEdge);
+                }
+            }
+
+            return startCoordIsValid;
+        }
+
+        // Finds closest node to the destination coords, may or may not be what is needed (hence why it's Raw)
+        void findClosestNodeInEdgeRaw(out DiDotNode<CoordsInt> startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge,
+                                      List<DiDotEdge<CoordsInt>> allDiGraphEdges, List<DiDotEdge<CoordsInt>> rejectedEdges, CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength)
+        {
+            //    Distance,                        Node, Edge
+            MinValue<float, Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>> minDistanceList = new MinValue<float, Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>>(1);
+            Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>> doubleEntry = new Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>(new DiDotNode<CoordsInt>(), new DiDotEdge<CoordsInt>());
+            minDistanceList.addValueToQueue((float)System.UInt16.MaxValue, doubleEntry);
+
+            List<DiDotNode<CoordsInt>> listOfNodes = null;
+            foreach (var edge in allDiGraphEdges)
+            {
+                if (rejectedEdges.Contains(edge) == true)
+                    continue;
+
+                if (adhearToMinEdgeLength == true)
+                    listOfNodes = edge.getNodeListExcludingEdgeNodes(this.newlyAddedMinEdgeLength);
+                else
+                    listOfNodes = edge.getNodeList();
+
+                foreach (var node in listOfNodes)
+                {
+                    CoordsInt allocatedTileMapCoords = node.getObject();
+                    //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(allocatedTileMapCoords);
+
+                    //allocatedTileMapCoords.print("\t\t\tCOORD: ");
+                    //worldSpaceCoords.print("\t\t\tWORLD COORD: ");
+
+                    if (adhearsToNodeMaxCondition(node) == true)
+                    {
+                        float distance = CommonFunctions.calculateCoordsDistance(allocatedTileMapCoords, destinationTileMapConnCoord);
+                        doubleEntry = new Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>(node, edge);
+                        minDistanceList.addValueToQueue(distance, doubleEntry);
+                    }
+                }
+            }
+
+            startNode = minDistanceList.getMinVal().Value.getOne();
+            originalStartNode = minDistanceList.getMinVal().Value.getOne();
+            startEdge = minDistanceList.getMinVal().Value.getTwo();
+        }
+
+        // Search along an edge by checking the passed in startNodes connected nodes
+        void findNextClosestNodeInEdge(ref List<DiDotNode<CoordsInt>> rejectedStartNodes, ref List<DiDotNode<CoordsInt>> listOfEdgeNodes, ref DiDotNode<CoordsInt> startNode, ref DiDotNode<CoordsInt> originalStartNode, ref bool exhuastedAllNodesInEdge)
+        {
+            rejectedStartNodes.Add(startNode);
+
+            bool foundNewStartNode = false;
+            while (foundNewStartNode == false)
+            {
+                List<DiDotNode<CoordsInt>> startNodeConnections = startNode.getRawListOfConnections();
+
+                // Check the start nodes adjacent connected nodes
+                foreach (var nodeConn in startNodeConnections)
+                {
+                    if (listOfEdgeNodes.Contains(nodeConn) == true && rejectedStartNodes.Contains(nodeConn) == false)
+                    {
+                        startNode = nodeConn;
+                        foundNewStartNode = true;
+                        break;
+                    }
+                }
+
+                // It's possible that the orignal start node was in the middle of the edge
+                //      This while loop can head up/down the edge looking for nodes, but it will check one direction first
+                //      Once we traveled all the way in one direction, assign the start node to the original start node so that we can search in the other directions
+                if (foundNewStartNode == false)
+                {
+                    startNode = originalStartNode;
+
+                    // Exhuasted all edge nodes once list of nodes count and rejected start nodes count is the same it means all nodes have been checked
+                    if (listOfEdgeNodes.Count == rejectedStartNodes.Count)
+                        exhuastedAllNodesInEdge = true;
+                }
+            }
+        }
+
+        bool adjacentDirectionsAreFlooded(ref CoordsInt startCoords, ref DimensionList floodedDimList)
+        {
+            bool startCoordIsValid = false;
+            foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
+            {
+                CoordsInt checkFloodedIsNextToStart = startCoords.deepCopyInt();
+
+                switch (dir)
+                {
+                    case Direction.None:
+                        continue;
+
+                    case Direction.North:
+                        checkFloodedIsNextToStart.incY();
+                        break;
+
+                    case Direction.East:
+                        checkFloodedIsNextToStart.incX();
+                        break;
+
+                    case Direction.South:
+                        checkFloodedIsNextToStart.decY();
+                        break;
+
+                    case Direction.West:
+                        checkFloodedIsNextToStart.decX();
+                        break;
+                }
+
+                if (floodedDimList.coordIsMarked(checkFloodedIsNextToStart) == true)
+                {
+                    startCoordIsValid = true;
+                    break;
+                }
+            }
+            return startCoordIsValid;
         }
     }
 }
