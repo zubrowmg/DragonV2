@@ -34,6 +34,16 @@ namespace DiDotGraphClasses
             this.orderedNodeList = new List<DiDotNode<T>>(list);
         }
 
+        public DiDotEdge()
+        {
+            this.id = -1;
+            this.firstIsNodeOne = true;
+
+            addNodeAsStart(null);
+            addNodeAsEnd(null);
+            this.orderedNodeList = new List<DiDotNode<T>>();
+        }
+
         // For deep copies
         public DiDotEdge(DiDotNode<T> nodeOne, DiDotNode<T> nodeTwo, List<DiDotNode<T>> orderedNodeList, 
             List<DiDotEdge<T>> nodeOneEdges, List<DiDotEdge<T>> nodeTwoEdges, bool firstIsNodeOne, int id)

@@ -1001,8 +1001,23 @@ namespace CommonlyUsedClasses
 
         public void getGrid(out TwoDList<int> grid, out CoordsInt startCoords)
         {
-            grid = this.grid;
+            grid = getGrid();
             startCoords = this.minCoords;
+        }
+
+        public TwoDList<int> getGrid()
+        {
+            return this.grid;
+        }
+
+        public bool coordIsMarked(CoordsInt coord)
+        {
+            bool coordIsOne = false;
+
+            if (this.grid.getElement(coord) == 1)
+                coordIsOne = true;
+
+            return coordIsOne;
         }
 
         public List<CoordsInt> getAllSelectedGridCoords()
