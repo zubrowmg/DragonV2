@@ -145,7 +145,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
         List<CoordsInt> listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.createZoneVeinTrunk(startCoords);
         this.zoneVeinGenContainer.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
-        //this.zoneVeinGenContainer.incCurrentVeinPass();
+        this.zoneVeinGenContainer.incCurrentVeinPass();
 
 
         bool graphIsDone = false;
@@ -162,6 +162,7 @@ public class ZoneVeinGenerator : ContainerAccessor
                 Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
             else if (graphIsDone == false)
             {
+            Debug.LogError("determineBranchStartDirection() needs to seach all directions for an open spot, but it needs to check if the primary directions can be traveled to first!!!!!!");
                 //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.createZoneVeinBranch(branchStartCoords, dirBias);
                 //this.zoneVeinGenContainer.incCurrentVeinPass();
 

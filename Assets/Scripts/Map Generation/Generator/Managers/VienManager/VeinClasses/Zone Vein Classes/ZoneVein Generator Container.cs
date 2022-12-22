@@ -142,8 +142,18 @@ public class ZoneVeinGeneratorContainer
         currentZone.setVeinZoneConnectionList(ref tileMapConnections);
     }
 
+    public ref Tile getTileFromTileMapConn(CoordsInt coords)
+    {
+        return ref this.getTileMapConnElement(coords).getTwo();
+    }
+
     public void incCurrentPassLock(CoordsInt coords)
     {
+        getTileMapConnElement(coords).getOne().incLockPass(getCurrentVeinPass());
+    }
 
+    public void decCurrentPassLock(CoordsInt coords)
+    {
+        getTileMapConnElement(coords).getOne().decLockPass(getCurrentVeinPass());
     }
 }

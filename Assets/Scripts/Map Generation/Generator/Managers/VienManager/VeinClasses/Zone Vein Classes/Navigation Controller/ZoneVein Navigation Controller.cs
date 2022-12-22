@@ -101,23 +101,11 @@ namespace VeinManagerClasses
             // Needs to choose a start direction based on zone direction bias
             //      And if there is open space in that direction
 
-            // Randomly choose vertical or horizontal direction to start
-            DirectionBias zoneDirBias = this.currentDirectionBias;
-            int rand = Random.Range(0, 2);
+            // foreach dir
+            // {
+            //this.zoneVeinGenContainer.tileMapConnCoordIsLocked__ForCurrentPass();
+            // }
 
-            if (rand == 0)
-            {
-                this.currentState.setCurrentDir(zoneDirBias.getHorizontalDir());
-                if (this.currentState.getCurrentDir() == Direction.None)
-                    this.currentState.setCurrentDir(zoneDirBias.getVerticalDir());
-
-            }
-            else
-            {
-                this.currentState.setCurrentDir(zoneDirBias.getVerticalDir());
-                if (this.currentState.getCurrentDir() == Direction.None)
-                    this.currentState.setCurrentDir(zoneDirBias.getHorizontalDir());
-            }
 
             if (this.currentState.getCurrentDir() == Direction.None)
                 Debug.LogError("ZoneVeinGenerator - determineBranchStartDirection(): Start Direction has no direction to start in");
@@ -289,11 +277,10 @@ namespace VeinManagerClasses
                 bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
                 if (pointIsInsideBounds == true)
                 {
-                    Double<TileTraveledToMarker, Tile> tileMapConnElement = zoneVeinGenContainer.getTileMapConnElement(attemptedCoord);
                     if (lockTileMapConn == true)
-                        tileMapConnElement.getOne().incLockPass(zoneVeinGenContainer.getCurrentVeinPass());
+                        zoneVeinGenContainer.incCurrentPassLock(attemptedCoord);
                     else
-                        tileMapConnElement.getOne().decLockPass(zoneVeinGenContainer.getCurrentVeinPass());
+                        zoneVeinGenContainer.decCurrentPassLock(attemptedCoord);
                 }
 
                 attemptedCoord = coords.deepCopyInt();
@@ -481,15 +468,14 @@ namespace VeinManagerClasses
                 bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
                 if (pointIsInsideBounds == true)
                 {
-                    Double<TileTraveledToMarker, Tile> tileMapConnElement = zoneVeinGenContainer.getTileMapConnElement(attemptedCoord);
                     if (locked == true)
                     {
-                        if (tileMapConnElement.getOne().isPassLocked(zoneVeinGenContainer.getCurrentVeinPass()) == true)
+                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForCurrentPass(attemptedCoord) == true)
                             dirCheck.Add(dir);
                     }
                     else
                     {
-                        if (tileMapConnElement.getOne().isPassLocked(zoneVeinGenContainer.getCurrentVeinPass()) == false)
+                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForCurrentPass(attemptedCoord) == false)
                             dirCheck.Add(dir);
                     }
                 }
@@ -600,7 +586,7 @@ namespace VeinManagerClasses
                 for (int y = 0; y < zoneVeinGenContainer.getTileMapConnY(); y++)
                 {
                     CoordsInt accessCoord = new CoordsInt(x, y);
-                    tileMapConnections_JustTile.addRefElement(accessCoord, ref zoneVeinGenContainer.getTileMapConnElement(accessCoord).getTwo());
+                    tileMapConnections_JustTile.addRefElement(accessCoord, ref zoneVeinGenContainer.getTileFromTileMapConn(accessCoord));
                 }
             }
 
