@@ -19,11 +19,10 @@ public class ZoneVeinGeneratorContainer
 
     // Tile Map Connections
     //              Double<         CanTravelTo, Tile >
-    public TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
-    public TwoDList<Tile> tileMapConnectionsJustTiles = new TwoDList<Tile>();
+    private TwoDList<Double<TileTraveledToMarker, Tile>> tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
 
     // Vein passes (Trunk = pass0, branches are pass1, 2, 3, etc)
-    public int currentVeinPass = 0;
+    private int currentVeinPass = 0;
 
     // The output vein zone
     public VeinZone currentVeinZone;
@@ -48,7 +47,26 @@ public class ZoneVeinGeneratorContainer
     }
 
     // =====================================================================================
-    //                                    
+    //                  Current vein pass functions                  
+    // =====================================================================================
+
+    public void incCurrentVeinPass()
+    {
+        this.currentVeinPass++;
+    }
+
+    public int getCurrentVeinPass()
+    {
+        return this.currentVeinPass;
+    }
+
+    public void resetCurrentVeinPass()
+    {
+        this.currentVeinPass = 0;
+    }
+
+    // =====================================================================================
+    //                  Tile Map Connections functions                  
     // =====================================================================================
 
     public CoordsInt getWorldMapCoordsFromTileMapConns(CoordsInt coords)
@@ -58,21 +76,74 @@ public class ZoneVeinGeneratorContainer
     }
 
 
-    // Checks for boundries and if the point cannot be traveled to
+    // Checks for boundries and if the point can be traveled to
     public bool checkTileMapConnPoint(CoordsInt coords)
     {
         // Check Boundry
-        bool rejected = !this.tileMapConnections.isInsideBounds(coords);
+        bool rejected = !this.coordsAreInsideTileMapBoundries(coords);
 
         if (rejected == true)
             return rejected;
 
-        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = this.tileMapConnections.getElement(coords);
-
         // Tile has already been traveled to
-        if (attemptedTileMapConnElement.getOne().isPassLocked(this.currentVeinPass) == true)
+        if (tileMapConnCoordIsLocked__ForCurrentPass(coords) == true)
             rejected = true;
 
         return rejected;
+    }
+
+    public bool tileMapConnCoordIsLocked__ForCurrentPass(CoordsInt coords)
+    {
+        bool tileConnIsLocked = false;
+
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
+        tileConnIsLocked = attemptedTileMapConnElement.getOne().isPassLocked(getCurrentVeinPass());
+
+        return tileConnIsLocked;
+    }
+
+    public bool coordsAreInsideTileMapBoundries(CoordsInt coords)
+    {
+        return tileMapConnections.isInsideBounds(coords);
+    }
+
+    public ref Double<TileTraveledToMarker, Tile> getTileMapConnElement(CoordsInt coords)
+    {
+        return ref tileMapConnections.getElement(coords);
+    }
+
+    public int getTileMapConnX()
+    {
+        return tileMapConnections.getXCount();
+    }
+
+    public int getTileMapConnY()
+    {
+        return tileMapConnections.getYCount();
+    }
+
+    public List<CoordsInt> getTileMapConnReducedCoordsList()
+    {
+        return tileMapConnections.getReducedCoordsList();
+    }
+
+    public void resetTileMapConnections()
+    {
+        this.tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
+    }
+
+    public void tileMapConnAddRefElement(CoordsInt newCoords, ref Double<TileTraveledToMarker, Tile> newEntry)
+    {
+        tileMapConnections.addRefElement(newCoords, ref newEntry);
+    }
+
+    public void attachTileMapConnToZone()
+    {
+        currentZone.setVeinZoneConnectionList(ref tileMapConnections);
+    }
+
+    public void incCurrentPassLock(CoordsInt coords)
+    {
+
     }
 }

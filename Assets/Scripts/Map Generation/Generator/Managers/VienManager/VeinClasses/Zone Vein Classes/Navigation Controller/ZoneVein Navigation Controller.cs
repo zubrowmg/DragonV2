@@ -31,10 +31,11 @@ namespace VeinManagerClasses
         List<Direction> primaryDir;
         List<Direction> secondaryDir;
 
-        // Initial zone length
+        // Edge Lengths
         int maxTrunkLength = 18;
+        int maxEdgeLenth = 8;
 
-        // Vein
+        // Vein Controls
         SetCoordsVein newVein;
         int veinWidth = 5;
 
@@ -47,7 +48,7 @@ namespace VeinManagerClasses
         //                                    Init Functions
         // =====================================================================================
 
-        public void initDefault()
+        public void initTrunk()
         {
             // Typically the first edge created is the trunk, so just use the current zones dir bias as the defualt
             init(zoneVeinGenContainer.currentZone.getDirBias());
@@ -71,7 +72,7 @@ namespace VeinManagerClasses
         }
 
 
-        void determineEdgeStartDirection()
+        void determineTrunkStartDirection()
         {
             // Randomly choose vertical or horizontal direction to start
             DirectionBias zoneDirBias = this.currentDirectionBias;
@@ -92,7 +93,34 @@ namespace VeinManagerClasses
             }
 
             if (this.currentState.getCurrentDir() == Direction.None)
-                Debug.LogError("ZoneVeinGenerator - determinStartDirection(): Start Direction has no direction to start in");
+                Debug.LogError("ZoneVeinGenerator - determineTrunkStartDirection(): Start Direction has no direction to start in");
+        }
+
+        void determineBranchStartDirection()
+        {
+            // Needs to choose a start direction based on zone direction bias
+            //      And if there is open space in that direction
+
+            // Randomly choose vertical or horizontal direction to start
+            DirectionBias zoneDirBias = this.currentDirectionBias;
+            int rand = Random.Range(0, 2);
+
+            if (rand == 0)
+            {
+                this.currentState.setCurrentDir(zoneDirBias.getHorizontalDir());
+                if (this.currentState.getCurrentDir() == Direction.None)
+                    this.currentState.setCurrentDir(zoneDirBias.getVerticalDir());
+
+            }
+            else
+            {
+                this.currentState.setCurrentDir(zoneDirBias.getVerticalDir());
+                if (this.currentState.getCurrentDir() == Direction.None)
+                    this.currentState.setCurrentDir(zoneDirBias.getHorizontalDir());
+            }
+
+            if (this.currentState.getCurrentDir() == Direction.None)
+                Debug.LogError("ZoneVeinGenerator - determineBranchStartDirection(): Start Direction has no direction to start in");
         }
 
         // Based on the current zones primary and secondary directions
@@ -122,25 +150,37 @@ namespace VeinManagerClasses
         //                              Create Zone Vein Functions (Edge only)
         // =====================================================================================
 
-        // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
         public List<CoordsInt> createZoneVeinTrunk(CoordsInt startCoords)
+        {
+            initTrunk();
+            determineTrunkStartDirection();
+            return createEdge(startCoords, maxTrunkLength);
+        }
+
+        public List<CoordsInt> createZoneVeinBranch(CoordsInt startCoords, DirectionBias dirBias)
+        {
+            init(dirBias);
+            determineBranchStartDirection();
+            return createEdge(startCoords, maxEdgeLenth);
+        }
+
+        // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
+        private List<CoordsInt> createEdge(CoordsInt startCoords, int maxLength)
         {
             this.currentState.setCurrentCoords(startCoords.deepCopyInt());
 
-            determineEdgeStartDirection();
-
-            bool trunkFinished = false;
+            bool edgeFinished = false;
 
             //this.currentCoords.print("Start Coords: ");
             this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
             this.stateHistory.addState(this.currentState.deepCopy());
 
-            while (trunkFinished == false)
+            while (edgeFinished == false)
             {
-                // Determine if the trunk is too long
-                if (this.stateHistory.getLength() > maxTrunkLength)
+                // Determine if the edge is too long
+                if (this.stateHistory.getLength() > maxLength)
                 {
-                    trunkFinished = true;
+                    edgeFinished = true;
                     break;
                 }
 
@@ -190,15 +230,6 @@ namespace VeinManagerClasses
 
         void travelOneUnit(Direction dir)
         {
-            //bool directionRejected = 
-            goDir(dir);
-
-            //if (directionRejected == true)
-            //    Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction rejected, what to do?");
-        }
-
-        void goDir(Direction dir)
-        {
             CoordsInt currentCoordsCopy = this.currentState.getCurrentCoords();
             CoordsInt attemptedTileMapCoords = currentCoordsCopy.deepCopyInt();
 
@@ -217,7 +248,7 @@ namespace VeinManagerClasses
                     attemptedTileMapCoords.decX();
                     break;
                 case Direction.None:
-                    Debug.LogError("ZoneVeinGenerator - goDir(): Direction.None passed in");
+                    Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction.None passed in");
                     break;
             }
 
@@ -255,14 +286,14 @@ namespace VeinManagerClasses
                 }
 
                 // If point is inside the bounds then mark it as not travelable
-                bool pointIsInsideBounds = zoneVeinGenContainer.tileMapConnections.isInsideBounds(attemptedCoord);
+                bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
                 if (pointIsInsideBounds == true)
                 {
-                    Double<TileTraveledToMarker, Tile> tileMapConnElement = zoneVeinGenContainer.tileMapConnections.getElement(attemptedCoord);
+                    Double<TileTraveledToMarker, Tile> tileMapConnElement = zoneVeinGenContainer.getTileMapConnElement(attemptedCoord);
                     if (lockTileMapConn == true)
-                        tileMapConnElement.getOne().incLockPass(zoneVeinGenContainer.currentVeinPass);
+                        tileMapConnElement.getOne().incLockPass(zoneVeinGenContainer.getCurrentVeinPass());
                     else
-                        tileMapConnElement.getOne().decLockPass(zoneVeinGenContainer.currentVeinPass);
+                        tileMapConnElement.getOne().decLockPass(zoneVeinGenContainer.getCurrentVeinPass());
                 }
 
                 attemptedCoord = coords.deepCopyInt();
@@ -447,18 +478,18 @@ namespace VeinManagerClasses
                 }
 
                 // If point is inside the bounds then check if it can be traveled to
-                bool pointIsInsideBounds = zoneVeinGenContainer.tileMapConnections.isInsideBounds(attemptedCoord);
+                bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
                 if (pointIsInsideBounds == true)
                 {
-                    Double<TileTraveledToMarker, Tile> tileMapConnElement = zoneVeinGenContainer.tileMapConnections.getElement(attemptedCoord);
+                    Double<TileTraveledToMarker, Tile> tileMapConnElement = zoneVeinGenContainer.getTileMapConnElement(attemptedCoord);
                     if (locked == true)
                     {
-                        if (tileMapConnElement.getOne().isPassLocked(zoneVeinGenContainer.currentVeinPass) == true)
+                        if (tileMapConnElement.getOne().isPassLocked(zoneVeinGenContainer.getCurrentVeinPass()) == true)
                             dirCheck.Add(dir);
                     }
                     else
                     {
-                        if (tileMapConnElement.getOne().isPassLocked(zoneVeinGenContainer.currentVeinPass) == false)
+                        if (tileMapConnElement.getOne().isPassLocked(zoneVeinGenContainer.getCurrentVeinPass()) == false)
                             dirCheck.Add(dir);
                     }
                 }
@@ -561,23 +592,19 @@ namespace VeinManagerClasses
             //      Does not check all locations in the tile map, does a "lazy job". Coords checked are based on the size of allocated tile map for the zone
             float overlapThreshold = .6f;
 
-            // Get the restricted zone dimensions
-            Dimensions restricedDims = zoneVeinGenContainer.currentZone.getAllocatedTileMapDims();
-
             // Get the "lazy" coords
-            List<CoordsInt> reducedTileMapConnCoordsList = zoneVeinGenContainer.tileMapConnections.getReducedCoordsList();
+            List<CoordsInt> reducedTileMapConnCoordsList = zoneVeinGenContainer.getTileMapConnReducedCoordsList();
             tileMapConnections_JustTile = new TwoDList<Tile>();
-            for (int x = 0; x < zoneVeinGenContainer.tileMapConnections.getXCount(); x++)
+            for (int x = 0; x < zoneVeinGenContainer.getTileMapConnX(); x++)
             {
-                for (int y = 0; y < zoneVeinGenContainer.tileMapConnections.getYCount(); y++)
+                for (int y = 0; y < zoneVeinGenContainer.getTileMapConnY(); y++)
                 {
                     CoordsInt accessCoord = new CoordsInt(x, y);
-                    tileMapConnections_JustTile.addRefElement(accessCoord, ref zoneVeinGenContainer.tileMapConnections.getElement(accessCoord).getTwo());
+                    tileMapConnections_JustTile.addRefElement(accessCoord, ref zoneVeinGenContainer.getTileMapConnElement(accessCoord).getTwo());
                 }
             }
 
-            // Restict the search area according to the amount of search points
-            //int maxTotalSearchArea = Mathf.FloorToInt(restricedDims.getArea() / reducedTileMapTwoDList_JustTile.getAreaCount());
+            // Restrict the search area conditions, these shouldn't be touched all willy nilly
             int maxTotalSearchArea = 9;
             int minTotalSearchArea = 4;
 
@@ -628,8 +655,8 @@ namespace VeinManagerClasses
                 choosenFreeArea = CommonFunctions.randomlySelectInList(ref freeAreas);
 
             // !!!!!!!!!!!!
-            choosenFreeArea.getCenterCoord().print("\tCENTER COORD: ");
-            zoneVeinGenContainer.currentZone.freeSpaces.Add(choosenFreeArea); // Debuging only, remove when done
+            //choosenFreeArea.getCenterCoord().print("\tCENTER COORD: ");
+            //zoneVeinGenContainer.currentZone.freeSpaces.Add(choosenFreeArea); // Debuging only, remove when done
             // !!!!!!!!!!!!
             
             return choosenFreeArea.getCenterCoord();

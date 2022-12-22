@@ -120,13 +120,20 @@ namespace VeinManagerClasses
             return nextEdgeType;
         }
 
-        public bool decideEndPoints()
+        public void determineNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out DirectionBias dirBias)
         {
-            bool graphIsDone = false;
+            graphIsDone = false;
             // Analyze the graph
             this.diGraph.analyzeGraph();
 
             this.print("================= " + zoneVeinGenContainer.currentVeinZone.getId().ToString() + " =================");
+
+            // !!!!!!!!!!!!!!!!!!!!
+            //      Will probably have to create a class to hold edge specific configs and circular edge specific configs
+            //      Need to output configs back up one in createZoneVein()
+            branchStartCoords = new CoordsInt(-1, -1);
+            dirBias = new DirectionBias(Direction.None, Direction.None);
+            edgeConfigFailed = false;
 
             // Detemine what needs to be done to the graph based on the non hit min conditions
             GraphEdgeType nextEdgeType = decideNextEdgeType();
@@ -137,21 +144,20 @@ namespace VeinManagerClasses
                     break;
 
                 case GraphEdgeType.Edge:
-                    configureNewEdge();
+                    configureNewEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
                     break;
 
                 case GraphEdgeType.CircularEdge:
-                    configureNewEdge();
+                    configureNewEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
                     //configureCicularNewEdge();
                     break;
             }
 
             Debug.Log("NEXT EDGE TYPE: " + nextEdgeType);
 
-            return graphIsDone;
         }
 
-        void configureNewEdge()
+        void configureNewEdge(out CoordsInt startCoords, out DirectionBias dirBias, out bool edgeConfigFailed)
         {
             // Basic configuration for now, expecting something more deliberate in the future
             // 1. Scan the allocated tile map connection for an empty space
@@ -159,24 +165,33 @@ namespace VeinManagerClasses
             // 3. Get the direction from the point to the empty space
 
             CoordsInt destinationMapConnCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace, out TwoDList<Tile> tileMapConnections_JustTile);
+            edgeConfigFailed = false;
 
+            startCoords = new CoordsInt(-1, -1);
+            dirBias = new DirectionBias(Direction.None, Direction.None);
             
             if (foundEmptySpace == false)
+            {
                 Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
+                edgeConfigFailed = true;
+            }
             else
             {
                 bool adhearToMinEdgeLength = true;
-                CoordsInt startNodeCoord = findClosestNodeInEdge(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile); // <========== NOT DONE !!!!!!!!!!!!!!!!!!!!
-                CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startNodeCoord);
+                startCoords = findClosestNodeInDiGraph(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out bool nodeSearchFailed);
+                CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
 
-                startNodeCoord.print("CLOSEST COORD TO FREE SPACE: ");
+                startCoords.print("CLOSEST COORD TO FREE SPACE: ");
                 worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
-                // Calculate the direction
-                //int displacementNeeded = 1;
-                //newDirBias = CommonFunctions.calculatePrimaryDirection(startNode.getObject(), destinationTileMapConnCoord, displacementNeeded);
-
-
+                if (nodeSearchFailed == false)
+                {
+                    // Calculate the direction
+                    int displacementNeeded = 1;
+                    dirBias = CommonFunctions.calculatePrimaryDirection(startCoords, destinationMapConnCoord, displacementNeeded);
+                }
+                else
+                    edgeConfigFailed = true;
             }
 
         }
@@ -249,11 +264,12 @@ namespace VeinManagerClasses
         //          1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
         //          2. Node can't have more than 4 connections
         //      Needs to also make sure that the closest node cords can be traveled to
-        CoordsInt findClosestNodeInEdge(CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile)
+        CoordsInt findClosestNodeInDiGraph(CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile, out bool nodeSearchFailed)
         {
             CoordsInt startCoords = new CoordsInt(-1, -1);
             List<DiDotEdge<CoordsInt>> allDiGraphEdges = this.diGraph.getListOfEdges();
             bool startCoordIsValid = false;
+            nodeSearchFailed = false;
 
             int maxFloodedArea = 100;
             DimensionList floodedDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getFloodedDimensionsUsingAlternateTileMap(destinationTileMapConnCoord, this.zoneVeinGenContainer.debugMode, maxFloodedArea, ref tileMapConnections_JustTile);
@@ -269,6 +285,7 @@ namespace VeinManagerClasses
 
                 if (allDiGraphEdges.Count == rejectedEdges.Count)
                 {
+                    nodeSearchFailed = true;
                     Debug.LogError("EXHAUSTED ALL EDGES IN ZONE DIGRAPH");
                     break;
                 }

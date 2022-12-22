@@ -46,6 +46,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
     public VeinZone generateZoneVein(ref Zone_New zone, int veinId)
     {
+
         init(veinId, ref zone);
 
         // Creates a grid of vein connection nodes
@@ -67,11 +68,10 @@ public class ZoneVeinGenerator : ContainerAccessor
     {
         zoneVeinGenContainer.currentVeinZone = new VeinZone(ref getContainerInst(), veinId, zone.getStartCoords());
         zoneVeinGenContainer.currentZone = zone;
-        zoneVeinGenContainer.tileMapConnections = new TwoDList<Double<TileTraveledToMarker, Tile>>();
+        zoneVeinGenContainer.resetTileMapConnections();
 
-        zoneVeinGenContainer.currentVeinPass = 0;
+        zoneVeinGenContainer.resetCurrentVeinPass();
 
-        zoneVeinGenContainer.zoneVeinNavigationController.initDefault();
         zoneVeinGenContainer.zoneVeinDiGraphController.init();
     }
 
@@ -106,8 +106,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                     Tile tileRef = allocatedTileMap.getElement(currentCoords);
                     Double<TileTraveledToMarker, Tile> newElement = new Double<TileTraveledToMarker, Tile>(travelToMarker, tileRef);
-                    zoneVeinGenContainer.tileMapConnections.addRefElement(newCoords, ref newElement);
-                    zoneVeinGenContainer.tileMapConnectionsJustTiles.addRefElement(newCoords, ref tileRef);
+                    zoneVeinGenContainer.tileMapConnAddRefElement(newCoords, ref newElement);
 
                     // Get the point that is the closest to the zone start coords
                     CoordsInt adjustedCoords = allocatedDimList.getMinCoords().deepCopyInt();
@@ -124,7 +123,8 @@ public class ZoneVeinGenerator : ContainerAccessor
             newCoords.setY(0);
         }
 
-        zoneVeinGenContainer.currentZone.setVeinZoneConnectionList(ref zoneVeinGenContainer.tileMapConnections);
+        // After creating the tile map connections attach it to the current zone
+        zoneVeinGenContainer.attachTileMapConnToZone();
 
         // Set the current coords so that we start generating at the proper start
         startCoords = minDistance.getMinVal().Value;
@@ -142,15 +142,32 @@ public class ZoneVeinGenerator : ContainerAccessor
     public void createZoneVein(CoordsInt startCoords)
     {
         // Create the main "trunk" of the zone vein
+
         List<CoordsInt> listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.createZoneVeinTrunk(startCoords);
         this.zoneVeinGenContainer.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
+        //this.zoneVeinGenContainer.incCurrentVeinPass();
+
 
         bool graphIsDone = false;
+        bool edgeConfigFailed = false;
+        CoordsInt branchStartCoords;
+        DirectionBias dirBias;
 
-        // Have the Di Graph Controller decide where the next connection point should be
-        graphIsDone = this.zoneVeinGenContainer.zoneVeinDiGraphController.decideEndPoints();
+        //while (graphIsDone == false)
+        //{
 
-        // createBranches();
+            // Have the Di Graph Controller determine next branch type and determine branch generation configs
+            this.zoneVeinGenContainer.zoneVeinDiGraphController.determineNextBranch(out graphIsDone, out edgeConfigFailed, out branchStartCoords, out dirBias);
+            if (edgeConfigFailed == true)
+                Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
+            else if (graphIsDone == false)
+            {
+                //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.createZoneVeinBranch(branchStartCoords, dirBias);
+                //this.zoneVeinGenContainer.incCurrentVeinPass();
+
+            }
+
+        //}
     }
 
     // =====================================================================================
