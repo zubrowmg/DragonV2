@@ -145,11 +145,21 @@ namespace VeinManagerClasses
             return createEdge(startCoords, maxTrunkLength);
         }
 
-        public List<CoordsInt> createZoneVeinBranch(CoordsInt startCoords, DirectionBias dirBias)
+        // This function is used if you have determined the start coord and second coord
+        //      Typically the start coord is already on a tile that is a vein (locked tile)
+        //          And the second coord is on a unlocked tile
+        public List<CoordsInt> createZoneVeinBranch(CoordsInt startCoords, CoordsInt nextCoords, DirectionBias dirBias)
         {
             init(dirBias);
-            determineBranchStartDirection();
-            return createEdge(startCoords, maxEdgeLenth);
+
+            // Need to determine a start direction
+            // determineBranchStartDirection();
+
+            // Going to add the start coord to the new vein, aka won't be able to roll back this coord
+            // newVein.addSetCoord(startCoords);  // NEEDS TO BE THE WORLD COORD
+            
+            // Then use nextCoords as the actual start coords
+            return createEdge(nextCoords, maxEdgeLenth);
         }
 
         // Creates the trunk of the zone vein and returns the zone vein coords of the trunk

@@ -102,6 +102,26 @@ public class ZoneVeinGeneratorContainer
         return tileConnIsLocked;
     }
 
+    public bool tileMapConnCoordIsPermaLocked(CoordsInt coords)
+    {
+        bool tileConnIsLocked = false;
+
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
+        tileConnIsLocked = attemptedTileMapConnElement.getOne().isPermaLocked();
+
+        return tileConnIsLocked;
+    }
+
+    public bool tileMapConnCoordIsLocked__ForAllPasses(CoordsInt coords)
+    {
+        bool tileConnIsLocked = false;
+
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
+        tileConnIsLocked = attemptedTileMapConnElement.getOne().isAnyPassLocked();
+
+        return tileConnIsLocked;
+    }
+
     public bool coordsAreInsideTileMapBoundries(CoordsInt coords)
     {
         return tileMapConnections.isInsideBounds(coords);

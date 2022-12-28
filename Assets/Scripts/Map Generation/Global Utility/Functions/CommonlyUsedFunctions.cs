@@ -11,6 +11,10 @@ namespace CommonlyUsedFunctions
     public static class CommonFunctions
     {
 
+        // ===========================================================
+        //                      List Related
+        // ===========================================================
+
         public static T randomlySelectInList<T>(ref List<T> list)
         {
             int rand = Random.Range(0, list.Count);
@@ -33,13 +37,47 @@ namespace CommonlyUsedFunctions
             return shuffledList;
         }
 
+        public static T randomlySelectFromList<T>(List<T> list)
+        {
+            int randInt = Random.Range(0, list.Count);
+
+            return list[randInt];
+        }
+
+        public static void addIfItemDoesntExist<T>(ref List<T> list, T item)
+        {
+            if (list.Contains(item) == false)
+                list.Add(item);
+        }
+
+        public static void addIfItemDoesntExist<T>(ref List<T> list, List<T> itemList)
+        {
+            foreach (var currentItem in itemList)
+                addIfItemDoesntExist(ref list, currentItem);
+        }
+
+        public static List<T> getSmallestListCount<T>(List<List<T>> list)
+        {
+            List<T> smallestCount = list[0];
+            foreach (var indexList in list)
+            {
+                if (indexList.Count < smallestCount.Count)
+                    smallestCount = indexList;
+            }
+            return smallestCount;
+        }
+
+
+        // ===========================================================
+        //                        Coords Related
+        // ===========================================================
+
         public static float calculateCoordsDistance(Coords<int> oneCoord, Coords<int> twoCoords)
         {
             float xChange = calculateDifference(oneCoord.getX(), twoCoords.getX());
             float yChange = calculateDifference(oneCoord.getY(), twoCoords.getY());
             return Mathf.Sqrt((xChange * xChange) + (yChange * yChange));
         }
-
 
         public static CoordsInt calculateCoordsAverage(Coords<int> oneCoord, Coords<int> twoCoord)
         {
@@ -64,17 +102,40 @@ namespace CommonlyUsedFunctions
             return new CoordsInt(xAverage, yAverage);
         }
 
-        public static float calculateDifference(float numOne, float numTwo)
+        public static int calculateArea(CoordsInt minCoords, CoordsInt maxCoords)
         {
-            return (float)Mathf.Abs(numOne - numTwo);
+            int xDiff = (int)CommonFunctions.calculateDifference(minCoords.getX(), maxCoords.getX());
+            int yDiff = (int)CommonFunctions.calculateDifference(minCoords.getY(), maxCoords.getY());
+
+            int area = (xDiff + 1) * (yDiff + 1);
+            return area;
         }
 
-        public static T randomlySelectFromList<T>(List<T> list)
+        public static DirectionBias calculatePrimaryDirection(CoordsInt startCoords, CoordsInt endCoords, int displacementNeeded)
         {
-            int randInt = Random.Range(0, list.Count);
+            int xDiff = endCoords.getX() - startCoords.getX();
+            int yDiff = endCoords.getY() - startCoords.getY();
 
-            return list[randInt];
+            Direction primaryHorizontalDir = Direction.None;
+            Direction primaryVerticalDir = Direction.None;
+
+            if (xDiff >= displacementNeeded)
+                primaryHorizontalDir = Direction.East;
+            else if (xDiff <= (displacementNeeded * -1))
+                primaryHorizontalDir = Direction.West;
+
+            if (yDiff >= displacementNeeded)
+                primaryVerticalDir = Direction.North;
+            else if (yDiff <= (displacementNeeded * -1))
+                primaryVerticalDir = Direction.South;
+
+            DirectionBias newDirectionBias = new DirectionBias(primaryHorizontalDir, primaryVerticalDir);
+            return newDirectionBias;
         }
+
+        // ===========================================================
+        //                      Direction Related
+        // ===========================================================
 
         public static Direction getOppositeDir(Direction dir)
         {
@@ -102,58 +163,13 @@ namespace CommonlyUsedFunctions
             return oppositeDir;
         }
 
-        public static void addIfItemDoesntExist<T>(ref List<T> list, T item)
+
+        // ===========================================================
+        //                  Basic Math Related
+        // ===========================================================
+        public static float calculateDifference(float numOne, float numTwo)
         {
-            if (list.Contains(item) == false)
-                list.Add(item);
-        }
-
-        public static void addIfItemDoesntExist<T>(ref List<T> list, List<T> itemList)
-        {
-            foreach (var currentItem in itemList)
-                addIfItemDoesntExist(ref list, currentItem);
-        }
-
-        public static List<T> getSmallestListCount<T>(List<List<T>> list)
-        {
-            List<T> smallestCount = list[0];
-            foreach (var indexList in list)
-            {
-                if (indexList.Count < smallestCount.Count)
-                    smallestCount = indexList;
-            }
-            return smallestCount;
-        }
-
-        public static int calculateArea(CoordsInt minCoords, CoordsInt maxCoords)
-        {
-            int xDiff = (int)CommonFunctions.calculateDifference(minCoords.getX(), maxCoords.getX());
-            int yDiff = (int)CommonFunctions.calculateDifference(minCoords.getY(), maxCoords.getY());
-
-            int area = (xDiff + 1) * (yDiff + 1);
-            return area;
-        }
-
-        public static DirectionBias calculatePrimaryDirection(CoordsInt startCoords, CoordsInt endCoords, int displacementNeeded)
-        {
-            int xDiff = endCoords.getX() - startCoords.getX();
-            int yDiff = endCoords.getY() - startCoords.getY();
-
-            Direction primaryHorizontalDir = Direction.None;
-            Direction primaryVerticalDir = Direction.None;
-
-            if (xDiff >= displacementNeeded)
-                primaryHorizontalDir = Direction.East;
-            else if (xDiff <= (displacementNeeded * -1))
-                primaryHorizontalDir = Direction.West;
-
-            if (yDiff >= displacementNeeded)
-                primaryVerticalDir = Direction.None;
-            else if (yDiff <= (displacementNeeded * -1))
-                primaryVerticalDir = Direction.South;
-
-            DirectionBias newDirectionBias = new DirectionBias(primaryHorizontalDir, primaryVerticalDir);
-            return newDirectionBias;
+            return (float)Mathf.Abs(numOne - numTwo);
         }
     }
 }

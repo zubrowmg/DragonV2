@@ -39,19 +39,49 @@ namespace VeinManagerClasses
             this.passLocked.Add(0);
         }
         
+        public bool isPermaLocked()
+        {
+            return this.permaLocked;
+        }
+
         public bool isPassLocked(int pass)
         {
-            bool locked = false;
+            bool locked = isPermaLocked();
 
-            if (this.permaLocked == true)
-                locked = true;
+            if (locked == false)
+                locked = passIsLockedCheck(pass, true);
+
+            return locked;
+        }
+
+        public bool isAnyPassLocked()
+        {
+            bool locked = isPermaLocked();
 
             if (locked == false)
             {
-                passExistCheck(pass);
-                if (passLocked[pass] > 0)
-                    locked = true;
+                // Go through each available pass
+                for (int pass = 0; pass < passLocked.Count; pass++)
+                {
+                    locked = passIsLockedCheck(pass, false);
+                    if (locked == true)
+                        break;
+                }
             }
+
+            return locked;
+        }
+
+        private bool passIsLockedCheck(int pass, bool checkIfPassExists)
+        {
+            bool locked = false;
+            
+            if (checkIfPassExists)
+                passExistCheck(pass);
+
+            if (passLocked[pass] > 0)
+                locked = true;
+
             return locked;
         }
 
@@ -67,7 +97,7 @@ namespace VeinManagerClasses
             passLocked[pass]--;
         }
 
-        public void passExistCheck(int pass)
+        private void passExistCheck(int pass)
         {
             //Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
             if (pass >= passLocked.Count)

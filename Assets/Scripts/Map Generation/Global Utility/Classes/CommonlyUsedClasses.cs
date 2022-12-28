@@ -522,6 +522,11 @@ namespace CommonlyUsedClasses
             return this.verticalDir;
         }
 
+        public List<Direction> getPrimaryDirections()
+        {
+            return new List<Direction> { horizontalDir, verticalDir };
+        }
+
         public void print()
         {
             Debug.Log("Horizontal: " + this.horizontalDir +

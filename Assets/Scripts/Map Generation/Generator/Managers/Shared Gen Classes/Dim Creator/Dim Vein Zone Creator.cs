@@ -308,7 +308,7 @@ namespace DimCreatorClasses
         {
             // TIGHT CONTROLS, DON'T CHANGE WILLY NILLY
             int individualSquareMaxArea = 4;
-            int individualSquareMinSideLength = 1;
+            int individualSquareMinSideLength = 1; // Should probably be 3, since vein generation will need 1 tile of space in between locked tiles
             int maxDistanceFromCenter = 99;
 
             Dimensions noRestrictedDims = getTileMapDims();
