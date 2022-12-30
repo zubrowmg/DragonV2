@@ -33,11 +33,14 @@ namespace VeinManagerClasses
         int maxEdgeCount = 4;
         int targetEdgeCount = 0;
 
-        int newlyAddedMinEdgeLength = 3; // 3 nodes
-
+        int newlyAddedMinEdgeLength = 3; // 3 nodes long
         int maxNodeConnections = 4;
 
-       
+
+        // Rejected DiDot Node and DiDot Edge
+        Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>> edgeToRejectedStartNodesDict;
+        DiDotNode<CoordsInt> currentStartNode;
+        DiDotEdge<CoordsInt> currentEdge;
 
         public ZoneVeinDiGraphContoller(ref ZoneVeinGeneratorContainer zoneVeinGenContainerInst, ref GeneratorContainer contInst) : base(ref contInst)
         {
@@ -53,6 +56,10 @@ namespace VeinManagerClasses
             this.diGraph = new DiDotGraph<CoordsInt>();
             this.targetEdgeCount = Random.Range(minEdgeCount, maxEdgeCount + 1);
             this.targetCircularEdgeCount = Random.Range(minCircularEdgeCount, maxCircularEdgeCount + 1);
+
+            this.edgeToRejectedStartNodesDict = new Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>>();
+            this.currentEdge = new DiDotEdge<CoordsInt>();
+            this.currentStartNode = new DiDotNode<CoordsInt>();
         }
 
         // Add a line of nodes to the graph
@@ -145,21 +152,21 @@ namespace VeinManagerClasses
                     break;
 
                 case GraphEdgeType.Edge:
-                    configureNewEdge(out branchStartCoords, out branchSecondCoords, out dirBias, out edgeConfigFailed);
+                    configureNewBranchEdge(out branchStartCoords, out branchSecondCoords, out dirBias, out edgeConfigFailed);
                     break;
 
                 case GraphEdgeType.CircularEdge:
-                    configureNewEdge(out branchStartCoords, out branchSecondCoords, out dirBias, out edgeConfigFailed);
+                    configureNewBranchEdge(out branchStartCoords, out branchSecondCoords, out dirBias, out edgeConfigFailed);
                     //configureCicularNewEdge();
                     break;
             }
 
-            Debug.Log("NEXT EDGE TYPE: " + nextEdgeType);
+            //Debug.Log("NEXT EDGE TYPE: " + nextEdgeType);
 
         }
 
 
-        List<CoordsInt> configureNewEdge(out CoordsInt startCoords, out CoordsInt secondCoord, out DirectionBias dirBias, out bool edgeConfigFailed)
+        List<CoordsInt> configureNewBranchEdge(out CoordsInt startCoords, out CoordsInt secondCoord, out DirectionBias dirBias, out bool edgeConfigFailed)
         {
             // Basic configuration for now, expecting something more deliberate in the future
             // 1. Scan the allocated tile map connection for an empty space
@@ -174,16 +181,26 @@ namespace VeinManagerClasses
             secondCoord = new CoordsInt(-1, -1);
             dirBias = new DirectionBias(Direction.None, Direction.None);
             
-            // while edgeConfigFailed and 
-                if (foundEmptySpace == false)
+            if (foundEmptySpace == false)
+            {
+                Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
+                edgeConfigFailed = true;
+            }
+            else
+            {
+                List<DiDotEdge<CoordsInt>> allDiGraphEdges = this.diGraph.getListOfEdges();
+                foreach (var edge in allDiGraphEdges)
                 {
-                    Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
-                    edgeConfigFailed = true;
+                    this.edgeToRejectedStartNodesDict.Add(edge, new List<DiDotNode<CoordsInt>>());
                 }
-                else
+
+
+                bool edgeGenerationWasSuccessful = false;
+                while (edgeGenerationWasSuccessful == false)
                 {
                     bool adhearToMinEdgeLength = true;
-                    startCoords = findClosestNodeInDiGraph(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList);
+                    DiDotNode<CoordsInt> validStartNode = findClosestNodeInDiGraph(allDiGraphEdges, destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList);
+                    startCoords = validStartNode.getObject();
                     //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
 
                     //startCoords.print("CLOSEST COORD TO FREE SPACE: ");
@@ -195,14 +212,34 @@ namespace VeinManagerClasses
 
                         dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out secondCoord);
 
-                        // ATTEMPT TO GENERATE THE BRANCH NOW, IF IT FAILS THEN TRY TO FIND ANOTHER NODE
-                        //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias);
+                        // Attempt to generate a new vein
+                        //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out bool edgeGenerationFailed);
+                        //edgeGenerationWasSuccessful = !edgeGenerationFailed;
+                        edgeGenerationWasSuccessful = true;
 
-                        // BOOL FOR IF ABOVE FAILED
+                        //if (edgeGenerationFailed == true)
+                        //{
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // If the generation failed, then add the start node as a rejected start node and search for another start node
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        // !!!!!!!!!!!!!!!!!!!!!!!!!
+                        //}
                     }
                     else
+                    {
                         edgeConfigFailed = true;
+                        Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find any suitable node in the DiGraph for a new edge");
+                    }
                 }
+            }
 
             return listOfZoneVeinCoords;
         }
@@ -316,20 +353,20 @@ namespace VeinManagerClasses
         //          1. Edges can't be shorter than newlyAddedMinEdgeLength (currently 3)
         //          2. Node can't have more than 4 connections
         //      Needs to also make sure that the closest node cords can be traveled to
-        CoordsInt findClosestNodeInDiGraph(CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList)
+        DiDotNode<CoordsInt> findClosestNodeInDiGraph(List<DiDotEdge<CoordsInt>> allDiGraphEdges, CoordsInt destinationTileMapConnCoord, bool adhearToMinEdgeLength, ref TwoDList<Tile> tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList)
         {
             int currentMinEdgeLength = 0;
             if (adhearToMinEdgeLength == true)
                 currentMinEdgeLength = this.newlyAddedMinEdgeLength;
 
-            CoordsInt startCoords = new CoordsInt(-1, -1);
-            List<DiDotEdge<CoordsInt>> allDiGraphEdges = this.diGraph.getListOfEdges();
+            DiDotNode<CoordsInt> startNode = new DiDotNode<CoordsInt>();
+
             bool startCoordIsValid = false;
             nodeSearchFailed = false;
 
             List<DiDotNode<CoordsInt>> rejectedStartNodes = new List<DiDotNode<CoordsInt>>();
-            Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>> edgeToRejectedStartNodesDict = new Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>>();
 
+            // Using the destination coord, get the max possible dim list
             int maxFloodedArea = 100;
             floodedDimList = this.zoneVeinGenContainer.dimVeinZoneCreator.getFloodedDimensionsUsingAlternateTileMap(destinationTileMapConnCoord, this.zoneVeinGenContainer.debugMode, maxFloodedArea, ref tileMapConnections_JustTile);
 
@@ -340,8 +377,8 @@ namespace VeinManagerClasses
                 exhuastedAllNodesInEdge = false;
 
                 // Finds closest node to the destination coords, doesn't care if it's valid or not
-                findClosestNodeInEdgeRaw(out DiDotNode<CoordsInt> startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge, 
-                                            allDiGraphEdges, rejectedEdges, destinationTileMapConnCoord, ref edgeToRejectedStartNodesDict, adhearToMinEdgeLength, currentMinEdgeLength);
+                findClosestNodeInEdgeRaw(out startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge, 
+                                            allDiGraphEdges, rejectedEdges, destinationTileMapConnCoord, adhearToMinEdgeLength, currentMinEdgeLength);
 
                 if (allDiGraphEdges.Count == rejectedEdges.Count)
                 {
@@ -368,8 +405,8 @@ namespace VeinManagerClasses
                     listOfEdgeNodes = startEdge.getNodeList();
 
                 // Check if the start coord is valid
-                rejectedStartNodes = edgeToRejectedStartNodesDict[startEdge];
-                startCoordIsValid = isStartCoordValid(ref rejectedStartNodes, ref startCoords, ref startNode, ref floodedDimList, ref listOfEdgeNodes, ref originalStartNode, ref exhuastedAllNodesInEdge);
+                rejectedStartNodes = this.edgeToRejectedStartNodesDict[startEdge];
+                startCoordIsValid = isStartCoordValid(ref rejectedStartNodes, ref startNode, ref floodedDimList, ref listOfEdgeNodes, ref originalStartNode, ref exhuastedAllNodesInEdge);
 
                 if (exhuastedAllNodesInEdge == true)
                 {
@@ -378,10 +415,10 @@ namespace VeinManagerClasses
                 }
             }
 
-            return startCoords;
+            return startNode;
         }
 
-        bool isStartCoordValid(ref List<DiDotNode<CoordsInt>> rejectedStartNodes, ref CoordsInt startCoords, ref DiDotNode<CoordsInt> startNode, ref DimensionList floodedDimList, ref List<DiDotNode<CoordsInt>> listOfEdgeNodes, ref DiDotNode<CoordsInt> originalStartNode, ref bool exhuastedAllNodesInEdge)
+        bool isStartCoordValid(ref List<DiDotNode<CoordsInt>> rejectedStartNodes, ref DiDotNode<CoordsInt> startNode, ref DimensionList floodedDimList, ref List<DiDotNode<CoordsInt>> listOfEdgeNodes, ref DiDotNode<CoordsInt> originalStartNode, ref bool exhuastedAllNodesInEdge)
         {
             bool startCoordIsValid = false;
 
@@ -391,7 +428,7 @@ namespace VeinManagerClasses
             //List<DiDotNode<CoordsInt>> rejectedStartNodes = new List<DiDotNode<CoordsInt>>();
             while (startCoordIsValid == false)
             {
-                startCoords = startNode.getObject();
+                CoordsInt startCoords = startNode.getObject();
                 //startCoords.print("NEW EDGE START: ");
 
                 // First check all adjacent coords to see if they are a part of the flooded dim list
@@ -410,8 +447,8 @@ namespace VeinManagerClasses
 
         // Finds closest node to the destination coords, may or may not be what is needed (hence why it's Raw)
         void findClosestNodeInEdgeRaw(out DiDotNode<CoordsInt> startNode, out DiDotNode<CoordsInt> originalStartNode, out DiDotEdge<CoordsInt> startEdge,
-                                      List<DiDotEdge<CoordsInt>> allDiGraphEdges, List<DiDotEdge<CoordsInt>> rejectedEdges, CoordsInt destinationTileMapConnCoord, 
-                                      ref Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>> edgeToRejectedStartNodesDict, bool adhearToMinEdgeLength, int currentMinEdgeLength)
+                                      List<DiDotEdge<CoordsInt>> allDiGraphEdges, List<DiDotEdge<CoordsInt>> rejectedEdges, CoordsInt destinationTileMapConnCoord,
+                                      bool adhearToMinEdgeLength, int currentMinEdgeLength)
         {
             //    Distance,                        Node, Edge
             MinValue<float, Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>> minDistanceList = new MinValue<float, Double<DiDotNode<CoordsInt>, DiDotEdge<CoordsInt>>>(1);
@@ -429,11 +466,8 @@ namespace VeinManagerClasses
                 else
                     listOfNodes = edge.getNodeList();
 
-                // Add a new rejected start node list if it doesn't exist yet
-                if (edgeToRejectedStartNodesDict.ContainsKey(edge) == false)
-                    edgeToRejectedStartNodesDict.Add(edge, new List<DiDotNode<CoordsInt>>());
 
-                List<DiDotNode<CoordsInt>> rejectedStartNodes = edgeToRejectedStartNodesDict[edge];
+                List<DiDotNode<CoordsInt>> rejectedStartNodes = this.edgeToRejectedStartNodesDict[edge];
 
                 foreach (var node in listOfNodes)
                 {
