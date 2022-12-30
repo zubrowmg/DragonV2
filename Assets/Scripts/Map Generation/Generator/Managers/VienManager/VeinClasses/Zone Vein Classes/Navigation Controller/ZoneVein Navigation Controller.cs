@@ -20,6 +20,7 @@ namespace VeinManagerClasses
 
         // Rollback
         bool currentlyInRollBack = false;
+        bool rolledBackTooFar = false;
 
         // Direction and momentum
         //      Momentum starts at 0 in any direction, has a percentage chance of changing direction after each increment. Once it hits the max then force direction change
@@ -64,6 +65,7 @@ namespace VeinManagerClasses
             this.currentState.setCurrentDir(Direction.None);
 
             this.currentlyInRollBack = false;
+            this.rolledBackTooFar = false;
 
             this.newVein = new SetCoordsVein(ref getContainerInst(), 0, new CoordsInt(0, 0), new CoordsInt(0, 0), false, false, false, this.veinWidth);
 
@@ -138,17 +140,17 @@ namespace VeinManagerClasses
         //                              Create Zone Vein Functions (Edge only)
         // =====================================================================================
 
-        public List<CoordsInt> createZoneVeinTrunk(CoordsInt startCoords)
+        public List<CoordsInt> randomlyGenerateZoneVeinTrunk(CoordsInt startCoords, out bool edgeCreationFailed)
         {
             initTrunk();
             determineTrunkStartDirection();
-            return createEdge(startCoords, maxTrunkLength);
+            return createEdge(startCoords, maxTrunkLength, out edgeCreationFailed);
         }
 
         // This function is used if you have determined the start coord and second coord
         //      Typically the start coord is already on a tile that is a vein (locked tile)
         //          And the second coord is on a unlocked tile
-        public List<CoordsInt> createZoneVeinBranch(CoordsInt startCoords, CoordsInt nextCoords, DirectionBias dirBias)
+        public List<CoordsInt> randomlyGenerateZoneVeinBranch(CoordsInt startCoords, CoordsInt nextCoords, DirectionBias dirBias, out bool edgeCreationFailed)
         {
             init(dirBias);
 
@@ -159,15 +161,16 @@ namespace VeinManagerClasses
             // newVein.addSetCoord(startCoords);  // NEEDS TO BE THE WORLD COORD
             
             // Then use nextCoords as the actual start coords
-            return createEdge(nextCoords, maxEdgeLenth);
+            return createEdge(nextCoords, maxEdgeLenth, out edgeCreationFailed);
         }
 
         // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
-        private List<CoordsInt> createEdge(CoordsInt startCoords, int maxLength)
+        private List<CoordsInt> createEdge(CoordsInt startCoords, int maxLength, out bool edgeCreationFailed)
         {
             this.currentState.setCurrentCoords(startCoords.deepCopyInt());
 
             bool edgeFinished = false;
+            edgeCreationFailed = false;
 
             //this.currentCoords.print("Start Coords: ");
             this.currentState.setCurrentWorldCoords(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(this.currentState.getCurrentCoords()));
@@ -200,6 +203,11 @@ namespace VeinManagerClasses
                 determineNewDirection();
                 this.currentlyInRollBack = false;
 
+                if (this.rolledBackTooFar == true)
+                {
+                    edgeCreationFailed = true;
+                    break;
+                }
                 // Track the current state
                 this.stateHistory.addState(this.currentState.deepCopy());
 
@@ -208,9 +216,13 @@ namespace VeinManagerClasses
                 this.currentState.clearRejectedDir();
             }
 
-            // Add all recorded world coords from the state history and trigger vein generation
-            newVein.addSetCoord(this.stateHistory.getListOfWorldCoords());
-            createVein();
+            if (edgeCreationFailed == false)
+            {
+                // Add all recorded world coords from the state history and trigger vein generation
+                newVein.addSetCoord(this.stateHistory.getListOfWorldCoords());
+                createVein();
+            }
+            
 
             List<CoordsInt> listOfZoneVeinCoords = this.stateHistory.getListOfZoneVeinCoords();
 
@@ -537,6 +549,7 @@ namespace VeinManagerClasses
 
             if (rollBackedTooFar == true)
             {
+                this.rolledBackTooFar = true;
                 Debug.LogError("ZoneVeinGenerator - rollBackState(): ROLLBACKED TOO FAR 1");
                 return;
             }
@@ -570,6 +583,7 @@ namespace VeinManagerClasses
 
                 if (rollBackedTooFar == true)
                 {
+                    this.rolledBackTooFar = true;
                     Debug.LogError("ZoneVeinGenerator - rollBackState(): ROLLBACKED TOO FAR 2");
                     return;
                 }

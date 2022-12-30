@@ -120,7 +120,7 @@ namespace VeinManagerClasses
             return nextEdgeType;
         }
 
-        public void determineNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out CoordsInt branchSecondCoords, out DirectionBias dirBias)
+        public void createNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out CoordsInt branchSecondCoords, out DirectionBias dirBias)
         {
             graphIsDone = false;
             // Analyze the graph
@@ -158,13 +158,15 @@ namespace VeinManagerClasses
 
         }
 
-        void configureNewEdge(out CoordsInt startCoords, out CoordsInt secondCoord, out DirectionBias dirBias, out bool edgeConfigFailed)
+
+        List<CoordsInt> configureNewEdge(out CoordsInt startCoords, out CoordsInt secondCoord, out DirectionBias dirBias, out bool edgeConfigFailed)
         {
             // Basic configuration for now, expecting something more deliberate in the future
             // 1. Scan the allocated tile map connection for an empty space
             // 2. Determine the closest point in the di graph controller to that empty space
             // 3. Get the direction from the point to the empty space
 
+            List<CoordsInt> listOfZoneVeinCoords = new List<CoordsInt>();
             CoordsInt destinationMapConnCoord = zoneVeinGenContainer.zoneVeinNavigationController.findEmptySpaceCoord(out bool foundEmptySpace, out TwoDList<Tile> tileMapConnections_JustTile);
             edgeConfigFailed = false;
 
@@ -172,76 +174,86 @@ namespace VeinManagerClasses
             secondCoord = new CoordsInt(-1, -1);
             dirBias = new DirectionBias(Direction.None, Direction.None);
             
-            if (foundEmptySpace == false)
-            {
-                Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
-                edgeConfigFailed = true;
-            }
-            else
-            {
-                bool adhearToMinEdgeLength = true;
-                startCoords = findClosestNodeInDiGraph(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList);
-                //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
-
-                //startCoords.print("CLOSEST COORD TO FREE SPACE: ");
-                //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
-
-                if (nodeSearchFailed == false)
+            // while edgeConfigFailed and 
+                if (foundEmptySpace == false)
                 {
-                    //destinationMapConnCoord.print("FREE SPACE COORD: ");
-
-                    // Calculate the direction
-                    int displacementNeeded = 1;
-                    dirBias = CommonFunctions.calculatePrimaryDirection(startCoords, destinationMapConnCoord, displacementNeeded);
-
-                    // Find the second coord based on the new dir bias
-                    bool secondaryCoordIsValid = false;
-                    List<Direction> primaryDir = dirBias.getPrimaryDirections();
-
-                    // Check primary directions first
-                    foreach (var dir in primaryDir)
-                    {
-                        if (dir.Equals(Direction.None) == false)
-                        {
-                            secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out secondCoord);
-
-                            if (secondaryCoordIsValid)
-                                break;
-                        }
-                    }
-
-                    // If primary directions failed, then look in non primary directions
-                    if (secondaryCoordIsValid == false)
-                    {
-                        foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
-                        {
-                            if (primaryDir.Contains(dir) == false && dir.Equals(Direction.None) == false)
-                            {
-                                Direction oppDir = CommonFunctions.getOppositeDir(dir);
-                                secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
-
-                                if (secondaryCoordIsValid)
-                                    break;
-                            }
-                        }
-                    }
-
-                    if (secondaryCoordIsValid == false)
-                        Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find a secondary coord??? Should have been validated in findClosestNodeInDiGraph()");
-                    
+                    Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find free space, space is probably too packed with veins already");
+                    edgeConfigFailed = true;
                 }
                 else
-                    edgeConfigFailed = true;
-            }
+                {
+                    bool adhearToMinEdgeLength = true;
+                    startCoords = findClosestNodeInDiGraph(destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList);
+                    //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
 
+                    //startCoords.print("CLOSEST COORD TO FREE SPACE: ");
+                    //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
+
+                    if (nodeSearchFailed == false)
+                    {
+                        //destinationMapConnCoord.print("FREE SPACE COORD: ");
+
+                        dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out secondCoord);
+
+                        // ATTEMPT TO GENERATE THE BRANCH NOW, IF IT FAILS THEN TRY TO FIND ANOTHER NODE
+                        //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias);
+
+                        // BOOL FOR IF ABOVE FAILED
+                    }
+                    else
+                        edgeConfigFailed = true;
+                }
+
+            return listOfZoneVeinCoords;
         }
 
 
-        
 
-        void configureCicularNewEdge()
+
+        DirectionBias configurePrimaryDirection(ref CoordsInt startCoords, CoordsInt destinationMapConnCoord, ref DimensionList floodedDimList, out CoordsInt secondCoord)
         {
-            
+            secondCoord = new CoordsInt(-1, -1);
+
+            // Calculate the direction
+            int displacementNeeded = 1;
+            DirectionBias dirBias = CommonFunctions.calculatePrimaryDirection(startCoords, destinationMapConnCoord, displacementNeeded);
+
+            // Find the second coord based on the new dir bias
+            bool secondaryCoordIsValid = false;
+            List<Direction> primaryDir = dirBias.getPrimaryDirections();
+
+            // Check primary directions first
+            foreach (var dir in primaryDir)
+            {
+                if (dir.Equals(Direction.None) == false)
+                {
+                    secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out secondCoord);
+
+                    if (secondaryCoordIsValid)
+                        break;
+                }
+            }
+
+            // If primary directions failed, then look in non primary directions
+            if (secondaryCoordIsValid == false)
+            {
+                foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
+                {
+                    if (primaryDir.Contains(dir) == false && dir.Equals(Direction.None) == false)
+                    {
+                        Direction oppDir = CommonFunctions.getOppositeDir(dir);
+                        secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
+
+                        if (secondaryCoordIsValid)
+                            break;
+                    }
+                }
+            }
+
+            if (secondaryCoordIsValid == false)
+                Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Could not find a secondary coord??? Should have been validated in findClosestNodeInDiGraph()");
+
+            return dirBias;
         }
 
         void print(string message)

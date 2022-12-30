@@ -58,8 +58,9 @@ public class DebugControllerManager : MonoBehaviour
     // ==============================================================================================
 
     int tempIndex = 0;
-    public void tempButtonPlotFreeSpaces()
+    public void tempButtonPlotAllFreeSpaces()
     {
+        // This plotted each free space that was determined via world coords. Which was depricated to use Tile Map Connection Points instead
         for (int zoneIdx = 0; zoneIdx < zoneListCount; zoneIdx++)
         {
             Zone_New zone = generatorInst.getZoneContainer().getZone(zoneIdx);
@@ -107,6 +108,11 @@ public class DebugControllerManager : MonoBehaviour
             }
         }
         tempIndex++;
+    }
+
+    public void tempButtonPlotFloodedFreeSpaceDimList()
+    {
+
     }
 
     // ==============================================================================================
