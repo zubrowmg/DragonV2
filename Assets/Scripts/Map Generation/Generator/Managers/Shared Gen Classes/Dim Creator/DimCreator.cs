@@ -601,9 +601,8 @@ namespace DimCreatorClasses
 
             if (this.alternateTileMapIsUsed == false)
             {
-                bool accessSuccesful = false;
                 CoordsInt tileCoords = new CoordsInt(coords.getX(), coords.getY());
-                currentTile = getTile(tileCoords, ref accessSuccesful);
+                currentTile = getTile(tileCoords, out bool accessSuccesful);
             }
             else
             {

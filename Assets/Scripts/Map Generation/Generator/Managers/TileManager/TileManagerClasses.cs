@@ -130,7 +130,7 @@ namespace TileManagerClasses
             return this.tileMapCenter;
         }
 
-        public ref Tile getTile(CoordsInt coords, ref bool accessSuccessful)
+        public ref Tile getTile(CoordsInt coords, out bool accessSuccessful)
         {
             if (tileMapDimensions.getMinX() <= coords.getX() && coords.getX() < tileMapDimensions.getMaxX() &&
                 tileMapDimensions.getMinY() <= coords.getY() && coords.getY() < tileMapDimensions.getMaxY())

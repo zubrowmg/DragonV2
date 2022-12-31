@@ -43,9 +43,31 @@ public class TileAccessor
         return contInst.tileMap.getTileMapCenter();
     }
 
-    public ref Tile getTile(CoordsInt coords, ref bool accessSuccessful)
+    public ref Tile getTile(CoordsInt coords, out bool accessSuccessful)
     {
-        return ref contInst.tileMap.getTile(coords, ref accessSuccessful);
+        return ref contInst.tileMap.getTile(coords, out accessSuccessful);
+    }
+
+    public List<Tile> getBlockOfTiles(CoordsInt centerCoord, int blockLength)
+    {
+        // Block length starts from the center, 1 length is a 3x3 black
+        List<Tile> blockOfTiles = new List<Tile>();
+        CoordsInt startCoord = centerCoord.deepCopyInt();
+        startCoord.decX(blockLength);
+        startCoord.decY(blockLength);
+
+        int sideLength = (blockLength * 2) + 1;
+
+        for (int x = 0; x < sideLength; x++)
+        {
+            for (int y = 0; y < sideLength; y++)
+            {
+                Tile tile = getTile(new CoordsInt(startCoord.getX() + x, startCoord.getY() + y), out bool accessSuccessful);
+                if (accessSuccessful)
+                    blockOfTiles.Add(tile);
+            }
+        }
+        return blockOfTiles;
     }
 
     public Depth getTileDepth(CoordsInt coords)

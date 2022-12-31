@@ -71,10 +71,18 @@ public class ZoneVeinGeneratorContainer
 
     public CoordsInt getWorldMapCoordsFromTileMapConns(CoordsInt coords)
     {
-        CoordsInt temp = this.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
-        return temp;
+        return this.tileMapConnections.getElement(coords).getTwo().getTileMapCoords();
     }
 
+    public List<CoordsInt> getWorldMapCoordsFromTileMapConns(List<CoordsInt> coordsList)
+    {
+        List<CoordsInt> worldCoords = new List<CoordsInt>();
+        foreach (var coords in coordsList)
+        {
+            worldCoords.Add(getWorldMapCoordsFromTileMapConns(coords));
+        }
+        return worldCoords;
+    }
 
     // Checks for boundries and if the point can be traveled to
     public bool checkTileMapConnPoint(CoordsInt coords)

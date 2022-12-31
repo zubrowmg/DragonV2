@@ -194,6 +194,7 @@ namespace VeinManagerClasses
             }
             else
             {
+                // Add each edge to the dictionary
                 List<DiDotEdge<CoordsInt>> allDiGraphEdges = this.diGraph.getListOfEdges();
                 foreach (var edge in allDiGraphEdges)
                 {
@@ -226,6 +227,12 @@ namespace VeinManagerClasses
                         // If the Navigation controller failed to generate a new edge, reject the current start node
                         if (edgeGenerationFailed == true)
                             this.edgeToRejectedStartNodesDict[this.currentStartEdge].Add(this.currentStartNode);
+                        else if (zoneVeinGenContainer.debugMode == true)
+                        {
+                            // Convert the flooded dim list points to world space coords
+                            List<CoordsInt> floodedFreeSpaceWorldCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(floodedDimList.getAllSelectedGridCoords());
+                            zoneVeinGenContainer.currentZone.floodedFreeSpaces.Add(floodedFreeSpaceWorldCoords);
+                        }
                     }
                     else
                     {

@@ -178,8 +178,7 @@ namespace VeinManagerClasses
 
         protected void placeVeinConnection(CoordsInt coords)
         {
-            bool accessSuccessful = false;
-            Tile selectedTile = getTile(coords, ref accessSuccessful);
+            Tile selectedTile = getTile(coords, out bool accessSuccessful);
 
             if (accessSuccessful)
                 addNewVeinConnection(ref selectedTile);
@@ -429,8 +428,7 @@ namespace VeinManagerClasses
         void markTileAsVein(CoordsInt index, DebugVeinTileType type)
         {
             //ZoneUnitProperties newZoneAndAbilities = null;
-            bool accessSuccessful = false;
-            Tile selectedTile = getTile(index, ref accessSuccessful);
+            Tile selectedTile = getTile(index, out bool accessSuccessful);
 
             if (accessSuccessful == true)
             {

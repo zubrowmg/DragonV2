@@ -29,6 +29,7 @@ public class Zone_New
 
     // Temporary Variables, meant to be deleted after debug is done
     public List<DimensionList> freeSpaces = new List<DimensionList>();
+    public List<List<CoordsInt>> floodedFreeSpaces = new List<List<CoordsInt>>();
 
 
     // Zones are created during vein zone generation
