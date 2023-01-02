@@ -492,12 +492,12 @@ namespace VeinManagerClasses
                 {
                     if (locked == true)
                     {
-                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForCurrentPass(attemptedCoord) == true)
+                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(attemptedCoord) == true)
                             dirCheck.Add(dir);
                     }
                     else
                     {
-                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForCurrentPass(attemptedCoord) == false)
+                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(attemptedCoord) == false)
                             dirCheck.Add(dir);
                     }
                 }
@@ -593,9 +593,6 @@ namespace VeinManagerClasses
         // =====================================================================================
         //                           DiGraph Controller Help Functions
         // =====================================================================================
-
-        
-
         public CoordsInt findEmptySpaceCoord(out bool foundFreeSpace, out TwoDList<Tile> tileMapConnections_JustTile)
         {
             // Uses dimVeinZoneCreator to find empty space in a restricted tile map dimension (The one that the zone is restricted to)

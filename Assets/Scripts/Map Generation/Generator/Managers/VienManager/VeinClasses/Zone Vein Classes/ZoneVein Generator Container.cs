@@ -94,20 +94,10 @@ public class ZoneVeinGeneratorContainer
             return rejected;
 
         // Tile has already been traveled to
-        if (tileMapConnCoordIsLocked__ForCurrentPass(coords) == true)
+        if (tileMapConnCoordIsLocked__ForAllPasses(coords) == true)
             rejected = true;
 
         return rejected;
-    }
-
-    public bool tileMapConnCoordIsLocked__ForCurrentPass(CoordsInt coords)
-    {
-        bool tileConnIsLocked = false;
-
-        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
-        tileConnIsLocked = attemptedTileMapConnElement.getOne().isPassLocked(getCurrentVeinPass());
-
-        return tileConnIsLocked;
     }
 
     public bool tileMapConnCoordIsPermaLocked(CoordsInt coords)
@@ -116,6 +106,16 @@ public class ZoneVeinGeneratorContainer
 
         Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
         tileConnIsLocked = attemptedTileMapConnElement.getOne().isPermaLocked();
+
+        return tileConnIsLocked;
+    }
+
+    public bool tileMapConnCoordIsLocked__ForCurrentPass(CoordsInt coords)
+    {
+        bool tileConnIsLocked = false;
+
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
+        tileConnIsLocked = attemptedTileMapConnElement.getOne().isPassLocked(getCurrentVeinPass());
 
         return tileConnIsLocked;
     }

@@ -210,7 +210,7 @@ namespace VeinManagerClasses
                     startCoords = this.currentStartNode.getObject();
                     
                     //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
-                    //startCoords.print("CLOSEST COORD TO FREE SPACE: ");
+                    startCoords.print("INITIAL START COORDS: ");
                     //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
                     if (nodeSearchFailed == false)
@@ -226,7 +226,10 @@ namespace VeinManagerClasses
 
                         // If the Navigation controller failed to generate a new edge, reject the current start node
                         if (edgeGenerationFailed == true)
+                        {
+                            Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Edge Generation failed. Moving onto a different start node");
                             this.edgeToRejectedStartNodesDict[this.currentStartEdge].Add(this.currentStartNode);
+                        }
                         else if (zoneVeinGenContainer.debugMode == true)
                         {
                             // Convert the flooded dim list points to world space coords
@@ -391,6 +394,7 @@ namespace VeinManagerClasses
                     else
                     {
                         Debug.LogError("EXHAUSTED ALL EDGES IN ZONE DIGRAPH, REDUCING MIN EDGE LENGTH REQUIRMENT");
+                        rejectedEdges = new List<DiDotEdge<CoordsInt>>();
                         currentMinEdgeLength--;
                         continue;
                     }
