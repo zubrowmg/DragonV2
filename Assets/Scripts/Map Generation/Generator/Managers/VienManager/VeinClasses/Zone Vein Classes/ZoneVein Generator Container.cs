@@ -100,34 +100,50 @@ public class ZoneVeinGeneratorContainer
         return rejected;
     }
 
-    public bool tileMapConnCoordIsPermaLocked(CoordsInt coords)
-    {
-        bool tileConnIsLocked = false;
+    public enum TileLockTest { Perma_Locked, Current_Pass, All_Passes }
 
-        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
-        tileConnIsLocked = attemptedTileMapConnElement.getOne().isPermaLocked();
+    public bool tileMapConnCoordIsLocked(CoordsInt coords, TileLockTest lockTestType)
+    {
+        bool tileConnIsLocked = true;
+        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement;
+
+        // Only test if it is inside of the bounds
+        if (tileMapConnections.isInsideBounds(coords) == true)
+        {
+            attemptedTileMapConnElement = getTileMapConnElement(coords);
+
+            switch (lockTestType)
+            {
+                case TileLockTest.All_Passes:
+                    tileConnIsLocked = attemptedTileMapConnElement.getOne().isAnyPassLocked();
+                    break;
+
+                case TileLockTest.Current_Pass:
+                    tileConnIsLocked = attemptedTileMapConnElement.getOne().isPassLocked(getCurrentVeinPass());
+                    break;
+
+                case TileLockTest.Perma_Locked:
+                    tileConnIsLocked = attemptedTileMapConnElement.getOne().isPermaLocked();
+                    break;
+            }
+        }
 
         return tileConnIsLocked;
+    }
+
+    public bool tileMapConnCoordIsPermaLocked(CoordsInt coords)
+    {
+        return tileMapConnCoordIsLocked(coords, TileLockTest.Perma_Locked);
     }
 
     public bool tileMapConnCoordIsLocked__ForCurrentPass(CoordsInt coords)
     {
-        bool tileConnIsLocked = false;
-
-        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
-        tileConnIsLocked = attemptedTileMapConnElement.getOne().isPassLocked(getCurrentVeinPass());
-
-        return tileConnIsLocked;
+        return tileMapConnCoordIsLocked(coords, TileLockTest.Current_Pass);
     }
 
     public bool tileMapConnCoordIsLocked__ForAllPasses(CoordsInt coords)
     {
-        bool tileConnIsLocked = false;
-
-        Double<TileTraveledToMarker, Tile> attemptedTileMapConnElement = getTileMapConnElement(coords);
-        tileConnIsLocked = attemptedTileMapConnElement.getOne().isAnyPassLocked();
-
-        return tileConnIsLocked;
+        return tileMapConnCoordIsLocked(coords, TileLockTest.All_Passes);
     }
 
     public bool coordsAreInsideTileMapBoundries(CoordsInt coords)

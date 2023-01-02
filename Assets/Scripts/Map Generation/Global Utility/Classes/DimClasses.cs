@@ -1014,8 +1014,11 @@ namespace CommonlyUsedClasses
         {
             bool coordIsOne = false;
 
-            if (this.grid.getElement(coord) == 1)
-                coordIsOne = true;
+            if (this.grid.isInsideBounds(coord) == true)
+            {
+                if (this.grid.getElement(coord) == 1)
+                    coordIsOne = true;
+            }
 
             return coordIsOne;
         }

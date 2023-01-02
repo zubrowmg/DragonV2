@@ -165,26 +165,29 @@ namespace CommonlyUsedFunctions
 
         public static CoordsInt changeCoordsBasedOnDir(CoordsInt coords, Direction dir, int inc)
         {
+            // Think that you need to create a new CoordsInt var as coords is passed in by reference
+            CoordsInt outputCoords = coords.deepCopyInt();
+
             switch (dir)
             {
                 case Direction.North:
-                    coords.incY(inc);
+                    outputCoords.incY(inc);
                     break;
                 case Direction.East:
-                    coords.incX(inc);
+                    outputCoords.incX(inc);
                     break;
                 case Direction.South:
-                    coords.decY(inc);
+                    outputCoords.decY(inc);
                     break;
                 case Direction.West:
-                    coords.decX(inc);
+                    outputCoords.decX(inc);
                     break;
                 case Direction.None:
                     Debug.Log("Commonly Used Functions - changeCoordsBasedOnDir(): Direction.None passed in");
                     break;
             }
 
-            return coords;
+            return outputCoords;
         }
 
         // ===========================================================

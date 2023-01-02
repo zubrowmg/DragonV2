@@ -108,6 +108,7 @@ namespace VeinManagerClasses
             List<Direction> acceptableDir = new List<Direction>();
             CoordsInt thirdCoord;
 
+
             // Check if primary direction can be traveled to
             foreach (var dir in this.currentDirectionBias.getPrimaryDirections())
             {
@@ -119,12 +120,14 @@ namespace VeinManagerClasses
                         acceptableDir.Add(dir);
                 }
             }
+            //Debug.Log("TTT____1");
 
             // Else check the secondary directions
             if (acceptableDir.Count != 0)
                 startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
             else
             {
+                //Debug.Log("TTT____2");
                 foreach (var dir in this.currentDirectionBias.getSecondaryDirections())
                 {
                     if (dir != Direction.None)
@@ -135,6 +138,7 @@ namespace VeinManagerClasses
                             acceptableDir.Add(dir);
                     }
                 }
+                //Debug.Log("TTT____3");
 
                 if (acceptableDir.Count != 0)
                     startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
