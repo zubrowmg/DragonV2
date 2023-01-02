@@ -163,6 +163,29 @@ namespace CommonlyUsedFunctions
             return oppositeDir;
         }
 
+        public static CoordsInt changeCoordsBasedOnDir(CoordsInt coords, Direction dir, int inc)
+        {
+            switch (dir)
+            {
+                case Direction.North:
+                    coords.incY(inc);
+                    break;
+                case Direction.East:
+                    coords.incX(inc);
+                    break;
+                case Direction.South:
+                    coords.decY(inc);
+                    break;
+                case Direction.West:
+                    coords.decX(inc);
+                    break;
+                case Direction.None:
+                    Debug.Log("Commonly Used Functions - changeCoordsBasedOnDir(): Direction.None passed in");
+                    break;
+            }
+
+            return coords;
+        }
 
         // ===========================================================
         //                  Basic Math Related

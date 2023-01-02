@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using CommonlyUsedDefinesAndEnums;
+using CommonlyUsedFunctions;
 
 namespace CommonlyUsedClasses
 {
@@ -500,6 +501,7 @@ namespace CommonlyUsedClasses
     {
         Direction horizontalDir;
         Direction verticalDir;
+        List<Direction> secondaryDirs;
 
         public DirectionBias(Direction horizontalDir, Direction verticalDir)
         {
@@ -510,6 +512,23 @@ namespace CommonlyUsedClasses
 
             this.horizontalDir = horizontalDir;
             this.verticalDir = verticalDir;
+
+            secondaryDirs = new List<Direction>();
+            if (horizontalDir == Direction.None)
+            {
+                secondaryDirs.Add(Direction.West);
+                secondaryDirs.Add(Direction.East);
+            }
+            else
+                secondaryDirs.Add(CommonFunctions.getOppositeDir(horizontalDir));
+
+            if (verticalDir == Direction.None)
+            {
+                secondaryDirs.Add(Direction.North);
+                secondaryDirs.Add(Direction.South);
+            }
+            else
+                secondaryDirs.Add(CommonFunctions.getOppositeDir(verticalDir));
         }
 
         public Direction getHorizontalDir()
@@ -525,6 +544,11 @@ namespace CommonlyUsedClasses
         public List<Direction> getPrimaryDirections()
         {
             return new List<Direction> { horizontalDir, verticalDir };
+        }
+
+        public List<Direction> getSecondaryDirections()
+        {
+            return secondaryDirs;
         }
 
         public void print()
@@ -633,7 +657,6 @@ namespace CommonlyUsedClasses
     public class MinValue<T1, T2> : OrderValuesBase<T1, T2>
     {
         public MinValue(int size) : base (size) {}
-
 
         protected override bool compareCheck(T1 keyInt, LinkedListNode<KeyValuePair<T1, T2>> pair)
         {

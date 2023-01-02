@@ -220,8 +220,8 @@ namespace VeinManagerClasses
                         dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out secondCoord);
 
                         // Attempt to generate a new vein
-                        bool edgeGenerationFailed = false;
-                        //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out bool edgeGenerationFailed);
+                        //bool edgeGenerationFailed = false;
+                        listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out bool edgeGenerationFailed);
                         edgeGenerationWasSuccessful = !edgeGenerationFailed;
 
                         // If the Navigation controller failed to generate a new edge, reject the current start node
@@ -268,7 +268,7 @@ namespace VeinManagerClasses
             {
                 if (dir.Equals(Direction.None) == false)
                 {
-                    secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out secondCoord);
+                    secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotLockedForAllPasses(ref startCoords, ref floodedDimList, dir, out secondCoord);
 
                     if (secondaryCoordIsValid)
                         break;
@@ -283,7 +283,7 @@ namespace VeinManagerClasses
                     if (primaryDir.Contains(dir) == false && dir.Equals(Direction.None) == false)
                     {
                         Direction oppDir = CommonFunctions.getOppositeDir(dir);
-                        secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
+                        secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotLockedForAllPasses(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
 
                         if (secondaryCoordIsValid)
                             break;
@@ -533,10 +533,13 @@ namespace VeinManagerClasses
             bool startCoordIsValid = false;
             foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
             {
-                startCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out CoordsInt nextCoord); // nextCoord is not used here
+                if (dir != Direction.None)
+                {
+                    startCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out CoordsInt nextCoord); // nextCoord is not used here
 
-                if (startCoordIsValid == true)
-                    break;
+                    if (startCoordIsValid == true)
+                        break;
+                }
             }
             return startCoordIsValid;
         }
@@ -545,36 +548,48 @@ namespace VeinManagerClasses
         {
             bool startCoordIsValid = false;
 
-            
             CoordsInt checkFloodedIsNextToStart = startCoords.deepCopyInt();
             nextCoord = startCoords.deepCopyInt();
 
-            switch (dir)
-            {
-                case Direction.None:
-                    return startCoordIsValid;
+            if (dir == Direction.None)
+                return startCoordIsValid;
+            else
+                checkFloodedIsNextToStart = CommonFunctions.changeCoordsBasedOnDir(checkFloodedIsNextToStart, dir, 1);
 
-                case Direction.North:
-                    checkFloodedIsNextToStart.incY();
-                    break;
-
-                case Direction.East:
-                    checkFloodedIsNextToStart.incX();
-                    break;
-
-                case Direction.South:
-                    checkFloodedIsNextToStart.decY();
-                    break;
-
-                case Direction.West:
-                    checkFloodedIsNextToStart.decX();
-                    break;
-            }
 
             if (floodedDimList.coordIsMarked(checkFloodedIsNextToStart) == true && zoneVeinGenContainer.tileMapConnCoordIsPermaLocked(checkFloodedIsNextToStart) == false)
                 startCoordIsValid = true;
 
             nextCoord = checkFloodedIsNextToStart;
+
+            //startCoords.print("START: ");
+            //nextCoord.print("NEXT: ");
+
+
+            return startCoordIsValid;
+        }
+
+        bool adjacentDirectionIsFloodedAndNotLockedForAllPasses(ref CoordsInt startCoords, ref DimensionList floodedDimList, Direction dir, out CoordsInt nextCoord)
+        {
+            bool startCoordIsValid = false;
+
+            CoordsInt checkFloodedIsNextToStart = startCoords.deepCopyInt();
+            nextCoord = startCoords.deepCopyInt();
+
+            if (dir == Direction.None)
+                return startCoordIsValid;
+            else
+                checkFloodedIsNextToStart = CommonFunctions.changeCoordsBasedOnDir(checkFloodedIsNextToStart, dir, 1);
+
+
+            if (floodedDimList.coordIsMarked(checkFloodedIsNextToStart) == true && zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(checkFloodedIsNextToStart) == false)
+                startCoordIsValid = true;
+
+            nextCoord = checkFloodedIsNextToStart;
+
+            //startCoords.print("START: ");
+            //nextCoord.print("NEXT: ");
+
 
             return startCoordIsValid;
         }

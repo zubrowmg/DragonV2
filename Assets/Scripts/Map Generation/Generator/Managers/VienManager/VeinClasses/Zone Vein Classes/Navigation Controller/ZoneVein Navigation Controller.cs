@@ -98,19 +98,55 @@ namespace VeinManagerClasses
                 Debug.LogError("ZoneVeinGenerator - determineTrunkStartDirection(): Start Direction has no direction to start in");
         }
 
-        void determineBranchStartDirection()
+        void determineBranchStartDirection(CoordsInt secondCoord, out bool foundStartDir)
         {
             // Needs to choose a start direction based on zone direction bias
             //      And if there is open space in that direction
+            //      The start direction is for the second coord!
+            foundStartDir = true;
+            Direction startDir = Direction.None;
+            List<Direction> acceptableDir = new List<Direction>();
+            CoordsInt thirdCoord;
 
-            // foreach dir
-            // {
-            //this.zoneVeinGenContainer.tileMapConnCoordIsLocked__ForCurrentPass();
-            // }
+            // Check if primary direction can be traveled to
+            foreach (var dir in this.currentDirectionBias.getPrimaryDirections())
+            {
+                if (dir != Direction.None)
+                {
+                    thirdCoord = CommonFunctions.changeCoordsBasedOnDir(secondCoord, dir, 1);
 
+                    if (this.zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(thirdCoord) == false)
+                        acceptableDir.Add(dir);
+                }
+            }
+
+            // Else check the secondary directions
+            if (acceptableDir.Count != 0)
+                startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
+            else
+            {
+                foreach (var dir in this.currentDirectionBias.getSecondaryDirections())
+                {
+                    if (dir != Direction.None)
+                    {
+                        thirdCoord = CommonFunctions.changeCoordsBasedOnDir(secondCoord, dir, 1);
+
+                        if (this.zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(thirdCoord) == false)
+                            acceptableDir.Add(dir);
+                    }
+                }
+
+                if (acceptableDir.Count != 0)
+                    startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
+            }
+
+            this.currentState.setCurrentDir(startDir);
 
             if (this.currentState.getCurrentDir() == Direction.None)
+            {
+                foundStartDir = false;
                 Debug.LogError("ZoneVeinGenerator - determineBranchStartDirection(): Start Direction has no direction to start in");
+            }
         }
 
         // Based on the current zones primary and secondary directions
@@ -155,13 +191,32 @@ namespace VeinManagerClasses
             init(dirBias);
 
             // Need to determine a start direction
-            // determineBranchStartDirection();
+            determineBranchStartDirection(nextCoords, out bool foundStartDir);
 
-            // Going to add the start coord to the new vein, aka won't be able to roll back this coord
-            // newVein.addSetCoord(startCoords);  // NEEDS TO BE THE WORLD COORD
-            
-            // Then use nextCoords as the actual start coords
-            return createEdge(nextCoords, maxEdgeLenth, out edgeCreationFailed);
+            Debug.Log("START DIR: " + this.currentState.getCurrentDir());
+
+            edgeCreationFailed = false;
+            List<CoordsInt> generatedBranchCoords = new List<CoordsInt>();
+            if (foundStartDir == false)
+            {
+                edgeCreationFailed = true;
+            }
+            else
+            {
+                // Going to add the start coord to the new vein, aka won't be able to roll back this coord
+                // !!!!!!!!!!!! DOES IT NEED TO LOCK THE TILES AROUND IT?
+                //newVein.addSetCoord(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords));  // NEEDS TO BE THE WORLD COORD
+
+                // Then use nextCoords as the actual start coords
+                //generatedBranchCoords = createEdge(nextCoords, maxEdgeLenth, out edgeCreationFailed);
+
+                //if (edgeCreationFailed)
+                // UNLOCK THE START COORD
+            }
+
+
+
+            return generatedBranchCoords;
         }
 
         // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
@@ -243,24 +298,10 @@ namespace VeinManagerClasses
             CoordsInt currentCoordsCopy = this.currentState.getCurrentCoords();
             CoordsInt attemptedTileMapCoords = currentCoordsCopy.deepCopyInt();
 
-            switch (dir)
-            {
-                case Direction.North:
-                    attemptedTileMapCoords.incY();
-                    break;
-                case Direction.East:
-                    attemptedTileMapCoords.incX();
-                    break;
-                case Direction.South:
-                    attemptedTileMapCoords.decY();
-                    break;
-                case Direction.West:
-                    attemptedTileMapCoords.decX();
-                    break;
-                case Direction.None:
-                    Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction.None passed in");
-                    break;
-            }
+            if (dir == Direction.None)
+                Debug.LogError("ZoneVeinGenerator - travelOneUnit(): Direction.None passed in");
+            else
+                attemptedTileMapCoords = CommonFunctions.changeCoordsBasedOnDir(attemptedTileMapCoords, dir, 1);
 
             this.currentState.setCurrentCoords(attemptedTileMapCoords.deepCopyInt());
 
@@ -277,23 +318,10 @@ namespace VeinManagerClasses
 
             foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
             {
-                switch (dir)
-                {
-                    case Direction.North:
-                        attemptedCoord.incY();
-                        break;
-                    case Direction.East:
-                        attemptedCoord.incX();
-                        break;
-                    case Direction.South:
-                        attemptedCoord.decY();
-                        break;
-                    case Direction.West:
-                        attemptedCoord.decX();
-                        break;
-                    case Direction.None:
-                        break; // Mark the current tile as well
-                }
+
+                // Mark the current tile as well, aka Direction.None
+                if (dir != Direction.None)
+                    attemptedCoord = CommonFunctions.changeCoordsBasedOnDir(attemptedCoord, dir, 1);
 
                 // If point is inside the bounds then mark it as not travelable
                 bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
@@ -469,22 +497,8 @@ namespace VeinManagerClasses
             {
                 if (dir == Direction.None)
                     continue;
-
-                switch (dir)
-                {
-                    case Direction.North:
-                        attemptedCoord.incY();
-                        break;
-                    case Direction.East:
-                        attemptedCoord.incX();
-                        break;
-                    case Direction.South:
-                        attemptedCoord.decY();
-                        break;
-                    case Direction.West:
-                        attemptedCoord.decX();
-                        break;
-                }
+                else
+                    attemptedCoord = CommonFunctions.changeCoordsBasedOnDir(attemptedCoord, dir, 1);
 
                 // If point is inside the bounds then check if it can be traveled to
                 bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
@@ -516,25 +530,12 @@ namespace VeinManagerClasses
         {
             CoordsInt attemptedTileMapCoords = this.currentState.getCurrentCoords().deepCopyInt();
 
-            switch (attempedDir)
-            {
-                case Direction.North:
-                    attemptedTileMapCoords.incY();
-                    break;
-                case Direction.East:
-                    attemptedTileMapCoords.incX();
-                    break;
-                case Direction.South:
-                    attemptedTileMapCoords.decY();
-                    break;
-                case Direction.West:
-                    attemptedTileMapCoords.decX();
-                    break;
-                case Direction.None:
+            
+            if (attempedDir == Direction.None)
                     Debug.LogError("ZoneVeinGenerator - goDir(): Direction.None passed in");
-                    break;
-            }
-
+            else
+                attemptedTileMapCoords = CommonFunctions.changeCoordsBasedOnDir(attemptedTileMapCoords, attempedDir, 1);
+            
             // Check if the bounds are correct, also check if it can be traveled to
             bool accepted = !zoneVeinGenContainer.checkTileMapConnPoint(attemptedTileMapCoords);
 

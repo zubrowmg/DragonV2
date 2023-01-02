@@ -166,6 +166,7 @@ public class ZoneVeinGenerator : ContainerAccessor
 
                 // Have the Di Graph Controller determine next branch type and determine branch generation configs
                 this.zoneVeinGenContainer.zoneVeinDiGraphController.createNextBranch(out graphIsDone, out edgeConfigFailed, out branchStartCoords, out branchSecondCoords, out dirBias);
+                this.zoneVeinGenContainer.incCurrentVeinPass();
                 branchStartCoords.print("\tFINAL START COORDS: ");
                 branchSecondCoords.print("\tFINAL NEXT COORDS: ");
 
@@ -174,9 +175,6 @@ public class ZoneVeinGenerator : ContainerAccessor
                     Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
                 else if (graphIsDone == false)
                 {
-                    Debug.LogError("determineBranchStartDirection() needs to seach all directions for an open spot, but it needs to check if the primary directions can be traveled to first!!!!!!");
-                    //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.createZoneVeinBranch(branchStartCoords, dirBias);
-                    //this.zoneVeinGenContainer.incCurrentVeinPass();
 
                 }
 
