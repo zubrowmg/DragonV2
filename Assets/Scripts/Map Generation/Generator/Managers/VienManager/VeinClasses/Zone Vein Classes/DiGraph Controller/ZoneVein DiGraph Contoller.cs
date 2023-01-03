@@ -211,7 +211,7 @@ namespace VeinManagerClasses
                     startCoords = this.currentStartNode.getObject();
                     
                     //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
-                    startCoords.print("START COORDS: ");
+                    startCoords.print("POTENTIAL START COORDS: ");
                     //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
                     if (nodeSearchFailed == false)
@@ -425,7 +425,9 @@ namespace VeinManagerClasses
                     }
                     else
                     {
-                        Debug.LogError("EXHAUSTED ALL EDGES IN ZONE DIGRAPH, REDUCING MIN EDGE LENGTH REQUIRMENT");
+                        zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "findClosestNodeInDiGraph()",
+                                            "Exhausted all edges in zone digraph, reducing min edge length requirement");
+
                         rejectedEdges = new List<DiDotEdge<CoordsInt>>();
                         currentMinEdgeLength--;
                         continue;
@@ -455,7 +457,8 @@ namespace VeinManagerClasses
                 if (exhuastedAllNodesInEdge == true)
                 {
                     rejectedEdges.Add(this.currentStartEdge);
-                    Debug.LogError("EXHAUSTED ALL NODES IN THE EDGE");
+                    zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "findClosestNodeInDiGraph()",
+                                            "Exhausted all nodes in current edge");
                 }
             }
 
