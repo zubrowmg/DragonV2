@@ -165,10 +165,10 @@ public class ZoneVeinGenerator : ContainerAccessor
             //{
 
                 // Have the Di Graph Controller determine next branch type and determine branch generation configs
-                this.zoneVeinGenContainer.zoneVeinDiGraphController.createNextBranch(out graphIsDone, out edgeConfigFailed, out branchStartCoords, out branchSecondCoords, out dirBias);
+                this.zoneVeinGenContainer.zoneVeinDiGraphController.createNextBranch(out graphIsDone, out edgeConfigFailed, out branchStartCoords, out dirBias);
                 this.zoneVeinGenContainer.incCurrentVeinPass();
                 branchStartCoords.print("\tFINAL START COORDS: ");
-                branchSecondCoords.print("\tFINAL NEXT COORDS: ");
+                //branchSecondCoords.print("\tFINAL NEXT COORDS: ");
 
 
                 if (edgeConfigFailed == true)

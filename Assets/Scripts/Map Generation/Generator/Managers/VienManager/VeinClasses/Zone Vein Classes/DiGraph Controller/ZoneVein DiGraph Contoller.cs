@@ -130,7 +130,7 @@ namespace VeinManagerClasses
             return nextEdgeType;
         }
 
-        public void createNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out CoordsInt branchSecondCoords, out DirectionBias dirBias)
+        public void createNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out DirectionBias dirBias)
         {
             graphIsDone = false;
             // Analyze the graph
@@ -142,7 +142,7 @@ namespace VeinManagerClasses
             //      Will probably have to create a class to hold edge specific configs and circular edge specific configs
             //      Need to output configs back up one in createZoneVein()
             branchStartCoords = new CoordsInt(-1, -1);
-            branchSecondCoords = new CoordsInt(-1, -1);
+            //branchSecondCoords = new CoordsInt(-1, -1);
             dirBias = new DirectionBias(Direction.None, Direction.None);
             edgeConfigFailed = false;
 
@@ -155,11 +155,11 @@ namespace VeinManagerClasses
                     break;
 
                 case GraphEdgeType.Edge:
-                    configureNewBranchEdge(out branchStartCoords, out branchSecondCoords, out dirBias, out edgeConfigFailed);
+                    configureNewBranchEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
                     break;
 
                 case GraphEdgeType.CircularEdge:
-                    configureNewBranchEdge(out branchStartCoords, out branchSecondCoords, out dirBias, out edgeConfigFailed);
+                    configureNewBranchEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
                     //configureCicularNewEdge();
                     break;
             }
@@ -169,7 +169,7 @@ namespace VeinManagerClasses
         }
 
 
-        List<CoordsInt> configureNewBranchEdge(out CoordsInt startCoords, out CoordsInt secondCoord, out DirectionBias dirBias, out bool edgeConfigFailed)
+        List<CoordsInt> configureNewBranchEdge(out CoordsInt startCoords, out DirectionBias dirBias, out bool edgeConfigFailed)
         {
             // Basic configuration for now, expecting something more deliberate in the future
             // 1. Scan the allocated tile map connection for an empty space
@@ -184,7 +184,6 @@ namespace VeinManagerClasses
             edgeConfigFailed = false;
 
             startCoords = new CoordsInt(-1, -1);
-            secondCoord = new CoordsInt(-1, -1);
             dirBias = new DirectionBias(Direction.None, Direction.None);
             
             if (foundEmptySpace == false)
@@ -222,7 +221,7 @@ namespace VeinManagerClasses
 
                         // Get the primary direction and determines a potential second point
                         //      Second point needs to be next to an existing vein, so the tile will be locked on a pass. It just can't be perma locked
-                        dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out secondCoord, out bool secondaryCoordIsValid);
+                        dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out List<CoordsInt> potentialSecondCoords, out bool secondaryCoordIsValid);
 
                         // Attempt to generate a new vein
                         //bool edgeGenerationFailed = false;
@@ -234,14 +233,14 @@ namespace VeinManagerClasses
                         // Attempt to generate a new vein
                         bool edgeGenerationFailed = false;
                         if (secondaryCoordIsValid == true)
-                            listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out edgeGenerationFailed);
+                            listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, potentialSecondCoords, dirBias, out edgeGenerationFailed);
                         else
                             edgeGenerationFailed = true;
 
                         edgeGenerationWasSuccessful = !edgeGenerationFailed;
                         
 
-                        Debug.Log("SECOND VALID: " + secondaryCoordIsValid + "\nEDGE GEN FAILED: " + edgeGenerationFailed);
+                        //Debug.Log("SECOND VALID: " + secondaryCoordIsValid + "\nEDGE GEN FAILED: " + edgeGenerationFailed);
 
 
 
@@ -254,7 +253,7 @@ namespace VeinManagerClasses
                                                         "Edge Generation failed. Moving onto a different start node\n" + "Rejected Start Node: " + startCoords.getPrintString());
                             }
 
-                            this.currentStartNode.getObject().print("---- REJECTING COORDS FOR GENERATION: ");
+                            //this.currentStartNode.getObject().print("---- REJECTING COORDS FOR GENERATION: ");
                             this.edgeToRejectedStartNodesDict[this.currentStartEdge].Add(this.currentStartNode);
                         }
                         else if (zoneVeinGenContainer.debugMode == true)
@@ -279,9 +278,10 @@ namespace VeinManagerClasses
 
 
 
-        DirectionBias configurePrimaryDirection(ref CoordsInt startCoords, CoordsInt destinationMapConnCoord, ref DimensionList floodedDimList, out CoordsInt secondCoord, out bool secondaryCoordIsValid)
+        DirectionBias configurePrimaryDirection(ref CoordsInt startCoords, CoordsInt destinationMapConnCoord, ref DimensionList floodedDimList, out List<CoordsInt> potentialSecondCoords, out bool secondaryCoordIsValid)
         {
-            secondCoord = new CoordsInt(-1, -1);
+            CoordsInt secondCoord = new CoordsInt(-1, -1);
+            potentialSecondCoords = new List<CoordsInt>();
 
             // Calculate the direction
             int displacementNeeded = 1;
@@ -300,7 +300,7 @@ namespace VeinManagerClasses
                     secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out secondCoord);
 
                     if (secondaryCoordIsValid)
-                        break;
+                        potentialSecondCoords.Add(secondCoord);
                 }
             }
 
@@ -315,7 +315,7 @@ namespace VeinManagerClasses
                         secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
 
                         if (secondaryCoordIsValid)
-                            break;
+                            potentialSecondCoords.Add(secondCoord);
                     }
                 }
             }

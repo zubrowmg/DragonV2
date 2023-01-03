@@ -98,7 +98,7 @@ namespace VeinManagerClasses
                 Debug.LogError("ZoneVeinGenerator - determineTrunkStartDirection(): Start Direction has no direction to start in");
         }
 
-        void determineBranchStartDirection(CoordsInt secondCoord, out bool foundStartDir)
+        void determineBranchStartDirection(List<CoordsInt> potentialSecondCoords, out bool foundStartDir)
         {
             // Needs to choose a start direction based on zone direction bias
             //      And if there is open space in that direction
@@ -108,28 +108,14 @@ namespace VeinManagerClasses
             List<Direction> acceptableDir = new List<Direction>();
             CoordsInt thirdCoord = new CoordsInt(-1, -1);
 
-
-            // Check if primary direction can be traveled to
-            foreach (var dir in this.currentDirectionBias.getPrimaryDirections())
+            foreach (var secondCoord in potentialSecondCoords)
             {
-                if (dir != Direction.None)
-                {
-                    thirdCoord = CommonFunctions.changeCoordsBasedOnDir(secondCoord, dir, 1);
+                secondCoord.print("----- SECOND COORD: ");
 
-                    if (this.zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(thirdCoord) == false)
-                        acceptableDir.Add(dir);
-                }
-            }
-            //Debug.Log("TTT____1");
-
-            // Else check the secondary directions
-            if (acceptableDir.Count != 0)
-                startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
-            else
-            {
-                //Debug.Log("TTT____2");
-                foreach (var dir in this.currentDirectionBias.getSecondaryDirections())
+                // Check if primary direction can be traveled to
+                foreach (var dir in this.currentDirectionBias.getPrimaryDirections())
                 {
+                
                     if (dir != Direction.None)
                     {
                         thirdCoord = CommonFunctions.changeCoordsBasedOnDir(secondCoord, dir, 1);
@@ -138,20 +124,53 @@ namespace VeinManagerClasses
                             acceptableDir.Add(dir);
                     }
                 }
-                //Debug.Log("TTT____3");
+                //Debug.Log("TTT____1");
 
+                // Else check the secondary directions
                 if (acceptableDir.Count != 0)
+                {
                     startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
-            }
+                    break;
+                }
+                else
+                {
+                    //Debug.Log("TTT____2");
+                    foreach (var dir in this.currentDirectionBias.getSecondaryDirections())
+                    {
+                        if (dir != Direction.None)
+                        {
+                            thirdCoord = CommonFunctions.changeCoordsBasedOnDir(secondCoord, dir, 1);
 
-            thirdCoord.print("THIRD COORD: ");
+                            if (this.zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(thirdCoord) == false)
+                                acceptableDir.Add(dir);
+                        }
+                    }
+                    //Debug.Log("TTT____3");
+
+                    if (acceptableDir.Count != 0)
+                    {
+                        startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
+                        break;
+                    }
+                }
+
+                    //thirdCoord.print("THIRD COORD: ");
+            }
 
             this.currentState.setCurrentDir(startDir);
 
             if (this.currentState.getCurrentDir() == Direction.None)
             {
                 foundStartDir = false;
-                Debug.LogError("ZoneVeinGenerator - determineBranchStartDirection(): Start Direction has no direction to start in");
+
+                if (zoneVeinGenContainer.debugMode == true)
+                {
+                    foreach (var secondCoord in potentialSecondCoords)
+                    {
+                        zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVeinGenerator", "determineBranchStartDirection()",
+                                            secondCoord.getPrintString() + "Start Direction has no direction to start in for the second coord: ");
+                    }
+                }
             }
         }
 
@@ -192,12 +211,12 @@ namespace VeinManagerClasses
         // This function is used if you have determined the start coord and second coord
         //      Typically the start coord is already on a tile that is a vein (locked tile)
         //          And the second coord is on a unlocked tile
-        public List<CoordsInt> randomlyGenerateZoneVeinBranch(CoordsInt startCoords, CoordsInt nextCoords, DirectionBias dirBias, out bool edgeCreationFailed)
+        public List<CoordsInt> randomlyGenerateZoneVeinBranch(CoordsInt startCoords, List<CoordsInt> potenatialSecondCoords, DirectionBias dirBias, out bool edgeCreationFailed)
         {
             init(dirBias);
 
             // Need to determine a start direction
-            determineBranchStartDirection(nextCoords, out bool foundStartDir);
+            determineBranchStartDirection(potenatialSecondCoords, out bool foundStartDir);
 
             Debug.Log("START DIR: " + this.currentState.getCurrentDir());
 
