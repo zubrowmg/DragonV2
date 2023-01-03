@@ -106,7 +106,7 @@ namespace VeinManagerClasses
             foundStartDir = true;
             Direction startDir = Direction.None;
             List<Direction> acceptableDir = new List<Direction>();
-            CoordsInt thirdCoord;
+            CoordsInt thirdCoord = new CoordsInt(-1, -1);
 
 
             // Check if primary direction can be traveled to
@@ -143,6 +143,8 @@ namespace VeinManagerClasses
                 if (acceptableDir.Count != 0)
                     startDir = CommonFunctions.randomlySelectFromList(acceptableDir);
             }
+
+            thirdCoord.print("THIRD COORD: ");
 
             this.currentState.setCurrentDir(startDir);
 
@@ -277,6 +279,10 @@ namespace VeinManagerClasses
 
             if (edgeCreationFailed == false)
             {
+                // Lock the final state
+                bool lockTileMapConn = true;
+                markTileMapPointsAroundCoord(this.currentState.getCurrentCoords(), lockTileMapConn);
+
                 // Add all recorded world coords from the state history and trigger vein generation
                 newVein.addSetCoord(this.stateHistory.getListOfWorldCoords());
                 createVein();

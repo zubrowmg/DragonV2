@@ -320,9 +320,9 @@ namespace DimCreatorClasses
 
             //directionBias.print();
 
-            this.debuging = true;
+            //this.debuging = true;
             DimensionList newDimList = getDimensions(startCoords);
-            this.debuging = false;
+            //this.debuging = false;
 
             if (debugMode)
                 markSelectedGridForDebug(newDimList);

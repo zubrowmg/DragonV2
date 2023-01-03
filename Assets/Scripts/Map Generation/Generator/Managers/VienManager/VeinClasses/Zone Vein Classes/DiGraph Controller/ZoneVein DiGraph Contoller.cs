@@ -212,7 +212,7 @@ namespace VeinManagerClasses
                     startCoords = this.currentStartNode.getObject();
                     
                     //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
-                    //startCoords.print("\tINITIAL START COORDS: ");
+                    startCoords.print("START COORDS: ");
                     //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
                     if (nodeSearchFailed == false)
@@ -220,19 +220,41 @@ namespace VeinManagerClasses
                         //Debug.Log("NODE SEARCH WAS SUCCESSFUL");
                         //destinationMapConnCoord.print("FREE SPACE COORD: ");
 
-                        dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out secondCoord);
+                        // Get the primary direction and determines a potential second point
+                        //      Second point needs to be next to an existing vein, so the tile will be locked on a pass. It just can't be perma locked
+                        dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out secondCoord, out bool secondaryCoordIsValid);
 
                         // Attempt to generate a new vein
                         //bool edgeGenerationFailed = false;
-                        listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out bool edgeGenerationFailed);
+                        //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out bool edgeGenerationFailed);
+                        //edgeGenerationWasSuccessful = !edgeGenerationFailed;
+
+
+                        
+                        // Attempt to generate a new vein
+                        bool edgeGenerationFailed = false;
+                        if (secondaryCoordIsValid == true)
+                            listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out edgeGenerationFailed);
+                        else
+                            edgeGenerationFailed = true;
+
                         edgeGenerationWasSuccessful = !edgeGenerationFailed;
+                        
+
+                        Debug.Log("SECOND VALID: " + secondaryCoordIsValid + "\nEDGE GEN FAILED: " + edgeGenerationFailed);
+
+
 
                         // If the Navigation controller failed to generate a new edge, reject the current start node
                         if (edgeGenerationFailed == true)
                         {
-                            Debug.LogError("ZoneVein DiGraph Controller Class - configureNewEdge(): Edge Generation failed. Moving onto a different start node");
+                            if (zoneVeinGenContainer.debugMode == true)
+                            {
+                                zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "configureNewBranchEdge()",
+                                                        "Edge Generation failed. Moving onto a different start node\n" + "Rejected Start Node: " + startCoords.getPrintString());
+                            }
 
-                            //this.currentStartNode.getObject().print("---- REJECTING COORDS FOR GENERATION: ");
+                            this.currentStartNode.getObject().print("---- REJECTING COORDS FOR GENERATION: ");
                             this.edgeToRejectedStartNodesDict[this.currentStartEdge].Add(this.currentStartNode);
                         }
                         else if (zoneVeinGenContainer.debugMode == true)
@@ -257,7 +279,7 @@ namespace VeinManagerClasses
 
 
 
-        DirectionBias configurePrimaryDirection(ref CoordsInt startCoords, CoordsInt destinationMapConnCoord, ref DimensionList floodedDimList, out CoordsInt secondCoord)
+        DirectionBias configurePrimaryDirection(ref CoordsInt startCoords, CoordsInt destinationMapConnCoord, ref DimensionList floodedDimList, out CoordsInt secondCoord, out bool secondaryCoordIsValid)
         {
             secondCoord = new CoordsInt(-1, -1);
 
@@ -266,15 +288,16 @@ namespace VeinManagerClasses
             DirectionBias dirBias = CommonFunctions.calculatePrimaryDirection(startCoords, destinationMapConnCoord, displacementNeeded);
 
             // Find the second coord based on the new dir bias
-            bool secondaryCoordIsValid = false;
+            secondaryCoordIsValid = false;
             List<Direction> primaryDir = dirBias.getPrimaryDirections();
+            List<Direction> secondaryDir = dirBias.getSecondaryDirections();
 
             // Check primary directions first
             foreach (var dir in primaryDir)
             {
                 if (dir.Equals(Direction.None) == false)
                 {
-                    secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotLockedForAllPasses(ref startCoords, ref floodedDimList, dir, out secondCoord);
+                    secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, dir, out secondCoord);
 
                     if (secondaryCoordIsValid)
                         break;
@@ -284,12 +307,12 @@ namespace VeinManagerClasses
             // If primary directions failed, then look in non primary directions
             if (secondaryCoordIsValid == false)
             {
-                foreach (Direction dir in System.Enum.GetValues(typeof(Direction)))
+                foreach (Direction dir in secondaryDir)
                 {
-                    if (primaryDir.Contains(dir) == false && dir.Equals(Direction.None) == false)
+                    if (dir.Equals(Direction.None) == false)
                     {
                         Direction oppDir = CommonFunctions.getOppositeDir(dir);
-                        secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotLockedForAllPasses(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
+                        secondaryCoordIsValid = adjacentDirectionIsFloodedAndNotPermaLocked(ref startCoords, ref floodedDimList, oppDir, out secondCoord);
 
                         if (secondaryCoordIsValid)
                             break;
@@ -298,7 +321,13 @@ namespace VeinManagerClasses
             }
 
             if (secondaryCoordIsValid == false)
-                Debug.LogError("ZoneVein DiGraph Controller Class - configurePrimaryDirection(): Could not find a secondary coord??? Should have been validated in findClosestNodeInDiGraph()");
+            {
+                if (zoneVeinGenContainer.debugMode == true)
+                {
+                    zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "configurePrimaryDirection()",
+                                            "Could not find a secondary coord for the branch generation");
+                }
+            }
 
             return dirBias;
         }
@@ -630,7 +659,7 @@ namespace VeinManagerClasses
         bool adjacentDirectionIsFloodedAndNotLockedForAllPasses(ref CoordsInt startCoords, ref DimensionList floodedDimList, Direction dir, out CoordsInt nextCoord)
         {
             bool startCoordIsValid = false;
-            //startCoords.print("Dir: " + dir +  "  ALL IN: " );
+
 
             CoordsInt checkFloodedIsNextToStart = startCoords.deepCopyInt();
             nextCoord = startCoords.deepCopyInt();
@@ -640,7 +669,7 @@ namespace VeinManagerClasses
             else
                 checkFloodedIsNextToStart = CommonFunctions.changeCoordsBasedOnDir(checkFloodedIsNextToStart, dir, 1);
 
-            //checkFloodedIsNextToStart.print("ALL OUT: ");
+            checkFloodedIsNextToStart.print("---------- Dir: " + dir +  "  OUT COORDS: " );
 
             if (floodedDimList.coordIsMarked(checkFloodedIsNextToStart) == true && zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(checkFloodedIsNextToStart) == false)
                 startCoordIsValid = true;

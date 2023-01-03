@@ -29,6 +29,7 @@ public class Zone_New
 
     // Debug vars
     public List<List<CoordsInt>> floodedFreeSpaces = new List<List<CoordsInt>>();
+    public LoggingClass debugInfo = new LoggingClass();
     
     // Temporary vars, meant to be deleted after debug is done
     public List<DimensionList> freeSpaces = new List<DimensionList>();
