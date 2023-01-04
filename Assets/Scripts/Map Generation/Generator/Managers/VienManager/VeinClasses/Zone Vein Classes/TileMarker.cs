@@ -99,10 +99,11 @@ namespace VeinManagerClasses
 
         private void passExistCheck(int pass)
         {
-            //Debug.Log("PASS: " + pass + "  \nCOUNT: " + passLocked.Count);
-            if (pass >= passLocked.Count)
+            //Debug.Log("------------------------\nPASS: " + pass + "  \nCOUNT: " + passLocked.Count);
+            // If the pass index doesn't exist then we need to add an entry to passLocked
+            if (pass + 1 >= passLocked.Count)
             {
-                for (int i = 0; i < pass; i++)
+                for (int i = 0; i <= pass; i++)
                 {
                     if (i < passLocked.Count)
                         continue;

@@ -130,13 +130,13 @@ namespace VeinManagerClasses
             return nextEdgeType;
         }
 
-        public void createNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out DirectionBias dirBias)
+        public List<CoordsInt> createNextBranch(out bool graphIsDone, out bool edgeConfigFailed, out CoordsInt branchStartCoords, out DirectionBias dirBias)
         {
+            List<CoordsInt> newBranchCoords = new List<CoordsInt>();
             graphIsDone = false;
             // Analyze the graph
             this.diGraph.analyzeGraph();
 
-            this.print("================= " + zoneVeinGenContainer.currentVeinZone.getId().ToString() + " =================");
 
             // !!!!!!!!!!!!!!!!!!!!
             //      Will probably have to create a class to hold edge specific configs and circular edge specific configs
@@ -155,17 +155,17 @@ namespace VeinManagerClasses
                     break;
 
                 case GraphEdgeType.Edge:
-                    configureNewBranchEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
+                    newBranchCoords = configureNewBranchEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
                     break;
 
                 case GraphEdgeType.CircularEdge:
-                    configureNewBranchEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
+                    newBranchCoords = configureNewBranchEdge(out branchStartCoords, out dirBias, out edgeConfigFailed);
                     //configureCicularNewEdge();
                     break;
             }
 
             //Debug.Log("NEXT EDGE TYPE: " + nextEdgeType);
-
+            return newBranchCoords;
         }
 
 
@@ -200,7 +200,6 @@ namespace VeinManagerClasses
                     this.edgeToRejectedStartNodesDict.Add(edge, new List<DiDotNode<CoordsInt>>());
                 }
 
-                //Debug.Log("===============================================================================" + "\n===============================================================================");
                 bool edgeGenerationWasSuccessful = false;
                 while (edgeGenerationWasSuccessful == false)
                 {
@@ -209,9 +208,9 @@ namespace VeinManagerClasses
                     // Gets the closest start node and set this.currentStartNode
                     findClosestNodeInDiGraph(allDiGraphEdges, destinationMapConnCoord, adhearToMinEdgeLength, ref tileMapConnections_JustTile, out bool nodeSearchFailed, out DimensionList floodedDimList);
                     startCoords = this.currentStartNode.getObject();
-                    
+
                     //CoordsInt worldSpaceCoords = zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords);
-                    startCoords.print("POTENTIAL START COORDS: ");
+                    //startCoords.print("POTENTIAL START COORDS: ");
                     //worldSpaceCoords.print("CLOSEST WORLD COORD TO FREE SPACE: ");
 
                     if (nodeSearchFailed == false)
@@ -224,13 +223,6 @@ namespace VeinManagerClasses
                         dirBias = configurePrimaryDirection(ref startCoords, destinationMapConnCoord, ref floodedDimList, out List<CoordsInt> potentialSecondCoords, out bool secondaryCoordIsValid);
 
                         // Attempt to generate a new vein
-                        //bool edgeGenerationFailed = false;
-                        //listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, secondCoord, dirBias, out bool edgeGenerationFailed);
-                        //edgeGenerationWasSuccessful = !edgeGenerationFailed;
-
-
-                        
-                        // Attempt to generate a new vein
                         bool edgeGenerationFailed = false;
                         if (secondaryCoordIsValid == true)
                             listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinNavigationController.randomlyGenerateZoneVeinBranch(startCoords, potentialSecondCoords, dirBias, out edgeGenerationFailed);
@@ -239,10 +231,6 @@ namespace VeinManagerClasses
 
                         edgeGenerationWasSuccessful = !edgeGenerationFailed;
                         
-
-                        //Debug.Log("SECOND VALID: " + secondaryCoordIsValid + "\nEDGE GEN FAILED: " + edgeGenerationFailed);
-
-
 
                         // If the Navigation controller failed to generate a new edge, reject the current start node
                         if (edgeGenerationFailed == true)
@@ -332,8 +320,10 @@ namespace VeinManagerClasses
             return dirBias;
         }
 
-        void print(string message)
+        public void print(string message)
         {
+            this.diGraph.analyzeGraph();
+
             List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
             List<DiDotCircularEdge<CoordsInt>> listOfCircularEdges = this.diGraph.getListOfCircularEdges();
 

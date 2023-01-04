@@ -48,6 +48,7 @@ namespace DiDotGraphClasses
         //      It should also be the object that connects to the new object
         public void addObject(ref T prevObject, ref T newObject)
         {
+
             this.diGraphChanged = true;
 
             DiDotNode<T> existingNode;

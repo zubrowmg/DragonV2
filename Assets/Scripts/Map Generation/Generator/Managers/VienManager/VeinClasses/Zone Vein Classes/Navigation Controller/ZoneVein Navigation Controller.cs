@@ -234,20 +234,38 @@ namespace VeinManagerClasses
                 finalSecondCoord.print("\tFINAL SECOND COORD: ");
 
                 // Going to add the start coord to the new vein, aka won't be able to roll back this coord
-                // !!!!!!!!!!!! DOES IT NEED TO LOCK THE TILES AROUND IT?
-                //newVein.addSetCoord(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords));  // NEEDS TO BE THE WORLD COORD
+                //      Also lock the tiles surrounding the start tile
+                bool lockTileMapConn = true;
+                markTileMapPointsAroundCoord(startCoords, lockTileMapConn);
+                generatedBranchCoords.Add(startCoords); // NEEDS TO BE TILE MAP CONN COORDS
+                this.newVein.addSetCoord(zoneVeinGenContainer.getWorldMapCoordsFromTileMapConns(startCoords));  // NEEDS TO BE THE WORLD COORD
 
                 // Then use nextCoords as the actual start coords
-                //generatedBranchCoords = createEdge(nextCoords, maxEdgeLenth, out edgeCreationFailed);
+                generatedBranchCoords.AddRange(createEdge(finalSecondCoord, maxEdgeLenth, out edgeCreationFailed));
 
-                //if (edgeCreationFailed)
-                // UNLOCK THE START COORD
+                // If edge creation fails then we need to unlock the tiles surrounding the start coord that we previously locked
+                if (edgeCreationFailed)
+                {
+                    lockTileMapConn = false;
+                    markTileMapPointsAroundCoord(startCoords, lockTileMapConn);
+                }
+                else
+                {
+                    string output = "";
+                    foreach (var coords in generatedBranchCoords)
+                    {
+                        output = output + coords.getPrintString() + "  ";
+                    }
+                    Debug.Log("NEW BRANCH COORDS: " + output);
+                }
             }
 
+            
 
 
             return generatedBranchCoords;
         }
+
 
         // Creates the trunk of the zone vein and returns the zone vein coords of the trunk
         private List<CoordsInt> createEdge(CoordsInt startCoords, int maxLength, out bool edgeCreationFailed)
@@ -538,16 +556,8 @@ namespace VeinManagerClasses
                 bool pointIsInsideBounds = zoneVeinGenContainer.coordsAreInsideTileMapBoundries(attemptedCoord);
                 if (pointIsInsideBounds == true)
                 {
-                    if (locked == true)
-                    {
-                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(attemptedCoord) == true)
-                            dirCheck.Add(dir);
-                    }
-                    else
-                    {
-                        if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(attemptedCoord) == false)
-                            dirCheck.Add(dir);
-                    }
+                    if (zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(attemptedCoord) == locked)
+                        dirCheck.Add(dir);
                 }
                 else if (locked == true)
                     dirCheck.Add(dir);

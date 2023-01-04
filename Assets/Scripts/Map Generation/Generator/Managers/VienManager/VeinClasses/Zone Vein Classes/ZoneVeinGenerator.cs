@@ -165,21 +165,35 @@ public class ZoneVeinGenerator : ContainerAccessor
             //{
 
                 // Have the Di Graph Controller determine next branch type and determine branch generation configs
-                this.zoneVeinGenContainer.zoneVeinDiGraphController.createNextBranch(out graphIsDone, out edgeConfigFailed, out branchStartCoords, out dirBias);
-                this.zoneVeinGenContainer.incCurrentVeinPass();
+                listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinDiGraphController.createNextBranch(out graphIsDone, out edgeConfigFailed, out branchStartCoords, out dirBias);
                 branchStartCoords.print("\tFINAL START COORDS: ");
-                //branchSecondCoords.print("\tFINAL NEXT COORDS: ");
+            //branchSecondCoords.print("\tFINAL NEXT COORDS: ");
 
 
-                if (edgeConfigFailed == true)
-                    Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
-                else if (graphIsDone == false)
+                /*
+                if (graphIsDone == false)
                 {
 
                 }
+                else
+                */
+                if (edgeConfigFailed == true)
+                    Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
+                else
+                {
+                    // Edge creation was successfull, add it to the di graph and increment the vein pass count
+                    this.zoneVeinGenContainer.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
+                    this.zoneVeinGenContainer.incCurrentVeinPass();
+                }
+            
 
             //}
+
+            
         }
+
+        this.zoneVeinGenContainer.zoneVeinDiGraphController.print("================= " + zoneVeinGenContainer.currentVeinZone.getId().ToString() + " =================");
+
     }
 
     // =====================================================================================
