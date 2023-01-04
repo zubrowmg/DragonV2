@@ -57,7 +57,7 @@ namespace DiDotGraphClasses
             DiDotNode<T> prevNode;
             bool prevObjectExists = objToNode.TryGetValue(prevObject, out prevNode);
 
-            // First Nodes
+            // First Node added to the di graph
             if (prevObjectExists == false && objToNode.Count == 0)
             {
                 DiDotNode <T> startNode = addNode(ref prevObject);
@@ -120,7 +120,7 @@ namespace DiDotGraphClasses
 
         // Will traverse the graph to get a list of edges and list of circular edges
         //      Currently only supports graphs that are connected, aka will not work for a graph split in two
-        public void identifyGraphEdges()
+        void identifyGraphEdges()
         {
             this.listOfEdges = new List<DiDotEdge<T>>();
             this.listOfNonCircularEdges = new List<DiDotEdge<T>>();
@@ -129,6 +129,7 @@ namespace DiDotGraphClasses
             // Get a node to start at
             DiDotNode<T> startNode = findNodeStartForAnalysis();
             List<DiDotNode<T>> doNotTravelList = new List<DiDotNode<T>>();
+
 
             // Will get a list of edges from a node, the node supplied SHOULD be an endnode or intersecting node
             //      Traverses entire graph
@@ -174,7 +175,7 @@ namespace DiDotGraphClasses
                 }
             }
 
-            // Add to listOfNonCircularEdges, basically any edges that aren't also circular edges
+            // Add to listOfNonCircularEdges, basically any edges that are not circular edges
             foreach (var edge in this.listOfEdges)
             {
                 bool edgeIsNotCircular = true;
@@ -315,9 +316,17 @@ namespace DiDotGraphClasses
                             prevEdgeCopy = prevEdge.deepCopy();
                         }
 
+                        
+
                         // Continue traversing the graph
                         if (nextNode.isDeadEnd() == false)
+                        {
+                            // Reset current path
+                            currentPath = new List<DiDotNode<T>>();
+
                             getEdgeStartingFromNode(nextNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref newEdge);
+
+                        }
 
                         // Find the prev edge in the list of edges, to make sure we keep editing the same edge
                         //      MIGHT NEED THIS FOR MEMORY SHANANAGINS!!!!!!!!!!!
