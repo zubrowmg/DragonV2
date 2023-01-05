@@ -50,10 +50,10 @@ namespace DiDotGraphClasses
 
         public bool isIntersection()
         {
-            bool deadEnd = false;
+            bool isIntersection = false;
             if (numOfConnections() > 2)
-                deadEnd = true;
-            return deadEnd;
+                isIntersection = true;
+            return isIntersection;
         }
     }
 }

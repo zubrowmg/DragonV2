@@ -230,8 +230,8 @@ namespace VeinManagerClasses
             }
             else
             {
-                Debug.Log("START DIR: " + this.currentState.getCurrentDir());
-                finalSecondCoord.print("\tFINAL SECOND COORD: ");
+                //Debug.Log("START DIR: " + this.currentState.getCurrentDir());
+                //finalSecondCoord.print("\tFINAL SECOND COORD: ");
 
                 // Going to add the start coord to the new vein, aka won't be able to roll back this coord
                 //      Also lock the tiles surrounding the start tile
@@ -249,14 +249,16 @@ namespace VeinManagerClasses
                     lockTileMapConn = false;
                     markTileMapPointsAroundCoord(startCoords, lockTileMapConn);
                 }
-                else
+                else if (zoneVeinGenContainer.debugMode == true)
                 {
                     string output = "";
                     foreach (var coords in generatedBranchCoords)
                     {
                         output = output + coords.getPrintString() + "  ";
                     }
-                    Debug.Log("NEW BRANCH COORDS: " + output);
+
+                    zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein Generator", "createZoneVein()",
+                                        "New Branch Coords: " + output);
                 }
             }
 

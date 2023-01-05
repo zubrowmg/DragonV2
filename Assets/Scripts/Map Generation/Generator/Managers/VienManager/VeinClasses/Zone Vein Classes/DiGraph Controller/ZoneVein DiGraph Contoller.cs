@@ -320,14 +320,14 @@ namespace VeinManagerClasses
             return dirBias;
         }
 
-        public void print(string message)
+        public void print(int zoneId)
         {
             this.diGraph.analyzeGraph();
 
             List<DiDotEdge<CoordsInt>> listOfEdges = this.diGraph.getListOfEdges();
             List<DiDotCircularEdge<CoordsInt>> listOfCircularEdges = this.diGraph.getListOfCircularEdges();
 
-            Debug.Log(message + 
+            Debug.Log("================= " + zoneId.ToString() + " =================" + 
                       "\nEDGE COUNT: " + listOfEdges.Count + 
                       "\nEDGE LIST:");
 
@@ -343,14 +343,16 @@ namespace VeinManagerClasses
                 List<DiDotEdge<CoordsInt>> nodeOneEdges = edge.getNodeOneEdgeConnections();
                 List<DiDotEdge<CoordsInt>> nodeTwoEdges = edge.getNodeTwoEdgeConnections();
 
+                strOutput = strOutput + "\n";
+
                 foreach (var edgeConnection in nodeOneEdges)
                 {
-                    strOutput = strOutput + "\t" + "E_" + edge.getId() + " <-> " + "E_" + edgeConnection.getId() + ": " + edge.getNodeOne().getObject().getPrintString();
+                    strOutput = strOutput + "\t\t" + "E_" + edge.getId() + " <-> " + "E_" + edgeConnection.getId() + ": " + edge.getNodeOne().getObject().getPrintString();
                 }
 
                 foreach (var edgeConnection in nodeTwoEdges)
                 {
-                    strOutput = strOutput + "\t" + "E_" + edge.getId() + " <-> " + "E_" + edgeConnection.getId() + ": " + edge.getNodeTwo().getObject().getPrintString();
+                    strOutput = strOutput + "\t\t" + "E_" + edge.getId() + " <-> " + "E_" + edgeConnection.getId() + ": " + edge.getNodeTwo().getObject().getPrintString();
                 }
 
 
@@ -406,7 +408,6 @@ namespace VeinManagerClasses
 
                 if (allDiGraphEdges.Count == rejectedEdges.Count)
                 {
-                    //
                     if (currentMinEdgeLength == 0)
                     {
                         nodeSearchFailed = true;
@@ -415,8 +416,11 @@ namespace VeinManagerClasses
                     }
                     else
                     {
-                        zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "findClosestNodeInDiGraph()",
+                        if (zoneVeinGenContainer.debugMode == true)
+                        {
+                            zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "findClosestNodeInDiGraph()",
                                             "Exhausted all edges in zone digraph, reducing min edge length requirement");
+                        }
 
                         rejectedEdges = new List<DiDotEdge<CoordsInt>>();
                         currentMinEdgeLength--;
@@ -447,8 +451,11 @@ namespace VeinManagerClasses
                 if (exhuastedAllNodesInEdge == true)
                 {
                     rejectedEdges.Add(this.currentStartEdge);
-                    zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "findClosestNodeInDiGraph()",
+                    if (zoneVeinGenContainer.debugMode == true)
+                    {
+                        zoneVeinGenContainer.currentZone.debugInfo.addLine("ZoneVein DiGraph Controller", "findClosestNodeInDiGraph()",
                                             "Exhausted all nodes in current edge");
+                    }
                 }
             }
 
@@ -662,7 +669,7 @@ namespace VeinManagerClasses
             else
                 checkFloodedIsNextToStart = CommonFunctions.changeCoordsBasedOnDir(checkFloodedIsNextToStart, dir, 1);
 
-            checkFloodedIsNextToStart.print("---------- Dir: " + dir +  "  OUT COORDS: " );
+            //checkFloodedIsNextToStart.print("---------- Dir: " + dir +  "  OUT COORDS: " );
 
             if (floodedDimList.coordIsMarked(checkFloodedIsNextToStart) == true && zoneVeinGenContainer.tileMapConnCoordIsLocked__ForAllPasses(checkFloodedIsNextToStart) == false)
                 startCoordIsValid = true;

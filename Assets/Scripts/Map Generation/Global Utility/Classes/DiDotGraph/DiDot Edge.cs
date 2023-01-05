@@ -34,6 +34,7 @@ namespace DiDotGraphClasses
             this.orderedNodeList = new List<DiDotNode<T>>(list);
         }
 
+        // Used to create empty edges
         public DiDotEdge()
         {
             this.id = -1;
@@ -56,14 +57,20 @@ namespace DiDotGraphClasses
             this.nodeOneEdges = nodeOneEdges;
             this.nodeTwoEdges = nodeTwoEdges;
 
-            addNodeAsStart(orderedNodeList[0]);
-            addNodeAsEnd(orderedNodeList[orderedNodeList.Count - 1]);
+            //addNodeAsStart(orderedNodeList[0]);  // Don't need this I think, seems redundant with this.nodeOne - nodeOne;
+            //addNodeAsEnd(orderedNodeList[orderedNodeList.Count - 1]); // Same as above
             this.orderedNodeList = new List<DiDotNode<T>>(orderedNodeList);
         }
 
         public DiDotEdge<T> deepCopy()
         {
             return new DiDotEdge<T>(this.nodeOne, this.nodeTwo, this.orderedNodeList, this.nodeOneEdges, this.nodeTwoEdges, this.firstIsNodeOne, this.id);
+        }
+
+
+        public bool addEdgeConnections(DiDotEdge<T> connectingEdge)
+        {
+            return addEdgeConnections(ref connectingEdge);
         }
 
         public bool addEdgeConnections(ref DiDotEdge<T> connectingEdge)
@@ -91,7 +98,7 @@ namespace DiDotGraphClasses
             if (nodeOne == null)
                 nodeOne = newNode;
             else
-                Debug.LogError("DiDotNode - addNode(): nodeOne exists");
+                Debug.LogError("DiDotEdge - addNode(): nodeOne exists");
         }
 
         public void addNodeAsEnd(DiDotNode<T> newNode)
@@ -99,7 +106,7 @@ namespace DiDotGraphClasses
             if (nodeTwo == null)
                 nodeTwo = newNode;
             else
-                Debug.LogError("DiDotNode - addNode(): nodeTwo exists!");
+                Debug.LogError("DiDotEdge - addNode(): nodeTwo exists!");
         }
 
         // =====================================================================================

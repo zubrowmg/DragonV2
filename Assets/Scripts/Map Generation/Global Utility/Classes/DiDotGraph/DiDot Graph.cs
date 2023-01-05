@@ -134,7 +134,7 @@ namespace DiDotGraphClasses
             // Will get a list of edges from a node, the node supplied SHOULD be an endnode or intersecting node
             //      Traverses entire graph
             //      Should also connect edges to one another
-            List<DiDotEdge<T>> currentListOfEdges = getEdgesStartingFromNodeStart(startNode, ref doNotTravelList);
+            List<DiDotEdge<T>> currentListOfEdges = getAllEdgesStartingFromNodeStart(startNode, ref doNotTravelList);
             CommonFunctions.addIfItemDoesntExist(ref this.listOfEdges, currentListOfEdges);
 
             // Check if any edges are circular
@@ -268,17 +268,59 @@ namespace DiDotGraphClasses
         //      Just like edge recursion was done
 
         // Will get a list of nodes aka an edge, starting from a specified node
-        List<DiDotEdge<T>> getEdgesStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)
+        List<DiDotEdge<T>> getAllEdgesStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)
         {
             List<DiDotEdge<T>> listOfEdges = new List<DiDotEdge<T>>();
             List<DiDotNode<T>> currentPath = new List<DiDotNode<T>>();
             DiDotEdge<T> prevEdge = null;
 
-            getEdgeStartingFromNode(startNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref prevEdge);
+            // Will get all edges in the digraph, but they won't be connected
+            traverseEdgesStartingFromNode(startNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref prevEdge);
+
+            // Connect all edges to one another
+            Dictionary<DiDotNode<T>, List<DiDotEdge<T>>> nodeToEdge = new Dictionary<DiDotNode<T>, List<DiDotEdge<T>>>();
+            List<DiDotNode<T>> endNodes = new List<DiDotNode<T>>();
+
+            // First get all edges that share a common node
+            foreach (var edge in listOfEdges)
+            {
+                // Each edge has 2 end nodes
+                for (int i = 0; i < 2; i++)
+                {
+                    DiDotNode<T> node = i == 0 ? edge.getNodeOne() : edge.getNodeTwo();
+                    bool nodeIsDeadEnd = node.isDeadEnd();
+
+                    if (nodeIsDeadEnd == false)
+                    {
+
+                        if (nodeToEdge.ContainsKey(node) == false)
+                            nodeToEdge.Add(node, new List<DiDotEdge<T>> { edge });
+                        else
+                            nodeToEdge[node].Add(edge);
+                    }
+                }
+            }
+
+            // Then connect all edges to each other
+            foreach (var item in nodeToEdge)
+            {
+                DiDotNode<T> node = item.Key;
+                List<DiDotEdge<T>> edgeList = item.Value;
+
+                foreach (var edge in edgeList)
+                {
+                    foreach (var edge2 in edgeList)
+                    {
+                        if (edge.Equals(edge2) == false)
+                            edge.addEdgeConnections(edge2);
+                    }
+                }
+            }
+
             return listOfEdges;
         }
 
-        void getEdgeStartingFromNode(DiDotNode<T> currentNode, ref List<DiDotNode<T>> currentPath, ref List<DiDotNode<T>> doNotTravelList, 
+        void traverseEdgesStartingFromNode(DiDotNode<T> currentNode, ref List<DiDotNode<T>> currentPath, ref List<DiDotNode<T>> doNotTravelList, 
                                     ref List<DiDotEdge<T>> listOfEdges, ref DiDotEdge<T> prevEdge)
         {
             currentPath.Add(currentNode);
@@ -308,6 +350,7 @@ namespace DiDotGraphClasses
                         listOfEdges.Add(newEdge);
 
                         // Connect to previous edge, if prev edge is null then that means this is the first edge found
+                        /*
                         DiDotEdge<T> prevEdgeCopy = null;
                         if (prevEdge != null)
                         {
@@ -315,8 +358,7 @@ namespace DiDotGraphClasses
                             newEdge.addEdgeConnections(ref prevEdge);
                             prevEdgeCopy = prevEdge.deepCopy();
                         }
-
-                        
+                        */
 
                         // Continue traversing the graph
                         if (nextNode.isDeadEnd() == false)
@@ -324,7 +366,7 @@ namespace DiDotGraphClasses
                             // Reset current path
                             currentPath = new List<DiDotNode<T>>();
 
-                            getEdgeStartingFromNode(nextNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref newEdge);
+                            traverseEdgesStartingFromNode(nextNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref newEdge);
 
                         }
 
@@ -337,7 +379,7 @@ namespace DiDotGraphClasses
                     else
                     {
                         // Continue traversing the graph
-                        getEdgeStartingFromNode(nextNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref prevEdge);
+                        traverseEdgesStartingFromNode(nextNode, ref currentPath, ref doNotTravelList, ref listOfEdges, ref prevEdge);
                     }
                     
                 }
