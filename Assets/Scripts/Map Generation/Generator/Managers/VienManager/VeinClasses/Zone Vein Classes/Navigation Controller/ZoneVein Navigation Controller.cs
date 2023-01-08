@@ -716,5 +716,7 @@ namespace VeinManagerClasses
             return choosenFreeArea.getCenterCoord();
         }
 
+
+
     }
 }

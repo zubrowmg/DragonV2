@@ -113,6 +113,24 @@ namespace DiDotGraphClasses
         //                              Getters and Setters
         // =====================================================================================
 
+        public int getTotalDistanceFromNodeToNode(DiDotNode<T> start, DiDotNode<T> stop)
+        {
+            List<DiDotNode<T>> nodeList = getNodeList();
+
+            int startIndex = nodeList.IndexOf(start);
+            int stopIndex = nodeList.IndexOf(stop);
+
+            if (startIndex == -1 || stopIndex == -1)
+                Debug.LogError("DiDotEdge - getTotalDistanceFromNodeToNode(): Failed to find node in the edge");
+
+            return Mathf.Abs(startIndex - stopIndex) + 1;
+        }
+
+        public int getEdgeLength()
+        {
+            return getNodeList().Count;
+        }
+
         public ref DiDotNode<T> getNodeOne()
         {
             return ref this.nodeOne;
@@ -127,11 +145,18 @@ namespace DiDotGraphClasses
             return ref this.orderedNodeList;
         }
 
+        // This only applies to the ends of edges that are dead ends
         public List<DiDotNode<T>> getNodeListExcludingEdgeNodes(int edgeNodeCount)
         {
             List<DiDotNode<T>> nonEdgeNodeList = new List<DiDotNode<T>>();
-            int nodeMin = edgeNodeCount;
-            int nodeMax = this.orderedNodeList.Count - edgeNodeCount;
+
+            int nodeMin = 0;
+            int nodeMax = this.orderedNodeList.Count; 
+            if (nodeOneIsDeadEnd())
+                nodeMin = edgeNodeCount;
+
+            if (nodeTwoIsDeadEnd())
+                nodeMax = nodeMax - edgeNodeCount;
 
             if (nodeMin > nodeMax)
                 Debug.LogWarning("DiDotEdge Class - getNodeListExcludingEdgeNodes(): This edge isn't big enough to have " + edgeNodeCount + "free nodes on each end");
