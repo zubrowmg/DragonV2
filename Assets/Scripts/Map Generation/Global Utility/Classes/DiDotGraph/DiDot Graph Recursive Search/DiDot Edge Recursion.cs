@@ -29,34 +29,55 @@ namespace DiDotGraphClasses
         //      Holds variables specific to the search function
         //      Since there can be multiple types of recursive uses you need create a constructor for each specific type
 
-        public GetCircularEdgeVariables<T> getCircularEdgeVars;
-        public TestEdgeVariables<T> testEdgeVars;
+        public GetCircularEdge__Variables<T> getCircularEdgeVars;
+        public ShortestDistanceFromNodeToNode__Variables<T> shortestDistanceFromNodeToNodeVars;
+        public TestEdge__Variables<T> testEdgeVars;
 
-        public SpecifcEdgeVariables(ref GetCircularEdgeVariables<T> getCircularEdgeVars)
+        public SpecifcEdgeVariables(ref ShortestDistanceFromNodeToNode__Variables<T> shortestDistanceFromNodeToNode)
+        {
+            this.shortestDistanceFromNodeToNodeVars = shortestDistanceFromNodeToNode;
+        }
+
+        public SpecifcEdgeVariables(ref GetCircularEdge__Variables<T> getCircularEdgeVars)
         {
             this.getCircularEdgeVars = getCircularEdgeVars;
         }
 
-        public SpecifcEdgeVariables(ref TestEdgeVariables<T> testEdgeVars)
+        public SpecifcEdgeVariables(ref TestEdge__Variables<T> testEdgeVars)
         {
             this.testEdgeVars = testEdgeVars;
         }
+
+
     }
 
-    public class TestEdgeVariables<T>
+    public class TestEdge__Variables<T>
     {
-        public TestEdgeVariables(T blah)
+        public TestEdge__Variables(T blah)
         {
         }
     }
 
-    public class GetCircularEdgeVariables<T>
+    public class ShortestDistanceFromNodeToNode__Variables<T>
+    {
+        public DiDotEdge<T> endEdge;
+        public DiDotNode<T> stopEdgeNode;
+        public int shortestDistance = -1; 
+
+        public ShortestDistanceFromNodeToNode__Variables(DiDotEdge<T> endEdge, DiDotNode<T> stopEdgeNode)
+        {
+            this.endEdge = endEdge;
+            this.stopEdgeNode = stopEdgeNode;
+        }
+    }
+
+    public class GetCircularEdge__Variables<T>
     {
         public DiDotEdge<T> startEdge;
         public DiDotNode<T> startEdgeNode;
         public List<List<DiDotEdge<T>>> listOfCircularEdges;
 
-        public GetCircularEdgeVariables(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode)
+        public GetCircularEdge__Variables(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode)
         {
             this.startEdge = startEdge;
             this.startEdgeNode = startEdgeNode;

@@ -274,12 +274,16 @@ namespace VeinManagerClasses
             return listOfZoneVeinCoords;
         }
 
-        List<CoordsInt> configureNewCicularEdge(out bool edgeConfigFailed)
+        public List<CoordsInt> configureNewCicularEdge(out bool edgeConfigFailed)
         {
             // Basic configuration for now, expecting something more deliberate in the future
             // 1. Find a start node and end node, find a the closest possible pair
             // 2. Check that the pair are touching in a flooded dim list
             // 3. Generate the line, not randomly. But on a straight path from start to end
+            
+            // REMOVE THIS ANALYZE!!!! DONE IN ONE FUNCTION ABOVE
+            this.diGraph.analyzeGraph();
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             configureNewCircularBranchInit();
 
@@ -438,7 +442,7 @@ namespace VeinManagerClasses
         // Will return all possible combinations of start end pairs, will not check if they are valid
         List<Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>> getAllStartEndPairsRaw(bool adhearToMinEdgeLength, int currentMinEdgeLength, List<DiDotEdge<CoordsInt>> allDiGraphEdges)
         {
-            List<Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>> allStartEndPairs = new List<Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>>();
+            DoubleListNoDuplicates<DiDotNode<CoordsInt>> allStartEndPairs = new DoubleListNoDuplicates<DiDotNode<CoordsInt>>();
 
             Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>> possibleStartEndNodes = new Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>>();
             //List<List<Di>
@@ -469,30 +473,69 @@ namespace VeinManagerClasses
                 // Now check if the current edge nodes can create start end pairs
                 if (edge.getEdgeLength() > this.minCircularEdgeSearchLength)
                 {
-                    foreach(var node1 in currentEdgeStartStopNodes)
+                    //Debug.Log("NEW EDGE:");
+                    foreach (var node1 in currentEdgeStartStopNodes)
                     {
                         foreach (var node2 in currentEdgeStartStopNodes)
                         {
                             if (node1.Equals(node2) == false)
                             {
+
                                 if (edge.getTotalDistanceFromNodeToNode(node1, node2) > this.minCircularEdgeSearchLength)
-                                    allStartEndPairs.Add(new Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>(node1, node2));  // !!!!!!!!!!!!!!! THIS WILL ADD DUPLICATES
+                                {
+                                    //Debug.Log("\tNODE:" + node1.getObject().getPrintString() + "  " + node2.getObject().getPrintString());
+                                    allStartEndPairs.addDoubleVal(node1, node2);
+                                }
                             }
                         }
                     }
                 }
             }
 
+            /*
+            string output = "DUPLICATE TEST";
+            foreach (var item in allStartEndPairs.getRawList())
+            {
+                output = output + "\n\t< " + item.getOne().getObject().getPrintString() + "  " + item.getTwo().getObject().getPrintString() + " >";
+            }
+            Debug.Log(output);
+            */
+
             // Now find all possible start end pairs from edge to edge
+            //      To save performance, we first find each possible start end pair, regardless of this.minCircularEdgeSearchLength
+            //      Then find the shortest distance (displacement, not node length) pair from start to end
+            //      Then check if it abides by this.minCircularEdgeSearchLength
+
+
+            //      edgeOne.Key == DiDotEdge
+            //      edgeOne.Value == List of possible start/end Nodes
+            foreach (var edgeOne in possibleStartEndNodes)
+            {
+                foreach (var edgeTwo in possibleStartEndNodes)
+                {
+                    // Make sure that the edges aren't the same edge
+                    if (edgeOne.Key.Equals(edgeTwo.Key) == false)
+                    {
+                        foreach (var edgeOneNode in edgeOne.Value)
+                        {
+                            foreach (var edgeTwoNode in edgeTwo.Value)
+                            {
+                                // No need to compare the same node
+                                if (edgeOneNode.Equals(edgeTwoNode) == false)
+                                {
+                                    // Calculate the diplacement between start and end nodes
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
 
 
-            // Double no duplicates list
-            //      Dictionary < node, List<DoubleEntry> >   if you attempt to add a new double entry, you need to check both double values in the dict
 
 
-
-            return allStartEndPairs;
+            return allStartEndPairs.getRawList();
         }
     }
 

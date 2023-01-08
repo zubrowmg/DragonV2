@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DiDotGraphClasses
 {
-    enum EdgeRecursionTypes { None, GetCircularEdges }
+    enum EdgeRecursionTypes { None, GetCircularEdges, ShortestDistanceFromNodeToNode }
     enum NodeRecursionTypes { None }
 
 }

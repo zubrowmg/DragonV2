@@ -123,6 +123,8 @@ namespace DiDotGraphClasses
             if (startIndex == -1 || stopIndex == -1)
                 Debug.LogError("DiDotEdge - getTotalDistanceFromNodeToNode(): Failed to find node in the edge");
 
+            //Debug.Log("\t\tDISTANCE: " + (Mathf.Abs(startIndex - stopIndex) + 1));
+
             return Mathf.Abs(startIndex - stopIndex) + 1;
         }
 

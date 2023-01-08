@@ -444,6 +444,7 @@ namespace CommonlyUsedClasses
         }
     }
 
+    
     public class Double<T1, T2>
     {
         protected T1 one;
@@ -494,6 +495,56 @@ namespace CommonlyUsedClasses
         public T3 getThree()
         {
             return this.three;
+        }
+    }
+
+    public class DoubleListNoDuplicates<T1>
+    {
+        // Both Double types need to be the same, you could probably extend this class so that it works for 2 different types
+        //      Or maybe make another class, same type is simpler and will probably be more effiecient
+        private Dictionary<T1, List<T1>> rawItemToDoubleList = new Dictionary<T1, List<T1>>();
+        private List<Double<T1, T1>> doubleList = new List<Double<T1, T1>>();
+
+        public DoubleListNoDuplicates()
+        {
+        }
+
+        public void addDoubleVal(T1 itemOne, T1 itemTwo)
+        {
+            bool itemOneExists = rawItemToDoubleList.TryGetValue(itemOne, out List<T1> itemOneList);
+            bool itemTwoExists = rawItemToDoubleList.TryGetValue(itemTwo, out List<T1> itemTwoList);
+            bool doubleValExists = false;
+
+            // Check if item one list contains the double value
+            //      Should only need to check one of items, since we add both nodes to rawItemToDoubleList
+            if (itemOneExists)
+                doubleValExists = itemOneList.Contains(itemTwo);
+
+            // Add the double entry if it doesn't exist
+            if (doubleValExists == false)
+            {
+                // Add to double list
+                Double<T1, T1> newEntry = new Double<T1, T1>(itemOne, itemTwo);
+                doubleList.Add(newEntry);
+
+                // Also add to raw list
+                if (itemOneExists == false)
+                    rawItemToDoubleList.Add(itemOne, new List<T1> { itemTwo });
+                else
+                    rawItemToDoubleList[itemOne].Add(itemTwo);
+
+                if (itemTwoExists == false)
+                    rawItemToDoubleList.Add(itemTwo, new List<T1> { itemOne });
+                else
+                    rawItemToDoubleList[itemTwo].Add(itemOne);
+
+            }
+        }
+
+        public List<Double<T1, T1>> getRawList()
+        {
+            //Debug.Log(doubleList.Count);
+            return doubleList;
         }
     }
 

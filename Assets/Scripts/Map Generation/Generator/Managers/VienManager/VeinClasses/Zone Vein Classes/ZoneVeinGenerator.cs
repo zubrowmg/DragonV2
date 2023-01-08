@@ -157,8 +157,6 @@ public class ZoneVeinGenerator : ContainerAccessor
             // Start branch generation processes
             bool graphIsDone = false;
             bool edgeConfigFailed = false;
-            CoordsInt branchStartCoords;
-            DirectionBias dirBias;
 
             //while (graphIsDone == false)
             //{
@@ -174,18 +172,19 @@ public class ZoneVeinGenerator : ContainerAccessor
                 else
                 */
                 if (edgeConfigFailed == true)
-                        Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
-                    else
-                    {
-                        // Edge creation was successfull, add it to the di graph and increment the vein pass count
-                        this.zoneVeinGenContainer.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
-                        this.zoneVeinGenContainer.incCurrentVeinPass();
-                    }
-            
+                    Debug.LogError("Class ZoneVeinGenerator - createZoneVein(): Initial zone edge configuration failed");
+                else
+                {
+                    // Edge creation was successfull, add it to the di graph and increment the vein pass count
+                    this.zoneVeinGenContainer.zoneVeinDiGraphController.addNodes(listOfZoneVeinCoords);
+                    this.zoneVeinGenContainer.incCurrentVeinPass();
+                }
 
+                // MAKE THIS FUNCTION PRIVATE ONCE DONE DEBUGGING, THIS IS ONLY FOR TESTING PURPOSES
+                listOfZoneVeinCoords = this.zoneVeinGenContainer.zoneVeinDiGraphController.configureNewCicularEdge(out edgeConfigFailed);
             //}
 
-            
+
         }
 
         this.zoneVeinGenContainer.zoneVeinDiGraphController.print(zoneVeinGenContainer.currentVeinZone.getId());

@@ -146,7 +146,7 @@ namespace DiDotGraphClasses
 
                 // If the edge is already a part of a circular edge, then don't search for it
                 if (alreadyCheckedEdges.Contains(edge) == false)
-                    listOfCircularEdges =  getCircularEdgesStart(edge);
+                    listOfCircularEdges = getCircularEdges__Start(edge);
 
                 if (listOfCircularEdges.Count == 1)
                 {
@@ -266,6 +266,7 @@ namespace DiDotGraphClasses
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // getEdgesStartingFromNodeStart() and getEdgeStartingFromNode() need to be templated into DiDotGraphNavigation class
         //      Just like edge recursion was done
+        //      This function traverses through all nodes
 
         // Will get a list of nodes aka an edge, starting from a specified node
         List<DiDotEdge<T>> getAllEdgesStartingFromNodeStart(DiDotNode<T> startNode, ref List<DiDotNode<T>> doNotTravelList)

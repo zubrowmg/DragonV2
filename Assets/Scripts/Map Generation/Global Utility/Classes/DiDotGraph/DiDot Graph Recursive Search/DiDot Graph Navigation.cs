@@ -20,7 +20,7 @@ namespace DiDotGraphClasses
         // ======================================================================
 
         // Will get a list of nodes aka an edge, starting from a specified node
-        protected void getCurrentEndNodeConnections(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out List<DiDotEdge<T>> edgeConnections, out DiDotNode<T> nextEdgeBaseNode)
+        private void getCurrentEndNodeConnections(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out List<DiDotEdge<T>> edgeConnections, out DiDotNode<T> nextEdgeBaseNode)
         {
             if (currentEdgeNode.Equals(currentEdge.getNodeOne()) == true)
             {
@@ -34,7 +34,7 @@ namespace DiDotGraphClasses
             }
         }
 
-        protected void getOppositeEndNode(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out DiDotNode<T> oppositeEdgeBaseNode)
+        private void getOppositeEndNode(DiDotEdge<T> currentEdge, DiDotNode<T> currentEdgeNode, out DiDotNode<T> oppositeEdgeBaseNode)
         {
             if (currentEdge.getNodeOne().Equals(currentEdgeNode) == true)
                 oppositeEdgeBaseNode = currentEdge.getNodeTwo();
@@ -43,7 +43,7 @@ namespace DiDotGraphClasses
         }
 
 
-        void edgeRecursionAgain(ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, EdgeRecursionTypes recursionType,
+        private void edgeRecursionAgain(ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, EdgeRecursionTypes recursionType,
                                 ref DiDotEdge<T> nextEdge, ref DiDotNode<T> nextEdgeBaseNode)
         {
             // Need to get the next edge node, should be opposite of the base node
@@ -51,8 +51,10 @@ namespace DiDotGraphClasses
             edgeRecursionBase(ref commonEdgeVars, ref specificEdgeVars, recursionType);
         }
 
-        void edgeRecursionBase(ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, EdgeRecursionTypes recursionType)
+        // Function that ALL recursion types need to go through
+        private void edgeRecursionBase(ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, EdgeRecursionTypes recursionType)
         {
+            // Add the current edge to the current path
             commonEdgeVars.currentPath.Add(commonEdgeVars.currentEdge);
             CommonFunctions.addIfItemDoesntExist(ref commonEdgeVars.doNotTravelList, commonEdgeVars.currentEdge);
 
@@ -69,11 +71,25 @@ namespace DiDotGraphClasses
                 // If this edge hasn't been traveled to or is not on the doNotTravelList then proceed
                 if (edgeCanBeTraveledTo == true)
                 {
+                    // Figure out which node in the current edge connects to the next edge
+                    bool nodeOneConnects = commonEdgeVars.currentEdge.nodeOneConnectsToGivenEdge(nextEdge);
+
+                    bool nextEdgeIsDeadEnd = false;
+                    if (nodeOneConnects == true)
+                        nextEdgeIsDeadEnd = nextEdge.nodeTwoIsDeadEnd();
+                    else
+                        nextEdgeIsDeadEnd = nextEdge.nodeOneIsDeadEnd();
+
                     switch (recursionType)
                     {
                         case (EdgeRecursionTypes.GetCircularEdges):
                         {
-                            getCircularEdgesConditions(ref nextEdge, ref nextEdgeBaseNode, ref commonEdgeVars, ref specificEdgeVars, recursionType);
+                            getCircularEdges__Conditions(ref nextEdge, nextEdgeIsDeadEnd, ref nextEdgeBaseNode, ref commonEdgeVars, ref specificEdgeVars, recursionType);
+                            break;
+                        }
+                        case (EdgeRecursionTypes.ShortestDistanceFromNodeToNode):
+                        {
+                            shortestDistanceFromNodeToNode__Conditions(ref nextEdge, nextEdgeIsDeadEnd, ref nextEdgeBaseNode, ref commonEdgeVars, ref specificEdgeVars, recursionType);
                             break;
                         }
                     }
@@ -87,42 +103,81 @@ namespace DiDotGraphClasses
             commonEdgeVars.doNotTravelList.Remove(commonEdgeVars.currentEdge);
         }
 
-        //==============================
-        //  Specific Edge Implementaion
-        //==============================
-        // name_Start() is meant to be called
-        // name_Conditions will be used by edgeRecursionBase()
+        //=============================================
+        //          Specific Edge Implementaion
+        //=============================================
+        // name__Start() is meant to be called in Di Dot Graph
+        // name__Conditions() will be used by edgeRecursionBase()
+        // Basic flow:
+        //      Call name__Start() -> edgeRecursionBase() -> name__Conditions() -> edgeRecursionAgain() -> edgeRecursionBase()
+        //          - edgeRecursionBase() will iterate over all possible edges
+        //          - edgeRecursionBase() will then select a name__Conditions() function, based on the recursion type
+        //          - name__Conditions() needs to include edgeRecursionAgain()
+        //          - edgeRecursionAgain() handles the direction aspect of the edge, aka an edge has two end points. Handles which endpoint to go to next
+        //
+        //
+        // name__Start() needs to include:
+        //      - name__Variables<T>, is needed by SpecifcEdgeVariables<T>
+        //      - SpecifcEdgeVariables<T>, handles all recursive variables for the specific type of recursion
+        //      - CommonEdgeVariables<T>, handles all recursive variables any type of recursion needs
 
-        protected List<List<DiDotEdge<T>>> getCircularEdgesStart(DiDotEdge<T> startEdge)
+        // edgeRecursionBase() needs to have name__Conditions() specified in the case statement
+
+        // ================================
+        // shortestDistanceFromNodeToNode
+        protected int shortestDistanceFromNodeToNode__Start(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode, 
+                                                                                 DiDotEdge<T> endEdge, DiDotNode<T> stopEdgeNode)
+        {
+            List<DiDotEdge<T>> doNotTravelList = new List<DiDotEdge<T>>();
+
+            // Setup CircularEdges specific and common type vars
+            ShortestDistanceFromNodeToNode__Variables<T> shortestDistanceVars = new ShortestDistanceFromNodeToNode__Variables<T>(endEdge, stopEdgeNode);
+            SpecifcEdgeVariables<T> specificEdgeVars = new SpecifcEdgeVariables<T>(ref shortestDistanceVars);
+            CommonEdgeVariables<T> commonEdgeVars = new CommonEdgeVariables<T>(startEdge, startEdgeNode, ref doNotTravelList);
+            EdgeRecursionTypes recursionType = EdgeRecursionTypes.ShortestDistanceFromNodeToNode;
+
+            // Call edge recursion base
+            edgeRecursionBase(ref commonEdgeVars, ref specificEdgeVars, recursionType);
+            int shortestDistance = specificEdgeVars.shortestDistanceFromNodeToNodeVars.shortestDistance;
+
+            return shortestDistance;
+        }
+
+        private void shortestDistanceFromNodeToNode__Conditions(ref DiDotEdge<T> nextEdge, bool nextEdgeIsDeadEnd, ref DiDotNode<T> nextEdgeBaseNode, 
+                                                                ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, 
+                                                                EdgeRecursionTypes recursionType)
+        {
+
+        }
+
+        // ================================
+        // getCircularEdges
+        protected List<List<DiDotEdge<T>>> getCircularEdges__Start(DiDotEdge<T> startEdge)
         {
             DiDotNode<T> startEdgeNode = startEdge.getNodeOne();
             List<DiDotEdge<T>> doNotTravelList = new List<DiDotEdge<T>>();
 
-            CommonEdgeVariables<T> commonEdgeVars = new CommonEdgeVariables<T>(startEdge, startEdgeNode, ref doNotTravelList);
-            GetCircularEdgeVariables<T> getCircularEdgeVars = new GetCircularEdgeVariables<T>(startEdge, startEdgeNode);
+            // Setup CircularEdges specific and common type vars
+            GetCircularEdge__Variables<T> getCircularEdgeVars = new GetCircularEdge__Variables<T>(startEdge, startEdgeNode);
             SpecifcEdgeVariables<T> specificEdgeVars = new SpecifcEdgeVariables<T>(ref getCircularEdgeVars);
+            CommonEdgeVariables<T> commonEdgeVars = new CommonEdgeVariables<T>(startEdge, startEdgeNode, ref doNotTravelList);
             EdgeRecursionTypes recursionType = EdgeRecursionTypes.GetCircularEdges;
 
             // If any node is a dead end, then it's impossible for it to be a circular edge
             if (startEdge.nodeOneIsDeadEnd() == true || startEdge.nodeTwoIsDeadEnd() == true)
                 return specificEdgeVars.getCircularEdgeVars.listOfCircularEdges;
 
-
+            // Call edge recursion base
             edgeRecursionBase(ref commonEdgeVars, ref specificEdgeVars, recursionType);
-            return specificEdgeVars.getCircularEdgeVars.listOfCircularEdges;
+            List<List<DiDotEdge<T>>> circularEdgesList = specificEdgeVars.getCircularEdgeVars.listOfCircularEdges;
+
+            return circularEdgesList;
         }
 
-        void getCircularEdgesConditions(ref DiDotEdge<T> nextEdge, ref DiDotNode<T> nextEdgeBaseNode, ref CommonEdgeVariables<T> commonEdgeVars, 
-                                        ref SpecifcEdgeVariables<T> specificEdgeVars, EdgeRecursionTypes recursionType)
+        private void getCircularEdges__Conditions(ref DiDotEdge<T> nextEdge, bool nextEdgeIsDeadEnd, ref DiDotNode<T> nextEdgeBaseNode, 
+                                                  ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, 
+                                                  EdgeRecursionTypes recursionType)
         {
-            // Figure out which node in the current edge connects to the next edge
-            bool nodeOneConnects = commonEdgeVars.currentEdge.nodeOneConnectsToGivenEdge(nextEdge);
-            bool deadEnd = false;
-            if (nodeOneConnects == true)
-                deadEnd = nextEdge.nodeTwoIsDeadEnd();
-            else
-                deadEnd = nextEdge.nodeOneIsDeadEnd();
-
             // If we make it back to the starting edge it can mean two things
             if (nextEdge.Equals(specificEdgeVars.getCircularEdgeVars.startEdge) == true)
             {
@@ -146,7 +201,7 @@ namespace DiDotGraphClasses
                 }
             }
             // If we hit a dead end stop here
-            else if (deadEnd == true)
+            else if (nextEdgeIsDeadEnd == true)
             {
 
             }
@@ -155,15 +210,19 @@ namespace DiDotGraphClasses
                 edgeRecursionAgain(ref commonEdgeVars, ref specificEdgeVars, recursionType, ref nextEdge, ref nextEdgeBaseNode);
         }
 
+        // ================================
+        // testEdgesStart - just a dummy function to help setup recursion
+
         void testEdgesStart(DiDotEdge<T> startEdge)
         {
             DiDotNode<T> startEdgeNode = startEdge.getNodeOne();
             List<DiDotEdge<T>> doNotTravelList = new List<DiDotEdge<T>>();
 
-            CommonEdgeVariables<T> commonEdgeVars = new CommonEdgeVariables<T>(startEdge, startEdgeNode, ref doNotTravelList);
+            // Setup TEST specific and common type vars
             T blah = default(T);
-            TestEdgeVariables<T> testEdgeVars = new TestEdgeVariables<T>(blah);
+            TestEdge__Variables<T> testEdgeVars = new TestEdge__Variables<T>(blah);
             SpecifcEdgeVariables<T> specificEdgeVars = new SpecifcEdgeVariables<T>(ref testEdgeVars);
+            CommonEdgeVariables<T> commonEdgeVars = new CommonEdgeVariables<T>(startEdge, startEdgeNode, ref doNotTravelList);
 
             EdgeRecursionTypes recursionType = EdgeRecursionTypes.GetCircularEdges;
 
