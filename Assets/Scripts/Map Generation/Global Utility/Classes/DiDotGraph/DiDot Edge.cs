@@ -109,6 +109,21 @@ namespace DiDotGraphClasses
                 Debug.LogError("DiDotEdge - addNode(): nodeTwo exists!");
         }
 
+        public int calculateDistanceToEndNode(DiDotNode<T> endNode, DiDotNode<T> node)
+        {
+            // endNode should be either nodeOne or nodeTwo
+            int distance = 0;
+
+            if (getNodeOne().Equals(endNode))
+                distance = this.orderedNodeList.IndexOf(node);
+            else if (getNodeTwo().Equals(endNode))
+                distance = this.orderedNodeList.Count - this.orderedNodeList.IndexOf(node);
+            else
+                Debug.LogError("DiDotEdge - calculateDistanceToEndNode(): endNode provided in not an end node");
+
+            return distance;
+        }
+
         // =====================================================================================
         //                              Getters and Setters
         // =====================================================================================

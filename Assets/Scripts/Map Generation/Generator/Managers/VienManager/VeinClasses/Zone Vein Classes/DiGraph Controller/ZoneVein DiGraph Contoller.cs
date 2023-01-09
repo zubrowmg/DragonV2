@@ -443,12 +443,11 @@ namespace VeinManagerClasses
         List<Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>> getAllStartEndPairsRaw(bool adhearToMinEdgeLength, int currentMinEdgeLength, List<DiDotEdge<CoordsInt>> allDiGraphEdges)
         {
             DoubleListNoDuplicates<DiDotNode<CoordsInt>> allStartEndPairs = new DoubleListNoDuplicates<DiDotNode<CoordsInt>>();
-
             Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>> possibleStartEndNodes = new Dictionary<DiDotEdge<CoordsInt>, List<DiDotNode<CoordsInt>>>();
-            //List<List<Di>
 
             // First grab all start/end nodes from the current di graph, we don't grab all of the nodes to gain performance
-            //      Also create possible start end pairs in each edge. Does NOT create start end pairs from one edge to another edge
+            //      First create possible start end pairs in each edge. Does NOT create start end pairs from one edge to another edge
+            //      This function will filter results if they don't abide by this.circularEdgeSearchLength
             foreach (var edge in allDiGraphEdges)
             {
                 List<DiDotNode<CoordsInt>> currentEdgeStartStopNodes = new List<DiDotNode<CoordsInt>>();
@@ -492,21 +491,8 @@ namespace VeinManagerClasses
                 }
             }
 
-            /*
-            string output = "DUPLICATE TEST";
-            foreach (var item in allStartEndPairs.getRawList())
-            {
-                output = output + "\n\t< " + item.getOne().getObject().getPrintString() + "  " + item.getTwo().getObject().getPrintString() + " >";
-            }
-            Debug.Log(output);
-            */
 
-            // Now find all possible start end pairs from edge to edge
-            //      To save performance, we first find each possible start end pair, regardless of this.minCircularEdgeSearchLength
-            //      Then find the shortest distance (displacement, not node length) pair from start to end
-            //      Then check if it abides by this.minCircularEdgeSearchLength
-
-
+            // Now find all possible start end pairs from edge to edge, does not care if nodes abide by this.circularEdgeSearchLength or not
             //      edgeOne.Key == DiDotEdge
             //      edgeOne.Value == List of possible start/end Nodes
             foreach (var edgeOne in possibleStartEndNodes)
@@ -520,10 +506,29 @@ namespace VeinManagerClasses
                         {
                             foreach (var edgeTwoNode in edgeTwo.Value)
                             {
-                                // No need to compare the same node
+                                // No need to have a pair with the same node
                                 if (edgeOneNode.Equals(edgeTwoNode) == false)
                                 {
-                                    // Calculate the diplacement between start and end nodes
+                                    // Finds the shortest length, will return -1 if none is found or is longer than this.circularEdgeSearchLength
+
+
+
+
+                                    // REDO USING NODE RECURSION, NOT EDGE RECURSION
+                                    /*
+                                    int shortestStartEndPairLength = this.diGraph.shortestLengthFromNodeToNode(edgeOne.Key, edgeOneNode, edgeTwo.Key, edgeTwoNode, this.circularEdgeSearchLength);
+
+                                    Debug.Log("LENGTH: " + shortestStartEndPairLength + 
+                                        "\n\t< " + edgeOneNode.getObject().getPrintString() + "  " + edgeTwoNode.getObject().getPrintString() + " >");
+
+                                    if (shortestStartEndPairLength != -1)
+                                        allStartEndPairs.addDoubleVal(edgeOneNode, edgeTwoNode);
+                                        */
+
+
+
+
+
                                 }
                             }
                         }
@@ -531,13 +536,27 @@ namespace VeinManagerClasses
                 }
             }
 
-
-
-
-
             return allStartEndPairs.getRawList();
         }
+
+        void organizeAllStartEndPairs(List<Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>> allStartEndPairs)
+        {
+            //      To save performance, we first find each possible start end pair, regardless of this.minCircularEdgeSearchLength
+            //      Then find the shortest distance (displacement, not node length) pair from start to end
+            //      Then check if it abides by this.minCircularEdgeSearchLength
+
+            MinValue<float, Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>> startStopPairMinDisplacement = new MinValue<float, Double<DiDotNode<CoordsInt>, DiDotNode<CoordsInt>>>(allStartEndPairs.Count);
+
+            // Calculate the diplacement between start and end nodes
+            foreach (var pairs in allStartEndPairs)
+            {
+
+
+            }
+        }
     }
+
+    
 
     // ===========================================
     // Find closest node in edge functions

@@ -262,6 +262,13 @@ namespace DiDotGraphClasses
         // Recursive functions that search through each di graph node
         // ===================================
 
+        public int shortestLengthFromNodeToNode(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode,
+                                                            DiDotEdge<T> endEdge, DiDotNode<T> stopEdgeNode,
+                                                            int maxNodeLength)
+        {
+            
+            return shortestLengthFromNodeToNode__Start(startEdge, startEdgeNode, endEdge, stopEdgeNode, maxNodeLength);
+        }
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // getEdgesStartingFromNodeStart() and getEdgeStartingFromNode() need to be templated into DiDotGraphNavigation class
