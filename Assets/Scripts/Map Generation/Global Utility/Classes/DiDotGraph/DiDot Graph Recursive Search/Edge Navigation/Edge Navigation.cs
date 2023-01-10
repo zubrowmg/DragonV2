@@ -65,10 +65,15 @@ namespace DiDotGraphClasses
 
 
         private void edgeRecursionAgain(ref CommonEdgeVariables<T> commonEdgeVars, ref SpecifcEdgeVariables<T> specificEdgeVars, EdgeRecursionTypes recursionType,
-                                ref DiDotEdge<T> nextEdge, ref DiDotNode<T> nextEdgeBaseNode)
+                                ref DiDotEdge<T> nextEdge, ref DiDotNode<T> prevEdgeEndNode)
         {
+            
             // Need to get the next edge node, should be opposite of the base node
-            getOppositeEndNode(nextEdge, nextEdgeBaseNode, out DiDotNode<T> nextEdgeNode);
+            getOppositeEndNode(nextEdge, prevEdgeEndNode, out DiDotNode<T> nextEdgeEndNode);
+            commonEdgeVars.currentEdge = nextEdge;
+            commonEdgeVars.currentEdgeEndNode = nextEdgeEndNode;
+
+
             edgeRecursionBase(ref commonEdgeVars, ref specificEdgeVars, recursionType);
         }
 
