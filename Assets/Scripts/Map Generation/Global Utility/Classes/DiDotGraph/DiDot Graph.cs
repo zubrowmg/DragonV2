@@ -7,7 +7,7 @@ using CommonlyUsedFunctions;
 
 namespace DiDotGraphClasses
 {
-    public class DiDotGraph<T> : DiDotGraphNavigation<T>
+    public class DiDotGraph<T> : DiDotGraphNavigationBase<T>
     {
         // This class is probably going to be the main way to create a digraph
         //      Just a connection of nodes, instead of edges and nodes since it's too much effort to add edges during the digraph creation
@@ -146,7 +146,7 @@ namespace DiDotGraphClasses
 
                 // If the edge is already a part of a circular edge, then don't search for it
                 if (alreadyCheckedEdges.Contains(edge) == false)
-                    listOfCircularEdges = getCircularEdges__Start(edge);
+                    listOfCircularEdges = edgeNav.getCircularEdges__Start(edge);
 
                 if (listOfCircularEdges.Count == 1)
                 {
@@ -262,12 +262,10 @@ namespace DiDotGraphClasses
         // Recursive functions that search through each di graph node
         // ===================================
 
-        public int shortestLengthFromNodeToNode(DiDotEdge<T> startEdge, DiDotNode<T> startEdgeNode,
-                                                            DiDotEdge<T> endEdge, DiDotNode<T> stopEdgeNode,
-                                                            int maxNodeLength)
+        public int shortestLengthFromNodeToNode(DiDotNode<T> startNode, DiDotNode<T> endNode, int maxNodeLength)
         {
             
-            return shortestLengthFromNodeToNode__Start(startEdge, startEdgeNode, endEdge, stopEdgeNode, maxNodeLength);
+            return nodeNav.shortestLengthFromNodeToNode__Start(startNode, endNode, maxNodeLength);
         }
 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

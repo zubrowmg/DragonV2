@@ -36,13 +36,7 @@ namespace DiDotGraphClasses
         //      Since there can be multiple types of recursive uses you need create a constructor for each specific type
 
         public GetCircularEdge__Variables<T> getCircularEdgeVars;
-        public ShortestLengthFromNodeToNode__Variables<T> shortestLengthFromNodeToNodeVars;
         public TestEdge__Variables<T> testEdgeVars;
-
-        public SpecifcEdgeVariables(ref ShortestLengthFromNodeToNode__Variables<T> shortestLengthFromNodeToNodeVars)
-        {
-            this.shortestLengthFromNodeToNodeVars = shortestLengthFromNodeToNodeVars;
-        }
 
         public SpecifcEdgeVariables(ref GetCircularEdge__Variables<T> getCircularEdgeVars)
         {
@@ -63,53 +57,7 @@ namespace DiDotGraphClasses
         }
     }
 
-    public class ShortestLengthFromNodeToNode__Variables<T>
-    {
-        public DiDotEdge<T> endEdge;
-        public DiDotNode<T> stopEdgeNode;
-        public int shortestLength = -1;
-        
-        public int currentDistanceTraveled = 0;
-        public int maxNodeLength;
-
-        public ShortestLengthFromNodeToNode__Variables(DiDotEdge<T> endEdge, DiDotNode<T> stopEdgeNode, int maxNodeLength)
-        {
-            this.endEdge = endEdge;
-            this.stopEdgeNode = stopEdgeNode;
-            this.maxNodeLength = maxNodeLength;
-        }
-
-        public void incTotalDistanceTravled(int incVal)
-        {
-            currentDistanceTraveled = currentDistanceTraveled + incVal;
-        }
-
-        public void decTotalDistanceTravled(int decVal)
-        {
-            currentDistanceTraveled = currentDistanceTraveled - decVal;
-        }
-
-        // Checks if the current distance traveled is shorter than it was before
-        public void setShortestLength()
-        {
-            bool updateShortestDistance = false;
-
-            if (shortestLength == -1)
-                updateShortestDistance = true;
-            else if (currentDistanceTraveled + 1 < shortestLength)
-                updateShortestDistance = true;
-
-            if (updateShortestDistance)
-                shortestLength = currentDistanceTraveled + 1; // Current distance is off by 1
-
-        }
-
-        public bool distanceIsMoreThanMinTravelLength()
-        {
-            return this.currentDistanceTraveled + 1 >= this.maxNodeLength;  // Current distance is off by 1
-        }
-    }
-
+    
     public class GetCircularEdge__Variables<T>
     {
         public DiDotEdge<T> startEdge;
