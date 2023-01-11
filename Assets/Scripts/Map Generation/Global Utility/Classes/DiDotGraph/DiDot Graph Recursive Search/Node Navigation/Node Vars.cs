@@ -67,18 +67,27 @@ namespace DiDotGraphClasses
 
     public class GetAllEdges__Variables<T>
     {
+        public List<DiDotEdge<T>> allEdges;
+        public int currentEdgeId;
 
+        public GetAllEdges__Variables(int currentEdgeId)
+        {
+            this.allEdges = new List<DiDotEdge<T>>();
+            this.currentEdgeId = currentEdgeId;
+        }
     }
 
     public class ShortestLengthFromNodeToNode__Variables<T>
     {
-        public int shortestLength = -1;
+        public int shortestLength;
 
-        public int currentDistanceTraveled = 0;
+        public int currentDistanceTraveled;
         public int maxNodeLength;
 
         public ShortestLengthFromNodeToNode__Variables(int maxNodeLength)
         {
+            this.shortestLength = -1;
+            this.currentDistanceTraveled = 0;
             this.maxNodeLength = maxNodeLength;
         }
 

@@ -34,8 +34,6 @@ public class Main : MonoBehaviour
         Debug.Log("Generation Time:  " + (stopWatch.ElapsedMilliseconds * .001) + "s");
         Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nWHENEVER YOU ARE DONE WITH A FEATURE CHECK THE ENHANCEMENT TAB IN BINDER\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Debug.LogError("CENTER COORD IN DIM LIST CLASS NEEDS TO BE DECIDED BY A ROUGH MEDIAN (X MEDIAN, Y MEDIAN) OF ALL 1 GRID TILES");
-        Debug.LogError("YOU WILL NEED TO VALIDATE IF DIDOT GRAPH shortestLengthFromNodeToNode() WORKS, AFTER CIRCULAR EDGES ARE IMPLEMENTED" +
-                "\nBECAUSE YOU HAVE NOT CHECKED IF THE RECURSIVE NATURE OF THIS FUNCTION WORKS");
 
         // Give the debug manager access to generation manager
         debugManager.GetComponent<DebugControllerManager>().init(ref generatorManager);

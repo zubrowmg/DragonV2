@@ -5,6 +5,6 @@ using UnityEngine;
 namespace DiDotGraphClasses
 {
     enum EdgeRecursionTypes { None, GetCircularEdges }
-    enum NodeRecursionTypes { None, ShortestLengthFromNodeToNode }
+    enum NodeRecursionTypes { None, GetAllEdges, ShortestLengthFromNodeToNode }
 
 }

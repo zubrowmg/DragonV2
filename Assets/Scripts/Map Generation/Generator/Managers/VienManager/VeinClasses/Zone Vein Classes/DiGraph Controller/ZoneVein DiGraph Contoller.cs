@@ -512,23 +512,13 @@ namespace VeinManagerClasses
                                     // Finds the shortest length, will return -1 if none is found or is longer than this.circularEdgeSearchLength
 
 
-
-
-                                    // REDO USING NODE RECURSION, NOT EDGE RECURSION
-                                    /*
-                                    int shortestStartEndPairLength = this.diGraph.shortestLengthFromNodeToNode(edgeOne.Key, edgeOneNode, edgeTwo.Key, edgeTwoNode, this.circularEdgeSearchLength);
+                                    int shortestStartEndPairLength = diGraph.shortestLengthFromNodeToNode(edgeOneNode, edgeTwoNode, this.circularEdgeSearchLength);
 
                                     Debug.Log("LENGTH: " + shortestStartEndPairLength + 
                                         "\n\t< " + edgeOneNode.getObject().getPrintString() + "  " + edgeTwoNode.getObject().getPrintString() + " >");
 
                                     if (shortestStartEndPairLength != -1)
                                         allStartEndPairs.addDoubleVal(edgeOneNode, edgeTwoNode);
-                                        */
-
-
-
-
-
                                 }
                             }
                         }
